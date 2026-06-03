@@ -63,6 +63,9 @@ nav{position:sticky;top:0;z-index:100;background:rgba(240,244,255,.92);backdrop-
 .tb-python{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;}
 .tb-robotics{background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;}
 .tb-product{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
+.tb-aiedge{background:#fdf4ff;color:#7e22ce;border:1px solid #e9d5ff;}
+.tb-industrial{background:#f0fdfa;color:#134e4a;border:1px solid #99f6e4;}
+.tb-esp32iot{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;}
 
 /* SECTION */
 section{padding:3rem 2rem;max-width:1200px;margin:0 auto;}
@@ -77,6 +80,9 @@ section{padding:3rem 2rem;max-width:1200px;margin:0 auto;}
 .tag-python{background:#d1fae5;color:#065f46;}
 .tag-robotics{background:#ede9fe;color:#5b21b6;}
 .tag-product{background:#fee2e2;color:#991b1b;}
+.tag-aiedge{background:#fdf4ff;color:#7e22ce;}
+.tag-industrial{background:#f0fdfa;color:#134e4a;}
+.tag-esp32iot{background:#fff7ed;color:#9a3412;}
 
 /* HEADER BG BY LEVEL */
 .sh-beginner{background:linear-gradient(90deg,#eff6ff,#f0f4ff);}
@@ -85,6 +91,9 @@ section{padding:3rem 2rem;max-width:1200px;margin:0 auto;}
 .sh-python{background:linear-gradient(90deg,#ecfdf5,#f0f4ff);}
 .sh-robotics{background:linear-gradient(90deg,#f5f3ff,#f0f4ff);}
 .sh-product{background:linear-gradient(90deg,#fef2f2,#f0f4ff);}
+.sh-aiedge{background:linear-gradient(90deg,#fdf4ff,#f0f4ff);}
+.sh-industrial{background:linear-gradient(90deg,#f0fdfa,#f0f4ff);}
+.sh-esp32iot{background:linear-gradient(90deg,#fff7ed,#f0f4ff);}
 
 /* WEEK GRID */
 .week-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.3rem;margin-bottom:1rem;}
@@ -131,6 +140,18 @@ section{padding:3rem 2rem;max-width:1200px;margin:0 auto;}
 .w26 .week-icon{background:linear-gradient(135deg,#d97706,#fbbf24);}
 .w27 .week-icon{background:linear-gradient(135deg,#0f766e,#99f6e4);}
 .w28 .week-icon{background:linear-gradient(135deg,#7c3aed,#f472b6);}
+.w29 .week-icon{background:linear-gradient(135deg,#6d28d9,#a78bfa);}
+.w30 .week-icon{background:linear-gradient(135deg,#7e22ce,#d946ef);}
+.w31 .week-icon{background:linear-gradient(135deg,#4c1d95,#818cf8);}
+.w32 .week-icon{background:linear-gradient(135deg,#3730a3,#c4b5fd);}
+.w33 .week-icon{background:linear-gradient(135deg,#065f46,#34d399);}
+.w34 .week-icon{background:linear-gradient(135deg,#0f766e,#5eead4);}
+.w35 .week-icon{background:linear-gradient(135deg,#047857,#86efac);}
+.w36 .week-icon{background:linear-gradient(135deg,#134e4a,#99f6e4);}
+.w37 .week-icon{background:linear-gradient(135deg,#c2410c,#fb923c);}
+.w38 .week-icon{background:linear-gradient(135deg,#b45309,#fcd34d);}
+.w39 .week-icon{background:linear-gradient(135deg,#92400e,#fde68a);}
+.w40 .week-icon{background:linear-gradient(135deg,#78350f,#f97316);}
 
 /* DIVIDER */
 .divider{max-width:1200px;margin:0 auto;padding:0 2rem;}
@@ -186,6 +207,9 @@ footer strong{color:#fff;}
     <a href="#python">Python</a>
     <a href="#robotics">Robotics</a>
     <a href="#product">Product</a>
+    <a href="#aiedge">AI/Edge</a>
+    <a href="#industrialiot">Industrial IoT</a>
+    <a href="#esp32iot">ESP32 IoT</a>
     <a href="#references">References</a>
     <a href="#resources">Resources</a>
   </div>
@@ -195,12 +219,12 @@ footer strong{color:#fff;}
 <div class="hero">
   <div class="hero-badge">Open Curriculum &bull; Arduino &bull; Robotics &bull; IoT</div>
   <h1>Learn <span>Arduino & Robotics</span><br>from Zero to Expert</h1>
-  <p>A complete 28-week hands-on course — from first LED blink to ROS-powered robots, IoT stations, PCB design, and product launches.</p>
+  <p>A complete 40-week hands-on course — from first LED blink to TinyML, industrial IoT, ROS-powered robots, and product launches.</p>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-num">28</div><div class="stat-label">Weeks</div></div>
-    <div class="stat"><div class="stat-num">224</div><div class="stat-label">Lessons</div></div>
-    <div class="stat"><div class="stat-num">28</div><div class="stat-label">Projects</div></div>
-    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Tracks</div></div>
+    <div class="stat"><div class="stat-num">40</div><div class="stat-label">Weeks</div></div>
+    <div class="stat"><div class="stat-num">320</div><div class="stat-label">Lessons</div></div>
+    <div class="stat"><div class="stat-num">40</div><div class="stat-label">Projects</div></div>
+    <div class="stat"><div class="stat-num">9</div><div class="stat-label">Tracks</div></div>
     <div class="stat"><div class="stat-num">Free</div><div class="stat-label">&amp; Open</div></div>
   </div>
   <div class="hero-ctas">
@@ -217,6 +241,9 @@ footer strong{color:#fff;}
   <a class="track-badge tb-python" href="#python">Weeks 17–20: Python Crossover</a>
   <a class="track-badge tb-robotics" href="#robotics">Weeks 21–24: Robotics Deep Dive</a>
   <a class="track-badge tb-product" href="#product">Weeks 25–28: Product Thinking</a>
+  <a class="track-badge tb-aiedge" href="#aiedge">Weeks 29–32: AI &amp; Edge ML</a>
+  <a class="track-badge tb-industrial" href="#industrialiot">Weeks 33–36: Industrial IoT</a>
+  <a class="track-badge tb-esp32iot" href="#esp32iot">Weeks 37–40: ESP32 IoT</a>
 </div>
 
 <!-- ============================================================
@@ -725,6 +752,231 @@ footer strong{color:#fff;}
 
 <div class="divider"><hr></div>
 
+<!-- ============================================================
+     AI & EDGE ML — Weeks 29–32
+     ============================================================ -->
+<section id="aiedge">
+  <div class="section-header sh-aiedge">
+    <span class="sh-icon">&#129504;</span>
+    <div class="sh-text">
+      <h2>AI &amp; Edge ML — Weeks 29 to 32</h2>
+      <p>TinyML, TensorFlow Lite Micro, Edge Impulse, image classification, and deploying AI to microcontrollers.</p>
+    </div>
+    <span class="sh-tag tag-aiedge">Weeks 29–32</span>
+  </div>
+  <div class="week-grid">
+
+    <div class="week-card w29">
+      <div class="week-header"><div class="week-icon">&#129504;</div><div class="week-title"><h3>Week 29 — TinyML Foundations</h3><span>TensorFlow Lite Micro &amp; Arduino Nano</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="AIEdge/Week29/Day1.html"><span class="day-num">Day 1</span><span class="day-title">What is TinyML?</span></a>
+        <a class="day-link" href="AIEdge/Week29/Day2.html"><span class="day-num">Day 2</span><span class="day-title">TensorFlow Lite Micro</span></a>
+        <a class="day-link" href="AIEdge/Week29/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Arduino Nano 33 BLE Sense</span></a>
+        <a class="day-link" href="AIEdge/Week29/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Your First ML Model</span></a>
+        <a class="day-link" href="AIEdge/Week29/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Sensor Data Collection</span></a>
+        <a class="day-link" href="AIEdge/Week29/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Model Evaluation</span></a>
+        <a class="day-link" href="AIEdge/Week29/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Deploying to Arduino</span></a>
+        <a class="day-link day-capstone" href="AIEdge/Week29/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 29 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w30">
+      <div class="week-header"><div class="week-icon">&#127993;</div><div class="week-title"><h3>Week 30 — Edge Impulse</h3><span>Keyword Spotting &amp; Model Training</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="AIEdge/Week30/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Edge Impulse Introduction</span></a>
+        <a class="day-link" href="AIEdge/Week30/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Data Acquisition</span></a>
+        <a class="day-link" href="AIEdge/Week30/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Signal Processing Blocks</span></a>
+        <a class="day-link" href="AIEdge/Week30/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Keyword Spotting</span></a>
+        <a class="day-link" href="AIEdge/Week30/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Training Your Model</span></a>
+        <a class="day-link" href="AIEdge/Week30/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Testing &amp; Validation</span></a>
+        <a class="day-link" href="AIEdge/Week30/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Deployment to Device</span></a>
+        <a class="day-link day-capstone" href="AIEdge/Week30/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 30 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w31">
+      <div class="week-header"><div class="week-icon">&#128247;</div><div class="week-title"><h3>Week 31 — Vision on ESP32-S3</h3><span>Image Classification &amp; Person Detection</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="AIEdge/Week31/Day1.html"><span class="day-num">Day 1</span><span class="day-title">ESP32-S3 for AI</span></a>
+        <a class="day-link" href="AIEdge/Week31/Day2.html"><span class="day-num">Day 2</span><span class="day-title">ESP32-S3 Eye Camera</span></a>
+        <a class="day-link" href="AIEdge/Week31/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Image Classification</span></a>
+        <a class="day-link" href="AIEdge/Week31/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Person Detection</span></a>
+        <a class="day-link" href="AIEdge/Week31/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Anomaly Detection</span></a>
+        <a class="day-link" href="AIEdge/Week31/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Confidence Thresholds</span></a>
+        <a class="day-link" href="AIEdge/Week31/Day7.html"><span class="day-num">Day 7</span><span class="day-title">TinyML + IoT</span></a>
+        <a class="day-link day-capstone" href="AIEdge/Week31/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 31 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w32">
+      <div class="week-header"><div class="week-icon">&#128736;</div><div class="week-title"><h3>Week 32 — AI Project Build</h3><span>Optimisation, Integration &amp; Field Testing</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="AIEdge/Week32/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Project Scoping</span></a>
+        <a class="day-link" href="AIEdge/Week32/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Data Strategy</span></a>
+        <a class="day-link" href="AIEdge/Week32/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Model Architecture Choice</span></a>
+        <a class="day-link" href="AIEdge/Week32/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Optimisation for Edge</span></a>
+        <a class="day-link" href="AIEdge/Week32/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Integration with Hardware</span></a>
+        <a class="day-link" href="AIEdge/Week32/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Field Testing</span></a>
+        <a class="day-link" href="AIEdge/Week32/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Build Day</span></a>
+        <a class="day-link day-capstone" href="AIEdge/Week32/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 32 Capstone</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- ============================================================
+     INDUSTRIAL IoT — Weeks 33–36
+     ============================================================ -->
+<section id="industrialiot">
+  <div class="section-header sh-industrial">
+    <span class="sh-icon">&#127981;</span>
+    <div class="sh-text">
+      <h2>Industrial IoT — Weeks 33 to 36</h2>
+      <p>Node-RED, InfluxDB, Grafana, ESP-NOW mesh networks, AWS/Azure/GCP IoT, and IoT security.</p>
+    </div>
+    <span class="sh-tag tag-industrial">Weeks 33–36</span>
+  </div>
+  <div class="week-grid">
+
+    <div class="week-card w33">
+      <div class="week-header"><div class="week-icon">&#128202;</div><div class="week-title"><h3>Week 33 — Data Pipelines</h3><span>Node-RED, InfluxDB &amp; Grafana</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="IndustrialIoT/Week33/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Node-RED Introduction</span></a>
+        <a class="day-link" href="IndustrialIoT/Week33/Day2.html"><span class="day-num">Day 2</span><span class="day-title">MQTT Broker Setup</span></a>
+        <a class="day-link" href="IndustrialIoT/Week33/Day3.html"><span class="day-num">Day 3</span><span class="day-title">ESP32 to Node-RED</span></a>
+        <a class="day-link" href="IndustrialIoT/Week33/Day4.html"><span class="day-num">Day 4</span><span class="day-title">InfluxDB Time Series</span></a>
+        <a class="day-link" href="IndustrialIoT/Week33/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Grafana Dashboards</span></a>
+        <a class="day-link" href="IndustrialIoT/Week33/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Alerting &amp; Notifications</span></a>
+        <a class="day-link" href="IndustrialIoT/Week33/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Data Pipeline Design</span></a>
+        <a class="day-link day-capstone" href="IndustrialIoT/Week33/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 33 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w34">
+      <div class="week-header"><div class="week-icon">&#128225;</div><div class="week-title"><h3>Week 34 — Mesh Networking</h3><span>ESP-NOW, Mesh &amp; LoRa Gateway</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="IndustrialIoT/Week34/Day1.html"><span class="day-num">Day 1</span><span class="day-title">ESP-NOW Introduction</span></a>
+        <a class="day-link" href="IndustrialIoT/Week34/Day2.html"><span class="day-num">Day 2</span><span class="day-title">ESP-NOW Unicast</span></a>
+        <a class="day-link" href="IndustrialIoT/Week34/Day3.html"><span class="day-num">Day 3</span><span class="day-title">ESP-NOW Broadcast</span></a>
+        <a class="day-link" href="IndustrialIoT/Week34/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Multi-Node Sensor Network</span></a>
+        <a class="day-link" href="IndustrialIoT/Week34/Day5.html"><span class="day-num">Day 5</span><span class="day-title">ESP32 Mesh Networking</span></a>
+        <a class="day-link" href="IndustrialIoT/Week34/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Mesh + MQTT Gateway</span></a>
+        <a class="day-link" href="IndustrialIoT/Week34/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Long Range with LoRa</span></a>
+        <a class="day-link day-capstone" href="IndustrialIoT/Week34/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 34 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w35">
+      <div class="week-header"><div class="week-icon">&#9729;</div><div class="week-title"><h3>Week 35 — Cloud Platforms</h3><span>AWS, Google, Azure &amp; Home Assistant</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="IndustrialIoT/Week35/Day1.html"><span class="day-num">Day 1</span><span class="day-title">AWS IoT Core</span></a>
+        <a class="day-link" href="IndustrialIoT/Week35/Day2.html"><span class="day-num">Day 2</span><span class="day-title">AWS IoT Rules</span></a>
+        <a class="day-link" href="IndustrialIoT/Week35/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Google Cloud IoT</span></a>
+        <a class="day-link" href="IndustrialIoT/Week35/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Home Assistant Integration</span></a>
+        <a class="day-link" href="IndustrialIoT/Week35/Day5.html"><span class="day-num">Day 5</span><span class="day-title">ESPHome Basics</span></a>
+        <a class="day-link" href="IndustrialIoT/Week35/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Azure IoT Hub</span></a>
+        <a class="day-link" href="IndustrialIoT/Week35/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Comparing Platforms</span></a>
+        <a class="day-link day-capstone" href="IndustrialIoT/Week35/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 35 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w36">
+      <div class="week-header"><div class="week-icon">&#128274;</div><div class="week-title"><h3>Week 36 — IoT Security</h3><span>TLS, OTA, API Keys &amp; Pen Testing</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="IndustrialIoT/Week36/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Why IoT Security Matters</span></a>
+        <a class="day-link" href="IndustrialIoT/Week36/Day2.html"><span class="day-num">Day 2</span><span class="day-title">TLS/SSL on ESP32</span></a>
+        <a class="day-link" href="IndustrialIoT/Week36/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Certificate Authentication</span></a>
+        <a class="day-link" href="IndustrialIoT/Week36/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Secure OTA Updates</span></a>
+        <a class="day-link" href="IndustrialIoT/Week36/Day5.html"><span class="day-num">Day 5</span><span class="day-title">API Key Management</span></a>
+        <a class="day-link" href="IndustrialIoT/Week36/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Network Security</span></a>
+        <a class="day-link" href="IndustrialIoT/Week36/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Penetration Testing IoT</span></a>
+        <a class="day-link day-capstone" href="IndustrialIoT/Week36/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 36 Capstone</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- ============================================================
+     ESP32 IoT — Weeks 37–40
+     ============================================================ -->
+<section id="esp32iot">
+  <div class="section-header sh-esp32iot">
+    <span class="sh-icon">&#128268;</span>
+    <div class="sh-text">
+      <h2>ESP32 IoT — Weeks 37 to 40</h2>
+      <p>Smart home automation, BLE wearables, LoRa long-range networking, and full IoT product builds.</p>
+    </div>
+    <span class="sh-tag tag-esp32iot">Weeks 37–40</span>
+  </div>
+  <div class="week-grid">
+
+    <div class="week-card w37">
+      <div class="week-header"><div class="week-icon">&#127968;</div><div class="week-title"><h3>Week 37 — Smart Home</h3><span>Smart Plugs, Thermostat &amp; ESPHome</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="ESP32IoT/Week37/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Smart Plug &amp; Power Monitor</span></a>
+        <a class="day-link" href="ESP32IoT/Week37/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Smart Thermostat</span></a>
+        <a class="day-link" href="ESP32IoT/Week37/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Motion &amp; Presence Detection</span></a>
+        <a class="day-link" href="ESP32IoT/Week37/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Smart Doorbell</span></a>
+        <a class="day-link" href="ESP32IoT/Week37/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Voice Assistant Integration</span></a>
+        <a class="day-link" href="ESP32IoT/Week37/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Automation Rules</span></a>
+        <a class="day-link" href="ESP32IoT/Week37/Day7.html"><span class="day-num">Day 7</span><span class="day-title">ESPHome Advanced</span></a>
+        <a class="day-link day-capstone" href="ESP32IoT/Week37/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 37 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w38">
+      <div class="week-header"><div class="week-icon">&#8987;</div><div class="week-title"><h3>Week 38 — BLE Wearables</h3><span>GATT Services, Heart Rate &amp; E-Paper</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="ESP32IoT/Week38/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Wearable Hardware</span></a>
+        <a class="day-link" href="ESP32IoT/Week38/Day2.html"><span class="day-num">Day 2</span><span class="day-title">BLE Advertising</span></a>
+        <a class="day-link" href="ESP32IoT/Week38/Day3.html"><span class="day-num">Day 3</span><span class="day-title">BLE GATT Services</span></a>
+        <a class="day-link" href="ESP32IoT/Week38/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Phone App via BLE</span></a>
+        <a class="day-link" href="ESP32IoT/Week38/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Heart Rate &amp; SpO2</span></a>
+        <a class="day-link" href="ESP32IoT/Week38/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Step Counter</span></a>
+        <a class="day-link" href="ESP32IoT/Week38/Day7.html"><span class="day-num">Day 7</span><span class="day-title">E-Paper Display</span></a>
+        <a class="day-link day-capstone" href="ESP32IoT/Week38/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 38 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w39">
+      <div class="week-header"><div class="week-icon">&#128243;</div><div class="week-title"><h3>Week 39 — LoRa Networks</h3><span>TTN, GPS Tracking &amp; Mesh</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="ESP32IoT/Week39/Day1.html"><span class="day-num">Day 1</span><span class="day-title">LoRa Physics</span></a>
+        <a class="day-link" href="ESP32IoT/Week39/Day2.html"><span class="day-num">Day 2</span><span class="day-title">LoRa32 Hardware Setup</span></a>
+        <a class="day-link" href="ESP32IoT/Week39/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Point-to-Point LoRa</span></a>
+        <a class="day-link" href="ESP32IoT/Week39/Day4.html"><span class="day-num">Day 4</span><span class="day-title">The Things Network (TTN)</span></a>
+        <a class="day-link" href="ESP32IoT/Week39/Day5.html"><span class="day-num">Day 5</span><span class="day-title">TTN to Dashboard</span></a>
+        <a class="day-link" href="ESP32IoT/Week39/Day6.html"><span class="day-num">Day 6</span><span class="day-title">GPS Tracking</span></a>
+        <a class="day-link" href="ESP32IoT/Week39/Day7.html"><span class="day-num">Day 7</span><span class="day-title">LoRa Mesh</span></a>
+        <a class="day-link day-capstone" href="ESP32IoT/Week39/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 39 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w40">
+      <div class="week-header"><div class="week-icon">&#127881;</div><div class="week-title"><h3>Week 40 — Final IoT Build</h3><span>Architecture, Firmware &amp; Cloud</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="ESP32IoT/Week40/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Project Ideation</span></a>
+        <a class="day-link" href="ESP32IoT/Week40/Day2.html"><span class="day-num">Day 2</span><span class="day-title">System Architecture</span></a>
+        <a class="day-link" href="ESP32IoT/Week40/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Hardware Build</span></a>
+        <a class="day-link" href="ESP32IoT/Week40/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Firmware Development</span></a>
+        <a class="day-link" href="ESP32IoT/Week40/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Cloud &amp; Dashboard Setup</span></a>
+        <a class="day-link" href="ESP32IoT/Week40/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Integration Testing</span></a>
+        <a class="day-link" href="ESP32IoT/Week40/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Build &amp; Polish Day</span></a>
+        <a class="day-link day-capstone" href="ESP32IoT/Week40/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 40 Capstone</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
 <!-- PITCH DECK BANNER -->
 <section style="padding-top:2rem;padding-bottom:0;max-width:1200px;margin:0 auto;padding-left:2rem;padding-right:2rem;">
   <div class="pitch-banner">
@@ -819,7 +1071,7 @@ footer strong{color:#fff;}
 <!-- FOOTER -->
 <footer>
   <p><strong>Arduino &amp; Robotics Teaching Curriculum</strong> &mdash; Open source &amp; free for educators and learners.</p>
-  <p style="margin-top:.5rem;">28 Weeks &bull; 224 Lessons &bull; 6 Tracks &bull; <a href="https://github.com/selvakumarvr/robotics" target="_blank" rel="noopener">github.com/selvakumarvr/robotics</a> &bull; <a href="https://selvakumarvr.github.io/robotics/" target="_blank" rel="noopener">Live Site</a></p>
+  <p style="margin-top:.5rem;">40 Weeks &bull; 320 Lessons &bull; 9 Tracks &bull; <a href="https://github.com/selvakumarvr/robotics" target="_blank" rel="noopener">github.com/selvakumarvr/robotics</a> &bull; <a href="https://selvakumarvr.github.io/robotics/" target="_blank" rel="noopener">Live Site</a></p>
 </footer>
 
 </body>
