@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arduino & Robotics Teaching — Full 28-Week Curriculum</title>
+<title>Arduino & Robotics Teaching — Full 40-Week Curriculum</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -167,20 +167,27 @@ section{padding:3rem 2rem;max-width:1200px;margin:0 auto;}
 /* REFERENCES */
 .ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem;}
 .ref-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid #e0e7ff;padding:1.1rem;display:flex;align-items:flex-start;gap:.8rem;text-decoration:none;transition:transform .2s,box-shadow .2s;}
-.ref-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.15);}
+.ref-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(79,70,229,.18);}
 .ref-icon{font-size:1.7rem;flex-shrink:0;margin-top:.1rem;}
 .ref-info h4{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:.2rem;}
 .ref-info p{font-size:.74rem;color:var(--muted);font-weight:600;}
 .ref-type{display:inline-block;font-size:.62rem;font-weight:800;padding:.12rem .45rem;border-radius:7px;margin-top:.3rem;text-transform:uppercase;letter-spacing:.04em;}
 .type-pdf{background:#fee2e2;color:#991b1b;}
 .type-html{background:#dbeafe;color:#1e40af;}
-
-/* ONLINE RESOURCES */
-.resource-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.9rem;}
-.resource-card{background:var(--card);border-radius:var(--radius);padding:1rem 1.1rem;box-shadow:var(--shadow);border:1px solid #e0e7ff;text-decoration:none;display:flex;align-items:center;gap:.7rem;transition:transform .2s,box-shadow .2s;}
-.resource-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.15);}
-.resource-card .ri{font-size:1.4rem;flex-shrink:0;}
-.resource-card span{font-size:.82rem;font-weight:700;color:var(--text);}
+.type-ext{background:#d1fae5;color:#065f46;}
+.type-tool{background:#fef3c7;color:#92400e;}
+.type-community{background:#ede9fe;color:#5b21b6;}
+/* ref category sub-headers */
+.ref-cat{display:flex;align-items:center;gap:.65rem;margin:2rem 0 .85rem;padding-bottom:.5rem;border-bottom:2px solid #e0e7ff;}
+.ref-cat-icon{font-size:1.3rem;}
+.ref-cat h3{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1rem;color:var(--text);}
+.ref-cat-tag{font-size:.68rem;font-weight:800;padding:.15rem .55rem;border-radius:9px;text-transform:uppercase;letter-spacing:.05em;}
+.rct-blue{background:#dbeafe;color:#1d4ed8;}
+.rct-indigo{background:#e0e7ff;color:#3730a3;}
+.rct-teal{background:#ccfbf1;color:#0f766e;}
+.rct-orange{background:#ffedd5;color:#c2410c;}
+.rct-purple{background:#ede9fe;color:#6d28d9;}
+.rct-green{background:#dcfce7;color:#166534;}
 
 /* FOOTER */
 footer{background:var(--text);color:rgba(255,255,255,.7);text-align:center;padding:2rem;font-size:.82rem;font-weight:600;}
@@ -211,7 +218,6 @@ footer strong{color:#fff;}
     <a href="#industrialiot">Industrial IoT</a>
     <a href="#esp32iot">ESP32 IoT</a>
     <a href="#references">References</a>
-    <a href="#resources">Resources</a>
   </div>
 </nav>
 
@@ -991,81 +997,293 @@ footer strong{color:#fff;}
 <div class="divider" style="padding-top:2rem;"><hr></div>
 
 <!-- ============================================================
-     REFERENCES
+     REFERENCE HUB
      ============================================================ -->
 <section id="references">
-  <div class="section-header" style="background:linear-gradient(90deg,#f0fdf4,#f0f4ff);">
-    <span class="sh-icon">&#128214;</span>
+  <div class="section-header sh-beginner">
+    <span class="sh-icon">&#128218;</span>
     <div class="sh-text">
-      <h2>Reference Materials</h2>
-      <p>Official books, guides, and cheat sheets included with this course.</p>
+      <h2>Reference Hub</h2>
+      <p>Books, official docs, simulators, tutorials, tools, and community links — everything in one place.</p>
     </div>
+    <span class="sh-tag tag-beginner">All Levels</span>
+  </div>
+
+  <!-- COURSE MATERIALS (PDFs) -->
+  <div class="ref-cat">
+    <span class="ref-cat-icon">&#128214;</span>
+    <h3>Course Materials</h3>
+    <span class="ref-cat-tag rct-blue">Included PDFs &amp; Files</span>
   </div>
   <div class="ref-grid">
     <a class="ref-card" href="reference/Arduino_Projects_Book.pdf" target="_blank">
       <span class="ref-icon">&#128214;</span>
-      <div class="ref-info"><h4>Arduino Projects Book</h4><p>Official Arduino starter guide with 15 hands-on projects.</p><span class="ref-type type-pdf">PDF</span></div>
+      <div class="ref-info"><h4>Arduino Projects Book</h4><p>Official Arduino starter guide — 15 hands-on beginner projects with full circuit diagrams.</p><span class="ref-type type-pdf">PDF</span></div>
     </a>
     <a class="ref-card" href="reference/GetStartedArduino.pdf" target="_blank">
       <span class="ref-icon">&#128218;</span>
-      <div class="ref-info"><h4>Getting Started with Arduino</h4><p>Beginner-friendly introduction to the Arduino platform.</p><span class="ref-type type-pdf">PDF</span></div>
+      <div class="ref-info"><h4>Getting Started with Arduino</h4><p>The original O'Reilly guide to Arduino — perfect first read for complete beginners.</p><span class="ref-type type-pdf">PDF</span></div>
     </a>
     <a class="ref-card" href="reference/ARDUINO_NOTEBOOKv6.pdf" target="_blank">
       <span class="ref-icon">&#128211;</span>
-      <div class="ref-info"><h4>Arduino Notebook v6</h4><p>Quick reference notebook covering core Arduino functions.</p><span class="ref-type type-pdf">PDF</span></div>
+      <div class="ref-info"><h4>Arduino Notebook v6</h4><p>Compact pocket reference covering all core Arduino functions, types, and syntax.</p><span class="ref-type type-pdf">PDF</span></div>
     </a>
     <a class="ref-card" href="reference/ARDUINO%20GUIDE%20ADA%20(1).pdf" target="_blank">
       <span class="ref-icon">&#128196;</span>
-      <div class="ref-info"><h4>Arduino Guide (Adafruit)</h4><p>Comprehensive Adafruit guide to Arduino programming and circuits.</p><span class="ref-type type-pdf">PDF</span></div>
+      <div class="ref-info"><h4>Arduino Guide (Adafruit)</h4><p>Adafruit's comprehensive guide — covers programming, libraries, and common sensors.</p><span class="ref-type type-pdf">PDF</span></div>
     </a>
     <a class="ref-card" href="reference/Building%20Arduino%20Projects%20for%20the%20Internet%20of%20Things%20(%20PDFDrive%20).pdf" target="_blank">
       <span class="ref-icon">&#127760;</span>
-      <div class="ref-info"><h4>Building Arduino IoT Projects</h4><p>Full book on connecting Arduino to the Internet of Things.</p><span class="ref-type type-pdf">PDF</span></div>
+      <div class="ref-info"><h4>Building Arduino IoT Projects</h4><p>Full book on cloud connectivity, MQTT, HTTP, and building real IoT devices.</p><span class="ref-type type-pdf">PDF</span></div>
     </a>
     <a class="ref-card" href="reference/electronicsProductionDesignRecitation2021.pdf" target="_blank">
       <span class="ref-icon">&#128268;</span>
-      <div class="ref-info"><h4>Electronics Production &amp; Design</h4><p>MIT-style recitation notes on electronics production and PCB design.</p><span class="ref-type type-pdf">PDF</span></div>
+      <div class="ref-info"><h4>Electronics Production &amp; Design</h4><p>MIT Fab Lab recitation notes on PCB design, soldering, and electronics production.</p><span class="ref-type type-pdf">PDF</span></div>
     </a>
     <a class="ref-card" href="reference/Arduino_Tinkercad_Electronics.html" target="_blank">
       <span class="ref-icon">&#128187;</span>
-      <div class="ref-info"><h4>Arduino &amp; Tinkercad Reference</h4><p>Interactive HTML reference for Tinkercad circuit simulation.</p><span class="ref-type type-html">HTML</span></div>
+      <div class="ref-info"><h4>Arduino &amp; Tinkercad Reference</h4><p>Interactive HTML reference for Tinkercad circuit simulation and component wiring.</p><span class="ref-type type-html">HTML</span></div>
     </a>
   </div>
-</section>
 
-<div class="divider"><hr></div>
+  <!-- OFFICIAL DOCUMENTATION -->
+  <div class="ref-cat">
+    <span class="ref-cat-icon">&#128196;</span>
+    <h3>Official Documentation</h3>
+    <span class="ref-cat-tag rct-indigo">Always Up-to-Date</span>
+  </div>
+  <div class="ref-grid">
+    <a class="ref-card" href="https://www.arduino.cc/reference/en/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128196;</span>
+      <div class="ref-info"><h4>Arduino Language Reference</h4><p>Complete reference for every Arduino function, variable type, and structure.</p><span class="ref-type type-ext">Official</span></div>
+    </a>
+    <a class="ref-card" href="https://docs.arduino.cc/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128218;</span>
+      <div class="ref-info"><h4>Arduino Documentation Hub</h4><p>All Arduino boards, libraries, IDE guides, and cloud platform docs in one place.</p><span class="ref-type type-ext">Official</span></div>
+    </a>
+    <a class="ref-card" href="https://www.arduino.cc/en/software" target="_blank" rel="noopener">
+      <span class="ref-icon">&#11015;</span>
+      <div class="ref-info"><h4>Arduino IDE 2 Download</h4><p>Latest Arduino IDE with auto-complete, serial plotter, and debugger built in.</p><span class="ref-type type-ext">Download</span></div>
+    </a>
+    <a class="ref-card" href="https://docs.espressif.com/projects/arduino-esp32/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128225;</span>
+      <div class="ref-info"><h4>ESP32 Arduino Core Docs</h4><p>Official Espressif docs for ESP32 — WiFi, BLE, FreeRTOS, sleep modes, and peripherals.</p><span class="ref-type type-ext">Official</span></div>
+    </a>
+    <a class="ref-card" href="https://micropython.org/doc/en/latest/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128013;</span>
+      <div class="ref-info"><h4>MicroPython Documentation</h4><p>Full MicroPython language reference, libraries, and hardware-specific guides.</p><span class="ref-type type-ext">Official</span></div>
+    </a>
+    <a class="ref-card" href="https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-python-sdk.pdf" target="_blank" rel="noopener">
+      <span class="ref-icon">&#127928;</span>
+      <div class="ref-info"><h4>Pico Python SDK Guide</h4><p>Official Raspberry Pi Pico MicroPython SDK — pinout, libraries, and examples.</p><span class="ref-type type-pdf">PDF</span></div>
+    </a>
+    <a class="ref-card" href="https://docs.platformio.org/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128296;</span>
+      <div class="ref-info"><h4>PlatformIO Documentation</h4><p>Professional embedded IDE for VS Code — supports 1000+ boards and frameworks.</p><span class="ref-type type-ext">Official</span></div>
+    </a>
+    <a class="ref-card" href="https://docs.kicad.org/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128268;</span>
+      <div class="ref-info"><h4>KiCad Documentation</h4><p>Official KiCad EDA docs — schematic capture, PCB layout, DRC, and Gerber export.</p><span class="ref-type type-ext">Official</span></div>
+    </a>
+  </div>
 
-<!-- ============================================================
-     ONLINE RESOURCES
-     ============================================================ -->
-<section id="resources">
-  <div class="section-header" style="background:linear-gradient(90deg,#eff6ff,#f0f4ff);">
-    <span class="sh-icon">&#128279;</span>
-    <div class="sh-text">
-      <h2>Online Resources</h2>
-      <p>Essential websites, simulators, and tools for every Arduino learner.</p>
-    </div>
+  <!-- SIMULATORS & TOOLS -->
+  <div class="ref-cat">
+    <span class="ref-cat-icon">&#128187;</span>
+    <h3>Simulators &amp; Design Tools</h3>
+    <span class="ref-cat-tag rct-teal">Try Before You Build</span>
   </div>
-  <div class="resource-grid">
-    <a class="resource-card" href="https://www.arduino.cc/reference/en/" target="_blank" rel="noopener"><span class="ri">&#128196;</span><span>Arduino Language Reference</span></a>
-    <a class="resource-card" href="https://www.tinkercad.com/circuits" target="_blank" rel="noopener"><span class="ri">&#128187;</span><span>Tinkercad Circuits Simulator</span></a>
-    <a class="resource-card" href="https://wokwi.com/" target="_blank" rel="noopener"><span class="ri">&#127918;</span><span>Wokwi Arduino Simulator</span></a>
-    <a class="resource-card" href="https://www.arduino.cc/en/software" target="_blank" rel="noopener"><span class="ri">&#11015;</span><span>Arduino IDE Download</span></a>
-    <a class="resource-card" href="https://docs.arduino.cc/" target="_blank" rel="noopener"><span class="ri">&#128218;</span><span>Arduino Documentation</span></a>
-    <a class="resource-card" href="https://www.arduino.cc/en/Tutorial/HomePage" target="_blank" rel="noopener"><span class="ri">&#127891;</span><span>Official Arduino Tutorials</span></a>
-    <a class="resource-card" href="https://randomnerdtutorials.com/" target="_blank" rel="noopener"><span class="ri">&#128295;</span><span>Random Nerd Tutorials</span></a>
-    <a class="resource-card" href="https://www.instructables.com/circuits/arduino/projects/" target="_blank" rel="noopener"><span class="ri">&#128161;</span><span>Instructables Arduino</span></a>
-    <a class="resource-card" href="https://hackster.io/arduino" target="_blank" rel="noopener"><span class="ri">&#128172;</span><span>Hackster.io Arduino</span></a>
-    <a class="resource-card" href="https://www.kicad.org/" target="_blank" rel="noopener"><span class="ri">&#128268;</span><span>KiCad PCB Design</span></a>
-    <a class="resource-card" href="https://fritzing.org/" target="_blank" rel="noopener"><span class="ri">&#9889;</span><span>Fritzing Circuit Designer</span></a>
-    <a class="resource-card" href="https://platformio.org/" target="_blank" rel="noopener"><span class="ri">&#128296;</span><span>PlatformIO IDE</span></a>
-    <a class="resource-card" href="https://micropython.org/" target="_blank" rel="noopener"><span class="ri">&#128013;</span><span>MicroPython Official</span></a>
-    <a class="resource-card" href="https://www.raspberrypi.com/documentation/microcontrollers/micropython.html" target="_blank" rel="noopener"><span class="ri">&#127928;</span><span>Pico MicroPython Docs</span></a>
-    <a class="resource-card" href="https://wiki.ros.org/" target="_blank" rel="noopener"><span class="ri">&#129302;</span><span>ROS Wiki</span></a>
-    <a class="resource-card" href="https://docs.opencv.org/4.x/" target="_blank" rel="noopener"><span class="ri">&#128065;</span><span>OpenCV Documentation</span></a>
-    <a class="resource-card" href="https://www.jlcpcb.com/" target="_blank" rel="noopener"><span class="ri">&#128268;</span><span>JLCPCB PCB Fabrication</span></a>
-    <a class="resource-card" href="https://www.autodesk.com/products/fusion-360/" target="_blank" rel="noopener"><span class="ri">&#128247;</span><span>Fusion 360 (3D Design)</span></a>
+  <div class="ref-grid">
+    <a class="ref-card" href="https://www.tinkercad.com/circuits" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128187;</span>
+      <div class="ref-info"><h4>Tinkercad Circuits</h4><p>Free browser-based Arduino simulator — wire circuits and run code without hardware.</p><span class="ref-type type-tool">Simulator</span></div>
+    </a>
+    <a class="ref-card" href="https://wokwi.com/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#127918;</span>
+      <div class="ref-info"><h4>Wokwi Simulator</h4><p>Online Arduino &amp; ESP32 simulator with WiFi, OLED, sensors, serial monitor, and more.</p><span class="ref-type type-tool">Simulator</span></div>
+    </a>
+    <a class="ref-card" href="https://fritzing.org/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#9889;</span>
+      <div class="ref-info"><h4>Fritzing</h4><p>Design breadboard diagrams and generate PCB layouts from your Arduino circuits.</p><span class="ref-type type-tool">Design</span></div>
+    </a>
+    <a class="ref-card" href="https://www.kicad.org/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128268;</span>
+      <div class="ref-info"><h4>KiCad PCB Designer</h4><p>Professional open-source EDA — schematic + PCB layout + 3D preview + Gerber export.</p><span class="ref-type type-tool">PCB</span></div>
+    </a>
+    <a class="ref-card" href="https://www.autodesk.com/products/fusion-360/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128247;</span>
+      <div class="ref-info"><h4>Fusion 360</h4><p>3D CAD for enclosures, robot parts, and mechanical design. Free for students.</p><span class="ref-type type-tool">3D Design</span></div>
+    </a>
+    <a class="ref-card" href="https://www.jlcpcb.com/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#129491;</span>
+      <div class="ref-info"><h4>JLCPCB</h4><p>Order custom PCBs from your Gerber files — 5 boards for ~$2, ships worldwide.</p><span class="ref-type type-tool">Fabrication</span></div>
+    </a>
+    <a class="ref-card" href="https://app.diagrams.net/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128220;</span>
+      <div class="ref-info"><h4>draw.io (diagrams.net)</h4><p>Free online tool for system architecture, flowcharts, and project block diagrams.</p><span class="ref-type type-tool">Diagram</span></div>
+    </a>
+    <a class="ref-card" href="https://platformio.org/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128296;</span>
+      <div class="ref-info"><h4>PlatformIO IDE</h4><p>VS Code extension for professional Arduino &amp; ESP32 development with debugging.</p><span class="ref-type type-tool">IDE</span></div>
+    </a>
   </div>
+
+  <!-- TUTORIALS & LEARNING -->
+  <div class="ref-cat">
+    <span class="ref-cat-icon">&#127891;</span>
+    <h3>Tutorials &amp; Learning</h3>
+    <span class="ref-cat-tag rct-orange">Step-by-Step Guides</span>
+  </div>
+  <div class="ref-grid">
+    <a class="ref-card" href="https://www.arduino.cc/en/Tutorial/HomePage" target="_blank" rel="noopener">
+      <span class="ref-icon">&#127891;</span>
+      <div class="ref-info"><h4>Official Arduino Tutorials</h4><p>Arduino's own beginner-to-advanced tutorials covering all built-in examples.</p><span class="ref-type type-ext">Tutorial</span></div>
+    </a>
+    <a class="ref-card" href="https://randomnerdtutorials.com/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128295;</span>
+      <div class="ref-info"><h4>Random Nerd Tutorials</h4><p>Hundreds of ESP32 &amp; Arduino project tutorials with full code and schematics.</p><span class="ref-type type-ext">Tutorial</span></div>
+    </a>
+    <a class="ref-card" href="https://lastminuteengineers.com/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128161;</span>
+      <div class="ref-info"><h4>Last Minute Engineers</h4><p>In-depth sensor and module tutorials — OLED, servo, DHT, stepper, and more.</p><span class="ref-type type-ext">Tutorial</span></div>
+    </a>
+    <a class="ref-card" href="https://learn.adafruit.com/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128512;</span>
+      <div class="ref-info"><h4>Adafruit Learning System</h4><p>High-quality project guides covering NeoPixel, displays, sensors, and CircuitPython.</p><span class="ref-type type-ext">Tutorial</span></div>
+    </a>
+    <a class="ref-card" href="https://learn.sparkfun.com/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#9889;</span>
+      <div class="ref-info"><h4>SparkFun Tutorials</h4><p>Electronics tutorials from basics to advanced — great for sensors, communication protocols.</p><span class="ref-type type-ext">Tutorial</span></div>
+    </a>
+    <a class="ref-card" href="https://www.instructables.com/circuits/arduino/projects/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128736;</span>
+      <div class="ref-info"><h4>Instructables Arduino</h4><p>Thousands of user-submitted Arduino projects with step-by-step build instructions.</p><span class="ref-type type-ext">Projects</span></div>
+    </a>
+    <a class="ref-card" href="https://hackster.io/arduino" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128172;</span>
+      <div class="ref-info"><h4>Hackster.io Arduino</h4><p>Curated Arduino &amp; IoT projects from makers worldwide — great for final project ideas.</p><span class="ref-type type-ext">Projects</span></div>
+    </a>
+    <a class="ref-card" href="https://projecthub.arduino.cc/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128640;</span>
+      <div class="ref-info"><h4>Arduino Project Hub</h4><p>Official Arduino community projects — browse by difficulty, topic, and board type.</p><span class="ref-type type-ext">Projects</span></div>
+    </a>
+  </div>
+
+  <!-- ROBOTICS & AI -->
+  <div class="ref-cat">
+    <span class="ref-cat-icon">&#129302;</span>
+    <h3>Robotics, AI &amp; IoT</h3>
+    <span class="ref-cat-tag rct-purple">Advanced Topics</span>
+  </div>
+  <div class="ref-grid">
+    <a class="ref-card" href="https://wiki.ros.org/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#129302;</span>
+      <div class="ref-info"><h4>ROS Wiki</h4><p>Complete ROS documentation — nodes, topics, services, launch files, and packages.</p><span class="ref-type type-ext">Docs</span></div>
+    </a>
+    <a class="ref-card" href="https://docs.ros.org/en/humble/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#127970;</span>
+      <div class="ref-info"><h4>ROS 2 Humble Docs</h4><p>Latest ROS 2 documentation — recommended for new robotics projects from 2024+.</p><span class="ref-type type-ext">Docs</span></div>
+    </a>
+    <a class="ref-card" href="https://docs.opencv.org/4.x/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128065;</span>
+      <div class="ref-info"><h4>OpenCV Documentation</h4><p>Full OpenCV 4.x Python &amp; C++ reference — image processing, detection, and tracking.</p><span class="ref-type type-ext">Docs</span></div>
+    </a>
+    <a class="ref-card" href="https://www.tensorflow.org/lite/microcontrollers" target="_blank" rel="noopener">
+      <span class="ref-icon">&#129504;</span>
+      <div class="ref-info"><h4>TensorFlow Lite Micro</h4><p>Deploy ML models on microcontrollers — official guide for TinyML on Arduino.</p><span class="ref-type type-ext">Docs</span></div>
+    </a>
+    <a class="ref-card" href="https://docs.edgeimpulse.com/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#127993;</span>
+      <div class="ref-info"><h4>Edge Impulse Docs</h4><p>Full guide to training and deploying ML models using Edge Impulse on Arduino/ESP32.</p><span class="ref-type type-ext">Docs</span></div>
+    </a>
+    <a class="ref-card" href="https://mqtt.org/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#127760;</span>
+      <div class="ref-info"><h4>MQTT Protocol Docs</h4><p>Official MQTT specification and best practices for IoT messaging and broker setup.</p><span class="ref-type type-ext">Protocol</span></div>
+    </a>
+    <a class="ref-card" href="https://thingsboard.io/docs/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128202;</span>
+      <div class="ref-info"><h4>ThingsBoard IoT Docs</h4><p>Open-source IoT platform docs — device management, dashboards, and data visualization.</p><span class="ref-type type-ext">Docs</span></div>
+    </a>
+    <a class="ref-card" href="https://esphome.io/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#127968;</span>
+      <div class="ref-info"><h4>ESPHome Docs</h4><p>YAML-based firmware for ESP32/ESP8266 — easy Home Assistant and smart home integration.</p><span class="ref-type type-ext">Docs</span></div>
+    </a>
+  </div>
+
+  <!-- CHEAT SHEETS & QUICK REFERENCE -->
+  <div class="ref-cat">
+    <span class="ref-cat-icon">&#128203;</span>
+    <h3>Cheat Sheets &amp; Quick Reference</h3>
+    <span class="ref-cat-tag rct-green">Pin It to Your Wall</span>
+  </div>
+  <div class="ref-grid">
+    <a class="ref-card" href="https://www.arduino.cc/en/Reference/HomePage" target="_blank" rel="noopener">
+      <span class="ref-icon">&#9889;</span>
+      <div class="ref-info"><h4>Arduino Functions Cheat Sheet</h4><p>All built-in functions at a glance — digitalRead, analogWrite, Serial, Wire, SPI.</p><span class="ref-type type-ext">Cheat Sheet</span></div>
+    </a>
+    <a class="ref-card" href="https://store.arduino.cc/products/arduino-uno-rev3" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128204;</span>
+      <div class="ref-info"><h4>Arduino Uno Pinout</h4><p>Official pin diagram for Arduino Uno — digital, analog, PWM, I2C, SPI, and UART pins.</p><span class="ref-type type-ext">Pinout</span></div>
+    </a>
+    <a class="ref-card" href="https://randomnerdtutorials.com/esp32-pinout-reference-gpios/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128204;</span>
+      <div class="ref-info"><h4>ESP32 GPIO Pinout Guide</h4><p>Which ESP32 pins are safe to use — input-only, strapping, ADC, touch, and DAC pins explained.</p><span class="ref-type type-ext">Pinout</span></div>
+    </a>
+    <a class="ref-card" href="https://randomnerdtutorials.com/raspberry-pi-pico-pinout/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128204;</span>
+      <div class="ref-info"><h4>Raspberry Pi Pico Pinout</h4><p>Complete Pico W pin diagram — GP pins, ADC, I2C, SPI, UART, PWM, and power pins.</p><span class="ref-type type-ext">Pinout</span></div>
+    </a>
+    <a class="ref-card" href="https://i2cdevlib.com/docs/i2c-addresses" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128275;</span>
+      <div class="ref-info"><h4>I2C Address Reference</h4><p>Common I2C device addresses — OLED (0x3C), MPU6050 (0x68), DS3231 (0x57), and more.</p><span class="ref-type type-ext">Reference</span></div>
+    </a>
+    <a class="ref-card" href="https://learn.sparkfun.com/tutorials/serial-communication/rules-of-serial" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128257;</span>
+      <div class="ref-info"><h4>Serial / UART Guide</h4><p>How UART, SPI, and I2C work — baud rates, wiring, and when to use each protocol.</p><span class="ref-type type-ext">Guide</span></div>
+    </a>
+    <a class="ref-card" href="https://www.rapidtables.com/electric/ohms-law.html" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128268;</span>
+      <div class="ref-info"><h4>Ohm's Law Calculator</h4><p>Calculate resistor values, current, and voltage — essential for LED and sensor circuits.</p><span class="ref-type type-ext">Calculator</span></div>
+    </a>
+    <a class="ref-card" href="https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128203;</span>
+      <div class="ref-info"><h4>Board Manager URLs</h4><p>All third-party board URLs for Arduino IDE — ESP32, ESP8266, Pico, STM32, and more.</p><span class="ref-type type-ext">Reference</span></div>
+    </a>
+  </div>
+
+  <!-- COMMUNITY -->
+  <div class="ref-cat">
+    <span class="ref-cat-icon">&#128101;</span>
+    <h3>Community &amp; Support</h3>
+    <span class="ref-cat-tag rct-green">Get Help &amp; Share</span>
+  </div>
+  <div class="ref-grid">
+    <a class="ref-card" href="https://forum.arduino.cc/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128172;</span>
+      <div class="ref-info"><h4>Arduino Official Forum</h4><p>The main Arduino community forum — post questions, share projects, and get help from experts.</p><span class="ref-type type-community">Forum</span></div>
+    </a>
+    <a class="ref-card" href="https://stackoverflow.com/questions/tagged/arduino" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128201;</span>
+      <div class="ref-info"><h4>Stack Overflow — Arduino</h4><p>Thousands of answered Arduino coding questions — great for specific error debugging.</p><span class="ref-type type-community">Q&amp;A</span></div>
+    </a>
+    <a class="ref-card" href="https://www.reddit.com/r/arduino/" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128172;</span>
+      <div class="ref-info"><h4>r/arduino — Reddit</h4><p>Active Arduino community — project showcases, help requests, and beginner-friendly answers.</p><span class="ref-type type-community">Community</span></div>
+    </a>
+    <a class="ref-card" href="https://github.com/topics/arduino" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128025;</span>
+      <div class="ref-info"><h4>GitHub Arduino Projects</h4><p>Thousands of open-source Arduino libraries and projects — great for learning from real code.</p><span class="ref-type type-community">Open Source</span></div>
+    </a>
+    <a class="ref-card" href="https://www.youtube.com/@GreatScottLab" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128250;</span>
+      <div class="ref-info"><h4>GreatScott! — YouTube</h4><p>Electronics and Arduino project videos — clear explanations of circuits and components.</p><span class="ref-type type-community">Video</span></div>
+    </a>
+    <a class="ref-card" href="https://www.youtube.com/@PaulMcWhorter" target="_blank" rel="noopener">
+      <span class="ref-icon">&#128250;</span>
+      <div class="ref-info"><h4>Paul McWhorter — YouTube</h4><p>Beginner-friendly Arduino video series — teaches from zero with clear step-by-step lessons.</p><span class="ref-type type-community">Video</span></div>
+    </a>
+  </div>
+
 </section>
 
 <!-- FOOTER -->
