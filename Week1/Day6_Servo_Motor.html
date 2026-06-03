@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 Day 6 — Servo Motor Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent:#0891b2; --accent-light:#22d3ee; --accent-glow:rgba(8,145,178,0.18);
+            --accent2:#f97316; --accent3:#8b5cf6; --accent4:#10b981; --accent5:#ec4899;
+            --warning:#f59e0b; --danger:#ef4444;
+            --text-primary:#07282e; --text-muted:#94a3b8;
+            --font-display:'Baloo 2',cursive; --font-body:'Nunito',sans-serif; --font-code:'Fira Code',monospace;
+            --title-size:clamp(1.8rem,5vw,3.6rem); --h2-size:clamp(1.3rem,3.5vw,2.2rem);
+            --h3-size:clamp(1rem,2.5vw,1.4rem); --body-size:clamp(0.78rem,1.5vw,1.05rem);
+            --small-size:clamp(0.68rem,1.1vw,0.88rem); --code-size:clamp(0.62rem,1.05vw,0.83rem);
+            --slide-padding:clamp(1.5rem,4vw,4rem); --content-gap:clamp(0.8rem,2vw,1.6rem);
+            --elem-gap:clamp(0.3rem,1vw,0.7rem); --radius:16px; --ease-out:cubic-bezier(0.16,1,0.3,1);
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;scroll-snap-type:y mandatory;height:100%;overflow-x:hidden;}
+        body{font-family:var(--font-body);background:#ecfeff;color:var(--text-primary);overflow-x:hidden;height:100%;line-height:1.5;}
+        .slide{width:100vw;height:100vh;height:100dvh;padding:var(--slide-padding);scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+        .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center;max-height:100%;overflow:hidden;gap:var(--content-gap);}
+        .progress-bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-light),var(--accent4));z-index:1000;transition:width 0.3s ease;}
+        .nav-dots{position:fixed;right:clamp(0.5rem,1.5vw,1.5rem);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:100;}
+        .nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(8,145,178,0.2);cursor:pointer;transition:all 0.3s ease;border:none;padding:0;}
+        .nav-dot.active{background:var(--accent);transform:scale(1.5);}
+        .nav-dot:hover{background:var(--accent-light);}
+        .slide-counter{position:fixed;bottom:clamp(0.5rem,2vw,1.2rem);right:clamp(0.5rem,2vw,1.2rem);font-family:var(--font-code);font-size:var(--small-size);color:var(--text-muted);z-index:100;background:rgba(255,255,255,0.85);padding:3px 10px;border-radius:20px;}
+        h1{font-family:var(--font-display);font-size:var(--title-size);font-weight:800;line-height:1.15;}
+        h2{font-family:var(--font-display);font-size:var(--h2-size);font-weight:700;line-height:1.2;color:var(--accent);}
+        h3{font-family:var(--font-display);font-size:var(--h3-size);font-weight:700;line-height:1.3;}
+        p,li{font-size:var(--body-size);line-height:1.65;color:#334155;}
+        strong{font-weight:700;}
+        .accent{color:var(--accent);} .accent2{color:var(--accent2);} .accent3{color:var(--accent3);} .accent4{color:var(--accent4);}
+        .bg-dots{background-image:radial-gradient(rgba(8,145,178,0.07) 1.5px,transparent 1.5px);background-size:28px 28px;}
+        .bg-white{background:#ffffff;}
+        .bg-cyan{background:linear-gradient(135deg,#ecfeff 0%,#cffafe 50%,#a5f3fc 100%);}
+        .bg-orange{background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 50%,#fed7aa 100%);}
+        .bg-green{background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 50%,#a7f3d0 100%);}
+        .card{background:#fff;border-radius:var(--radius);padding:clamp(0.8rem,2vw,1.4rem);border:2px solid rgba(8,145,178,0.1);box-shadow:0 2px 12px rgba(8,145,178,0.06);transition:all 0.3s ease;}
+        .card:hover{border-color:rgba(8,145,178,0.25);box-shadow:0 6px 24px rgba(8,145,178,0.12);transform:translateY(-2px);}
+        .card-cyan{border-left:4px solid var(--accent);background:linear-gradient(135deg,#fff 80%,#ecfeff);}
+        .card-orange{border-left:4px solid var(--accent2);background:linear-gradient(135deg,#fff 80%,#fff7ed);}
+        .card-purple{border-left:4px solid var(--accent3);background:linear-gradient(135deg,#fff 80%,#f3e8ff);}
+        .card-green{border-left:4px solid var(--accent4);background:linear-gradient(135deg,#fff 80%,#ecfdf5);}
+        .card-pink{border-left:4px solid var(--accent5);background:linear-gradient(135deg,#fff 80%,#fdf2f8);}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:var(--content-gap);align-items:start;}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--elem-gap);}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--elem-gap);}
+        @media(max-width:768px){.two-col,.grid-3{grid-template-columns:1fr 1fr;}}
+        .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:var(--small-size);font-weight:700;}
+        .badge-cyan{background:#cffafe;color:var(--accent);}
+        .badge-orange{background:#fff7ed;color:var(--accent2);}
+        .badge-purple{background:#f3e8ff;color:var(--accent3);}
+        .badge-green{background:#ecfdf5;color:var(--accent4);}
+        .badge-pink{background:#fdf2f8;color:var(--accent5);}
+        .section-label{font-family:var(--font-code);font-size:var(--small-size);letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+        .divider{height:3px;width:60px;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent-light));}
+        .subtitle{font-size:clamp(0.9rem,2vw,1.3rem);color:#475569;font-weight:500;}
+        .code-block{background:#07282e;border-radius:12px;padding:clamp(0.8rem,2vw,1.4rem);font-family:var(--font-code);font-size:var(--code-size);color:#a5f3fc;overflow-x:auto;border:2px solid rgba(34,211,238,0.25);}
+        .code-block .kw{color:#f0abfc;} .code-block .fn{color:#67e8f9;} .code-block .num{color:#fcd34d;}
+        .code-block .cmt{color:#6ee7b7;font-style:italic;} .code-block .str{color:#f9a8d4;} .code-block .pin{color:#fb923c;} .code-block .typ{color:#a5f3fc;} .code-block .inc{color:#fde68a;}
+        .code-block pre{white-space:pre;line-height:1.8;}
+        .step{display:flex;align-items:flex-start;gap:clamp(0.5rem,1.5vw,1rem);padding:clamp(0.5rem,1.2vw,0.9rem);background:#fff;border-radius:12px;border:2px solid rgba(8,145,178,0.12);}
+        .step-num{min-width:clamp(28px,3.5vw,40px);height:clamp(28px,3.5vw,40px);border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:var(--body-size);flex-shrink:0;font-family:var(--font-display);}
+        .quiz-option{padding:clamp(0.5rem,1.2vw,0.85rem) clamp(0.8rem,2vw,1.2rem);border-radius:10px;background:#fff;border:2px solid rgba(8,145,178,0.15);cursor:pointer;font-size:var(--body-size);font-weight:600;color:#334155;transition:all 0.2s ease;text-align:left;font-family:var(--font-body);}
+        .quiz-option:hover{border-color:var(--accent);background:#ecfeff;transform:translateX(4px);}
+        .quiz-option.correct{background:#d1fae5;border-color:var(--accent4);color:#065f46;}
+        .quiz-option.wrong{background:#fee2e2;border-color:var(--danger);color:#991b1b;}
+        .quiz-feedback{font-size:var(--body-size);font-weight:700;padding:0.5em 1em;border-radius:10px;display:none;margin-top:0.5em;}
+        .quiz-feedback.show{display:block;}
+        .reveal,.reveal-right,.reveal-scale,.reveal-up{opacity:0;transition:opacity 0.6s var(--ease-out),transform 0.6s var(--ease-out);}
+        .reveal{transform:translateY(24px);} .reveal-right{transform:translateX(24px);} .reveal-scale{transform:scale(0.92);} .reveal-up{transform:translateY(-20px);}
+        .reveal.visible,.reveal-right.visible,.reveal-scale.visible,.reveal-up.visible{opacity:1;transform:none;}
+        [data-delay="1"]{transition-delay:0.1s;} [data-delay="2"]{transition-delay:0.2s;} [data-delay="3"]{transition-delay:0.3s;} [data-delay="4"]{transition-delay:0.4s;}
+        .big-emoji{font-size:clamp(3rem,8vw,6rem);line-height:1;display:block;text-align:center;}
+        .hl-cyan{background:#cffafe;border-left:4px solid var(--accent);color:#164e63;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-orange{background:#fff7ed;border-left:4px solid var(--accent2);color:#9a3412;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-green{background:#ecfdf5;border-left:4px solid var(--accent4);color:#065f46;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-yellow{background:#fffbeb;border-left:4px solid var(--warning);color:#92400e;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .section-tag{display:inline-flex;align-items:center;gap:0.4em;padding:0.3em 0.9em;border-radius:30px;font-size:var(--small-size);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.4em;}
+        .tag-day{background:#cffafe;color:var(--accent);border:2px solid #a5f3fc;}
+        .tag-hw{background:#fff7ed;color:#f97316;border:2px solid #fed7aa;}
+        .tag-quiz{background:#f3e8ff;color:var(--accent3);border:2px solid #c4b5fd;}
+        .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.25;pointer-events:none;}
+        /* Servo angle visual */
+        .servo-arc{display:flex;flex-direction:column;align-items:center;gap:0.3em;}
+        .angle-boxes{display:flex;gap:0.4em;justify-content:center;flex-wrap:wrap;margin-top:0.4em;}
+        .angle-box{background:#cffafe;border:2px solid var(--accent);border-radius:10px;padding:0.4em 0.6em;text-align:center;font-family:var(--font-code);font-size:var(--small-size);color:#164e63;min-width:52px;}
+        .angle-box span{display:block;font-size:0.65em;color:#0891b2;font-weight:700;margin-bottom:0.2em;}
+    </style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">1 / 15</div>
+
+<!-- SLIDE 1: TITLE -->
+<section class="slide bg-cyan">
+    <div class="blob" style="width:300px;height:300px;background:#a5f3fc;top:-80px;right:-80px;"></div>
+    <div class="blob" style="width:200px;height:200px;background:#d8b4fe;bottom:-60px;left:-60px;"></div>
+    <div class="slide-content" style="align-items:flex-start;">
+        <span class="section-tag tag-day reveal-up">Week 1 · Day 6</span>
+        <h1 class="reveal" style="margin-top:0.2em;">Let's <span class="accent">Move!</span></h1>
+        <p class="subtitle reveal" data-delay="2">Servo motors, the Servo library, sweep, and potentiometer position control</p>
+        <div class="divider reveal" data-delay="3" style="margin-top:0.8em;"></div>
+        <div class="reveal" data-delay="4" style="display:flex;gap:0.8em;flex-wrap:wrap;margin-top:0.5em;">
+            <span class="badge badge-cyan">Servo Motor</span>
+            <span class="badge badge-orange">Servo Library</span>
+            <span class="badge badge-purple">0° – 180°</span>
+            <span class="badge badge-green">Sweep Project</span>
+            <span class="badge badge-pink">Pot Control</span>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 2: RECAP -->
+<section class="slide bg-dots" style="background-color:#ecfeff;">
+    <div class="slide-content">
+        <span class="section-label reveal">Quick Recap</span>
+        <h2 class="reveal" data-delay="1">What We Learned in Day 5</h2>
+        <div class="grid-2 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-orange"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">☀️</div><div><h3 style="font-size:var(--body-size);">LDR Sensor</h3><p style="font-size:var(--small-size);">Photoresistor in a voltage divider — analogRead gives 0–1023 based on light</p></div></div></div>
+            <div class="card card-cyan"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">🎯</div><div><h3 style="font-size:var(--body-size);">Threshold Logic</h3><p style="font-size:var(--small-size);">if (light &lt; THRESHOLD) — automatic decisions based on sensor readings</p></div></div></div>
+            <div class="card card-green"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">🗺</div><div><h3 style="font-size:var(--body-size);">map() &amp; constrain()</h3><p style="font-size:var(--small-size);">Scale values between ranges and clamp them safely</p></div></div></div>
+            <div class="card card-purple"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">🌙</div><div><h3 style="font-size:var(--body-size);">Night Lamp Project</h3><p style="font-size:var(--small-size);">LED brightness automatically controlled by ambient light level</p></div></div></div>
+        </div>
+        <div class="hl-cyan reveal" data-delay="3" style="font-size:var(--small-size);">Today we add <strong>motion</strong> — a servo motor that can rotate to any angle from 0° to 180°!</div>
+    </div>
+</section>
+
+<!-- SLIDE 3: AGENDA -->
+<section class="slide bg-dots" style="background-color:#ecfeff;">
+    <div class="slide-content">
+        <span class="section-label reveal">Today's Agenda</span>
+        <h2 class="reveal" data-delay="1">What We'll Do Today</h2>
+        <div class="reveal" data-delay="2" style="display:flex;flex-direction:column;gap:0.45em;margin-top:0.3em;">
+            <div class="step"><div class="step-num">1</div><div><h3 style="font-size:var(--body-size);">What is a Servo Motor?</h3><p style="font-size:var(--small-size);">Controlled rotation 0°–180° — 3 wires: power, ground, signal</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent2);">2</div><div><h3 style="font-size:var(--body-size);">The Servo Library</h3><p style="font-size:var(--small-size);">#include &lt;Servo.h&gt; — attach() and write() to control angle</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent3);">3</div><div><h3 style="font-size:var(--body-size);">Project 1: Sweep</h3><p style="font-size:var(--small-size);">Smooth sweep from 0° to 180° and back using a for loop</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent4);">4</div><div><h3 style="font-size:var(--body-size);">Project 2: Pot-Controlled Servo</h3><p style="font-size:var(--small-size);">Turn the potentiometer knob to point the servo at any angle</p></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 4: SECTION DIVIDER -->
+<section class="slide" style="background:linear-gradient(135deg,#0891b2 0%,#22d3ee 50%,#67e8f9 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#a5f3fc;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">⚙️</span>
+        <p class="section-label reveal" data-delay="1" style="color:#cffafe;margin-top:0.5em;">Part 1</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">The Servo<br>Motor</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#a5f3fc;margin-top:0.5em;">Precise angular control — tell it an angle (0–180°) and it goes there!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#a5f3fc);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 5: SERVO EXPLAINED -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">What is a Servo Motor?</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-cyan">
+                    <h3 style="font-size:var(--body-size);">Controlled rotation — not continuous!</h3>
+                    <p style="font-size:var(--small-size);">Unlike a regular motor that just spins, a servo moves to a <strong class="accent">specific angle</strong> (0–180°) and holds there.</p>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">3 Wires</h3>
+                    <div style="display:flex;flex-direction:column;gap:0.3em;margin-top:0.3em;font-size:var(--small-size);">
+                        <div style="display:flex;align-items:center;gap:0.5em;"><div style="width:16px;height:16px;background:#ef4444;border-radius:3px;"></div><strong>Red</strong> → 5V (power)</div>
+                        <div style="display:flex;align-items:center;gap:0.5em;"><div style="width:16px;height:16px;background:#1e293b;border-radius:3px;"></div><strong>Black/Brown</strong> → GND</div>
+                        <div style="display:flex;align-items:center;gap:0.5em;"><div style="width:16px;height:16px;background:#f97316;border-radius:3px;"></div><strong>Orange/Yellow</strong> → Signal pin (any digital pin)</div>
+                    </div>
+                </div>
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">Real-world uses</h3>
+                    <p style="font-size:var(--small-size);">RC car steering, robot arms, camera gimbals, door locks, drone tail rotors!</p>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2">
+                <div class="card" style="background:#ecfeff;border:2px solid #a5f3fc;padding:1em;">
+                    <p style="font-size:var(--small-size);font-weight:800;color:var(--accent);margin-bottom:0.6em;">Servo angle positions:</p>
+                    <div class="angle-boxes">
+                        <div class="angle-box"><span>LEFT</span>0°</div>
+                        <div class="angle-box"><span>↑</span>45°</div>
+                        <div class="angle-box"><span>CENTER</span>90°</div>
+                        <div class="angle-box"><span>↑</span>135°</div>
+                        <div class="angle-box"><span>RIGHT</span>180°</div>
+                    </div>
+                    <div style="margin-top:0.8em;background:#07282e;border-radius:8px;padding:0.6em;text-align:center;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;font-family:var(--font-code);font-size:var(--small-size);color:#a5f3fc;">
+                            <span style="color:#fb923c;">0°</span>
+                            <div style="flex:1;height:3px;background:linear-gradient(90deg,#fb923c,#22d3ee);margin:0 0.5em;border-radius:2px;"></div>
+                            <span style="color:#22d3ee;">180°</span>
+                        </div>
+                        <p style="color:#6ee7b7;font-size:var(--small-size);margin-top:0.3em;">Full range of motion</p>
+                    </div>
+                </div>
+                <div class="hl-yellow" style="margin-top:0.5em;font-size:var(--small-size);">The servo uses a feedback mechanism (potentiometer inside) to know its current position. That's how it holds an angle precisely!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 6: SERVO LIBRARY -->
+<section class="slide bg-dots" style="background-color:#ecfeff;">
+    <div class="slide-content">
+        <h2 class="reveal">The Servo Library</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="code-block" style="font-size:var(--small-size);">
+<pre><span class="cmt">// 1. Include the library</span>
+<span class="inc">#include &lt;Servo.h&gt;</span>
+
+<span class="cmt">// 2. Create a Servo object</span>
+Servo myServo;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="cmt">// 3. Attach to pin 9</span>
+  myServo.<span class="fn">attach</span>(<span class="num">9</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cmt">// 4. Move to angle</span>
+  myServo.<span class="fn">write</span>(<span class="num">0</span>);    <span class="cmt">// 0°</span>
+  <span class="fn">delay</span>(<span class="num">1000</span>);
+  myServo.<span class="fn">write</span>(<span class="num">90</span>);   <span class="cmt">// 90°</span>
+  <span class="fn">delay</span>(<span class="num">1000</span>);
+  myServo.<span class="fn">write</span>(<span class="num">180</span>);  <span class="cmt">// 180°</span>
+  <span class="fn">delay</span>(<span class="num">1000</span>);
+}</pre>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-cyan"><h3 style="font-size:var(--body-size);">#include &lt;Servo.h&gt;</h3><p style="font-size:var(--small-size);">Loads the Servo library — a built-in Arduino library. No download needed. Must be at the very top of your code.</p></div>
+                <div class="card card-orange"><h3 style="font-size:var(--body-size);">Servo myServo</h3><p style="font-size:var(--small-size);">Creates a Servo object called myServo. You can call it anything! Two servos = Servo servoA, servoB.</p></div>
+                <div class="card card-purple"><h3 style="font-size:var(--body-size);">myServo.attach(9)</h3><p style="font-size:var(--small-size);">Connects the servo object to pin 9. The signal wire goes here.</p></div>
+                <div class="card card-green"><h3 style="font-size:var(--body-size);">myServo.write(90)</h3><p style="font-size:var(--small-size);">Moves servo to exactly 90 degrees. Any value 0–180 is valid.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 7: SECTION DIVIDER — PROJECT 1 -->
+<section class="slide" style="background:linear-gradient(135deg,#10b981 0%,#34d399 50%,#6ee7b7 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:240px;height:240px;background:#a7f3d0;bottom:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🔄</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ecfdf5;margin-top:0.5em;">Project 1</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Servo<br>Sweep!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#d1fae5;margin-top:0.5em;">Smooth back-and-forth motion — 0° to 180° and back, forever</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#a7f3d0);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 8: SWEEP CODE -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent4);">Servo Sweep Code</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="inc">#include &lt;Servo.h&gt;</span>
+
+Servo myServo;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  myServo.<span class="fn">attach</span>(<span class="num">9</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cmt">// Sweep 0° → 180°</span>
+  <span class="kw">for</span> (<span class="typ">int</span> i = <span class="num">0</span>; i &lt;= <span class="num">180</span>; i++) {
+    myServo.<span class="fn">write</span>(i);
+    <span class="fn">delay</span>(<span class="num">15</span>);
+  }
+
+  <span class="cmt">// Sweep 180° → 0°</span>
+  <span class="kw">for</span> (<span class="typ">int</span> i = <span class="num">180</span>; i >= <span class="num">0</span>; i--) {
+    myServo.<span class="fn">write</span>(i);
+    <span class="fn">delay</span>(<span class="num">15</span>);
+  }
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-green">
+                    <h3 style="font-size:var(--body-size);">Why delay(15)?</h3>
+                    <p style="font-size:var(--small-size);">Gives the servo time to physically move to each degree before the next command. Too fast and it stutters or skips!</p>
+                </div>
+                <div class="card card-cyan">
+                    <h3 style="font-size:var(--body-size);">Each loop step moves 1°</h3>
+                    <p style="font-size:var(--small-size);">i goes 0→1→2…180, writing each value. 181 steps × 15ms = about 2.7 seconds for one sweep direction.</p>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">Wiring</h3>
+                    <p style="font-size:var(--small-size);">Red → 5V | Black → GND | Orange → Pin 9. In Tinkercad: search "Servo" and it's listed in components.</p>
+                </div>
+                <div class="hl-cyan" style="font-size:var(--small-size);">Try changing delay(15) to delay(5) for fast sweep, or delay(50) for slow. See the difference!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 9: SECTION DIVIDER — PROJECT 2 -->
+<section class="slide" style="background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fdba74 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:240px;height:240px;background:#fed7aa;top:5%;left:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🎚️</span>
+        <p class="section-label reveal" data-delay="1" style="color:#fff7ed;margin-top:0.5em;">Project 2</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Pot-Controlled<br>Servo!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ffedd5;margin-top:0.5em;">Turn the potentiometer — servo follows your hand in real time!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#fed7aa);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 10: POT SERVO CODE -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Potentiometer Controls Servo</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="inc">#include &lt;Servo.h&gt;</span>
+
+Servo myServo;
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">potPin</span> = <span class="pin">A0</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  myServo.<span class="fn">attach</span>(<span class="num">9</span>);
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="typ">int</span> potVal = <span class="fn">analogRead</span>(<span class="pin">potPin</span>);
+
+  <span class="cmt">// Map 0-1023 → 0-180 degrees</span>
+  <span class="typ">int</span> angle = <span class="fn">map</span>(potVal,
+    <span class="num">0</span>, <span class="num">1023</span>, <span class="num">0</span>, <span class="num">180</span>);
+
+  myServo.<span class="fn">write</span>(angle);
+
+  <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"Pot: "</span>);
+  <span class="fn">Serial</span>.<span class="fn">print</span>(potVal);
+  <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"  Angle: "</span>);
+  <span class="fn">Serial</span>.<span class="fn">println</span>(angle);
+
+  <span class="fn">delay</span>(<span class="num">15</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">map(potVal, 0, 1023, 0, 180)</h3>
+                    <p style="font-size:var(--small-size);">Scales pot's 0–1023 range to servo's 0–180 range. Pot at 512 → servo at 90°.</p>
+                </div>
+                <div class="card card-cyan">
+                    <h3 style="font-size:var(--body-size);">Direct, real-time control!</h3>
+                    <p style="font-size:var(--small-size);">The loop runs very fast. As you turn the pot, the servo almost instantly follows — feels like a direct connection.</p>
+                </div>
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">Wiring both components</h3>
+                    <p style="font-size:var(--small-size);">Potentiometer: 5V, A0 (middle), GND. Servo: 5V (red), GND (black), Pin 9 (orange).</p>
+                </div>
+                <div class="hl-orange" style="font-size:var(--small-size);">This is the same pattern used in RC cars and robot arms — a joystick or knob directly controlling a motor's position!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 11: BUTTON SERVO POSITIONS -->
+<section class="slide bg-dots" style="background-color:#ecfeff;">
+    <div class="slide-content">
+        <h2 class="reveal">Bonus: Button-Controlled Servo Positions</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="inc">#include &lt;Servo.h&gt;</span>
+Servo s;
+<span class="kw">const</span> <span class="typ">int</span> btn1=<span class="num">2</span>, btn2=<span class="num">3</span>, btn3=<span class="num">4</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  s.<span class="fn">attach</span>(<span class="num">9</span>);
+  <span class="fn">pinMode</span>(btn1, <span class="pin">INPUT_PULLUP</span>);
+  <span class="fn">pinMode</span>(btn2, <span class="pin">INPUT_PULLUP</span>);
+  <span class="fn">pinMode</span>(btn3, <span class="pin">INPUT_PULLUP</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">if</span> (!<span class="fn">digitalRead</span>(btn1)) s.<span class="fn">write</span>(<span class="num">0</span>);
+  <span class="kw">if</span> (!<span class="fn">digitalRead</span>(btn2)) s.<span class="fn">write</span>(<span class="num">90</span>);
+  <span class="kw">if</span> (!<span class="fn">digitalRead</span>(btn3)) s.<span class="fn">write</span>(<span class="num">180</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-cyan"><h3 style="font-size:var(--body-size);">3 preset positions</h3><p style="font-size:var(--small-size);">Button 1 = 0° (left), Button 2 = 90° (centre), Button 3 = 180° (right). Like presets on a radio!</p></div>
+                <div class="card card-green"><h3 style="font-size:var(--body-size);">!digitalRead(btn)</h3><p style="font-size:var(--small-size);">The ! means NOT. With INPUT_PULLUP, pressed = LOW = false. !false = true — so the condition triggers when pressed.</p></div>
+                <div class="hl-cyan" style="font-size:var(--small-size);">Real robotics example: each button snaps the arm to a position — like a robot arm picking up, holding, and placing objects!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 12: HOMEWORK -->
+<section class="slide bg-cyan">
+    <div class="blob" style="width:230px;height:230px;background:#a5f3fc;top:-60px;right:-60px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-hw reveal">Homework</span>
+        <h2 class="reveal" data-delay="1">Your Homework Challenges</h2>
+        <div class="grid-3 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-cyan"><div style="font-size:1.4em;margin-bottom:0.4em;">1</div><h3 style="font-size:var(--body-size);color:var(--accent);">Speed Control</h3><p style="font-size:var(--small-size);">Add a potentiometer to control the sweep speed. Map pot value to the delay inside the sweep for loop.</p></div>
+            <div class="card card-orange"><div style="font-size:1.4em;margin-bottom:0.4em;">2</div><h3 style="font-size:var(--body-size);color:var(--accent2);">LDR Servo</h3><p style="font-size:var(--small-size);">Use a light sensor to move the servo. Bright light → servo points right (180°). Dark → servo points left (0°). Like a sunflower!</p></div>
+            <div class="card card-green"><div style="font-size:1.4em;margin-bottom:0.4em;">3</div><h3 style="font-size:var(--body-size);color:var(--accent4);">Research Task</h3><p style="font-size:var(--small-size);">Find 3 real robots that use servo motors. What angles do they move to? What do they pick up or control?</p></div>
+        </div>
+        <div class="reveal" data-delay="3" style="margin-top:0.5em;"><div class="hl-yellow" style="font-size:var(--small-size);"><strong>Bonus:</strong> Control TWO servos with two potentiometers — like a 2-axis robot arm! Use Servo servoA, servoB; and attach each to different pins.</div></div>
+    </div>
+</section>
+
+<!-- SLIDES 13-15 -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Servo Library Reference</h2>
+        <div class="grid-2 reveal" data-delay="1" style="margin-top:0.3em;">
+            <div class="card card-cyan"><h3 style="font-size:var(--body-size);">#include &lt;Servo.h&gt;</h3><p style="font-size:var(--small-size);">Load the built-in Servo library. Must be at the top of your sketch.</p></div>
+            <div class="card card-orange"><h3 style="font-size:var(--body-size);">Servo myServo</h3><p style="font-size:var(--small-size);">Declare a servo object. Name it anything you like.</p></div>
+            <div class="card card-purple"><h3 style="font-size:var(--body-size);">myServo.attach(pin)</h3><p style="font-size:var(--small-size);">Connect servo signal wire to a digital pin. Call this in setup().</p></div>
+            <div class="card card-green"><h3 style="font-size:var(--body-size);">myServo.write(angle)</h3><p style="font-size:var(--small-size);">Move to 0–180 degrees. The servo holds that position.</p></div>
+        </div>
+        <div class="hl-cyan reveal" data-delay="2" style="font-size:var(--small-size);margin-top:0.4em;"><strong>Note:</strong> The Servo library uses timer resources. When using Servo on pins 9 or 10, analogWrite() on those pins may not work — use pins 3, 5, 6, or 11 for other PWM devices.</div>
+    </div>
+</section>
+
+<section class="slide" style="background:linear-gradient(135deg,#8b5cf6 0%,#a78bfa 50%,#c4b5fd 100%);text-align:center;align-items:center;">
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🧠</span>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Quiz Time!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ede9fe;">Test what you know about servo motors!</p>
+    </div>
+</section>
+
+<section class="slide" style="background:linear-gradient(135deg,#ecfeff 0%,#cffafe 100%);">
+    <div class="slide-content">
+        <span class="section-tag tag-quiz reveal">Quick Quiz</span>
+        <h2 class="reveal" data-delay="1">Test Your Knowledge!</h2>
+        <div class="two-col reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q1. What angle range can a servo move to?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 0 to 255</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) 0 to 180 degrees</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) 0 to 360 degrees</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 0 to 90 degrees</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q2. Which function moves a servo to 90°?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) analogWrite(9, 90)</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) myServo.write(90)</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) tone(9, 90)</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) digitalWrite(9, 90)</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q3. What does the servo's orange wire connect to?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 5V power</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) GND</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) Digital signal pin</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Analog pin A0</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q4. What must you include to use servo functions?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) #include &lt;Motor.h&gt;</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) #include &lt;Servo.h&gt;</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) #include &lt;Wire.h&gt;</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) No include needed</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const slides=document.querySelectorAll('.slide'),progressBar=document.getElementById('progressBar'),navDotsContainer=document.getElementById('navDots'),slideCounter=document.getElementById('slideCounter'),total=slides.length;let current=0;
+    slides.forEach((_,i)=>{const dot=document.createElement('button');dot.className='nav-dot'+(i===0?' active':'');dot.setAttribute('aria-label',`Slide ${i+1}`);dot.addEventListener('click',()=>scrollToSlide(i));navDotsContainer.appendChild(dot);});
+    function updateUI(i){current=i;progressBar.style.width=(total>1?(i/(total-1))*100:100)+'%';slideCounter.textContent=`${i+1} / ${total}`;document.querySelectorAll('.nav-dot').forEach((d,j)=>d.classList.toggle('active',j===i));revealSlide(i);}
+    function scrollToSlide(i){slides[i].scrollIntoView({behavior:'smooth'});}
+    const obs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting&&en.intersectionRatio>=0.5)updateUI(Array.from(slides).indexOf(en.target));});},{threshold:0.5});
+    slides.forEach(s=>obs.observe(s));
+    function revealSlide(i){slides[i].querySelectorAll('.reveal,.reveal-right,.reveal-scale,.reveal-up').forEach(el=>el.classList.add('visible'));}
+    document.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();if(current<total-1)scrollToSlide(current+1);}else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();if(current>0)scrollToSlide(current-1);}});
+    window.addEventListener('load',()=>updateUI(0));
+    function answer(btn,result){const g=btn.closest('.card');g.querySelectorAll('.quiz-option').forEach(b=>{b.style.pointerEvents='none';if(b.getAttribute('onclick').includes("'correct'"))b.classList.add('correct');});const f=g.querySelector('.quiz-feedback');if(result==='correct'){btn.classList.add('correct');f.textContent='Correct!';f.style.background='#d1fae5';f.style.color='#065f46';}else{btn.classList.add('wrong');f.textContent='Not quite — check the green answer!';f.style.background='#fee2e2';f.style.color='#991b1b';}f.classList.add('show');}
+</script>
+</body>
+</html>

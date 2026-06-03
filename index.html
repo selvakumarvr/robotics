@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arduino & Robotics Teaching — Full 28-Week Curriculum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #f0f4ff;
+  --bg2:         #e8efff;
+  --card:        #ffffff;
+  --text:        #1e1b4b;
+  --muted:       #64748b;
+  --accent:      #4f46e5;
+  --accent-l:    #818cf8;
+  --accent-glow: rgba(79,70,229,.15);
+  --orange:      #f97316;
+  --green:       #10b981;
+  --pink:        #ec4899;
+  --purple:      #8b5cf6;
+  --teal:        #0891b2;
+  --amber:       #f59e0b;
+  --red:         #ef4444;
+  --radius:      14px;
+  --shadow:      0 4px 20px rgba(79,70,229,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(240,244,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid #dde4ff;padding:.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;}
+.nav-logo{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.15rem;color:var(--accent);text-decoration:none;white-space:nowrap;}
+.nav-links{display:flex;gap:.4rem;flex-wrap:wrap;}
+.nav-links a{font-size:.78rem;font-weight:700;color:var(--muted);text-decoration:none;padding:.25rem .6rem;border-radius:8px;transition:all .2s;white-space:nowrap;}
+.nav-links a:hover{color:var(--accent);background:var(--accent-glow);}
+
+/* HERO */
+.hero{text-align:center;padding:5rem 2rem 3rem;background:linear-gradient(160deg,#e8efff 0%,#f0f4ff 60%,#fdf4ff 100%);}
+.hero-badge{display:inline-block;background:var(--accent-glow);color:var(--accent);font-weight:700;font-size:.8rem;padding:.35rem .9rem;border-radius:20px;border:1px solid #c7d2fe;margin-bottom:1.2rem;letter-spacing:.04em;text-transform:uppercase;}
+.hero h1{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(2rem,6vw,3.8rem);color:var(--text);line-height:1.15;margin-bottom:1rem;}
+.hero h1 span{background:linear-gradient(135deg,var(--accent),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{max-width:620px;margin:0 auto 2rem;color:var(--muted);font-size:1.05rem;font-weight:600;}
+.hero-stats{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:2.5rem;}
+.stat{background:var(--card);border-radius:var(--radius);padding:.8rem 1.4rem;box-shadow:var(--shadow);border:1px solid #e0e7ff;text-align:center;}
+.stat-num{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.8rem;color:var(--accent);}
+.stat-label{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.hero-ctas{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.hero-cta{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;font-weight:800;font-size:.95rem;padding:.8rem 1.8rem;border-radius:30px;text-decoration:none;box-shadow:0 4px 20px var(--accent-glow);transition:transform .2s,box-shadow .2s;}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.25);}
+.hero-cta.outline{background:transparent;color:var(--accent);border:2px solid #c7d2fe;}
+.hero-cta.outline:hover{background:var(--accent-glow);}
+
+/* TRACK BADGES */
+.tracks{display:flex;justify-content:center;gap:.75rem;flex-wrap:wrap;padding:1.5rem 2rem .5rem;max-width:1000px;margin:0 auto;}
+.track-badge{font-size:.78rem;font-weight:800;padding:.4rem 1rem;border-radius:20px;text-decoration:none;transition:transform .15s;}
+.track-badge:hover{transform:translateY(-1px);}
+.tb-beginner{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;}
+.tb-intermediate{background:#fce7f3;color:#9d174d;border:1px solid #fbcfe8;}
+.tb-advanced{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.tb-python{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;}
+.tb-robotics{background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;}
+.tb-product{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
+
+/* SECTION */
+section{padding:3rem 2rem;max-width:1200px;margin:0 auto;}
+.section-header{margin-bottom:1.75rem;padding:.9rem 1.2rem;border-radius:var(--radius);display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+.sh-icon{font-size:2rem;flex-shrink:0;}
+.sh-text h2{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(1.3rem,3vw,1.9rem);color:var(--text);}
+.sh-text p{color:var(--muted);font-weight:600;font-size:.88rem;margin-top:.15rem;}
+.sh-tag{font-size:.72rem;font-weight:800;padding:.2rem .65rem;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+.tag-beginner{background:#dbeafe;color:#1d4ed8;}
+.tag-intermediate{background:#fce7f3;color:#9d174d;}
+.tag-advanced{background:#fef3c7;color:#92400e;}
+.tag-python{background:#d1fae5;color:#065f46;}
+.tag-robotics{background:#ede9fe;color:#5b21b6;}
+.tag-product{background:#fee2e2;color:#991b1b;}
+
+/* HEADER BG BY LEVEL */
+.sh-beginner{background:linear-gradient(90deg,#eff6ff,#f0f4ff);}
+.sh-intermediate{background:linear-gradient(90deg,#fdf2f8,#f0f4ff);}
+.sh-advanced{background:linear-gradient(90deg,#fffbeb,#f0f4ff);}
+.sh-python{background:linear-gradient(90deg,#ecfdf5,#f0f4ff);}
+.sh-robotics{background:linear-gradient(90deg,#f5f3ff,#f0f4ff);}
+.sh-product{background:linear-gradient(90deg,#fef2f2,#f0f4ff);}
+
+/* WEEK GRID */
+.week-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.3rem;margin-bottom:1rem;}
+.week-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid #e0e7ff;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.week-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(79,70,229,.15);}
+.week-header{padding:.9rem 1.1rem .7rem;display:flex;align-items:center;gap:.7rem;}
+.week-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.week-title h3{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:.9rem;color:var(--text);line-height:1.2;}
+.week-title span{font-size:.72rem;font-weight:700;color:var(--muted);}
+.week-days{padding:0 1.1rem 1.1rem;display:flex;flex-direction:column;gap:.25rem;}
+.day-link{display:flex;align-items:center;gap:.55rem;padding:.4rem .55rem;border-radius:8px;text-decoration:none;transition:background .15s;}
+.day-link:hover{background:var(--accent-glow);}
+.day-num{font-family:'Fira Code',monospace;font-size:.68rem;font-weight:500;color:var(--accent-l);min-width:30px;}
+.day-title{font-size:.78rem;font-weight:700;color:var(--text);line-height:1.3;}
+.day-capstone .day-title{color:var(--orange);}
+.day-capstone .day-num{color:var(--orange);}
+
+/* WEEK COLOR SCHEMES */
+.w1  .week-icon{background:linear-gradient(135deg,#4f46e5,#818cf8);}
+.w2  .week-icon{background:linear-gradient(135deg,#f97316,#fbbf24);}
+.w3  .week-icon{background:linear-gradient(135deg,#10b981,#34d399);}
+.w4  .week-icon{background:linear-gradient(135deg,#0891b2,#38bdf8);}
+.w5  .week-icon{background:linear-gradient(135deg,#8b5cf6,#c084fc);}
+.w6  .week-icon{background:linear-gradient(135deg,#ec4899,#f472b6);}
+.w7  .week-icon{background:linear-gradient(135deg,#ef4444,#fb923c);}
+.w8  .week-icon{background:linear-gradient(135deg,#f59e0b,#fde68a);}
+.w9  .week-icon{background:linear-gradient(135deg,#0f766e,#2dd4bf);}
+.w10 .week-icon{background:linear-gradient(135deg,#7c3aed,#a78bfa);}
+.w11 .week-icon{background:linear-gradient(135deg,#1d4ed8,#60a5fa);}
+.w12 .week-icon{background:linear-gradient(135deg,#be185d,#f472b6);}
+.w13 .week-icon{background:linear-gradient(135deg,#d97706,#fcd34d);}
+.w14 .week-icon{background:linear-gradient(135deg,#059669,#6ee7b7);}
+.w15 .week-icon{background:linear-gradient(135deg,#dc2626,#f87171);}
+.w16 .week-icon{background:linear-gradient(135deg,#7c3aed,#c4b5fd);}
+.w17 .week-icon{background:linear-gradient(135deg,#047857,#34d399);}
+.w18 .week-icon{background:linear-gradient(135deg,#0891b2,#67e8f9);}
+.w19 .week-icon{background:linear-gradient(135deg,#16a34a,#86efac);}
+.w20 .week-icon{background:linear-gradient(135deg,#0d9488,#5eead4);}
+.w21 .week-icon{background:linear-gradient(135deg,#6d28d9,#c4b5fd);}
+.w22 .week-icon{background:linear-gradient(135deg,#1e40af,#93c5fd);}
+.w23 .week-icon{background:linear-gradient(135deg,#9d174d,#f9a8d4);}
+.w24 .week-icon{background:linear-gradient(135deg,#1f2937,#6b7280);}
+.w25 .week-icon{background:linear-gradient(135deg,#b91c1c,#fca5a5);}
+.w26 .week-icon{background:linear-gradient(135deg,#d97706,#fbbf24);}
+.w27 .week-icon{background:linear-gradient(135deg,#0f766e,#99f6e4);}
+.w28 .week-icon{background:linear-gradient(135deg,#7c3aed,#f472b6);}
+
+/* DIVIDER */
+.divider{max-width:1200px;margin:0 auto;padding:0 2rem;}
+.divider hr{border:none;border-top:2px dashed #c7d2fe;}
+
+/* PITCH DECK BANNER */
+.pitch-banner{background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:var(--radius);padding:1.8rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;}
+.pitch-banner h3{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.3rem;color:#fff;}
+.pitch-banner p{color:rgba(255,255,255,.8);font-weight:600;font-size:.85rem;margin-top:.2rem;}
+.pitch-btn{background:#fff;color:var(--accent);font-weight:800;font-size:.85rem;padding:.65rem 1.4rem;border-radius:20px;text-decoration:none;flex-shrink:0;transition:transform .2s;}
+.pitch-btn:hover{transform:scale(1.04);}
+
+/* REFERENCES */
+.ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem;}
+.ref-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid #e0e7ff;padding:1.1rem;display:flex;align-items:flex-start;gap:.8rem;text-decoration:none;transition:transform .2s,box-shadow .2s;}
+.ref-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.15);}
+.ref-icon{font-size:1.7rem;flex-shrink:0;margin-top:.1rem;}
+.ref-info h4{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:.2rem;}
+.ref-info p{font-size:.74rem;color:var(--muted);font-weight:600;}
+.ref-type{display:inline-block;font-size:.62rem;font-weight:800;padding:.12rem .45rem;border-radius:7px;margin-top:.3rem;text-transform:uppercase;letter-spacing:.04em;}
+.type-pdf{background:#fee2e2;color:#991b1b;}
+.type-html{background:#dbeafe;color:#1e40af;}
+
+/* ONLINE RESOURCES */
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.9rem;}
+.resource-card{background:var(--card);border-radius:var(--radius);padding:1rem 1.1rem;box-shadow:var(--shadow);border:1px solid #e0e7ff;text-decoration:none;display:flex;align-items:center;gap:.7rem;transition:transform .2s,box-shadow .2s;}
+.resource-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,70,229,.15);}
+.resource-card .ri{font-size:1.4rem;flex-shrink:0;}
+.resource-card span{font-size:.82rem;font-weight:700;color:var(--text);}
+
+/* FOOTER */
+footer{background:var(--text);color:rgba(255,255,255,.7);text-align:center;padding:2rem;font-size:.82rem;font-weight:600;}
+footer a{color:var(--accent-l);text-decoration:none;}
+footer strong{color:#fff;}
+
+@media(max-width:600px){
+  .hero h1{font-size:1.8rem;}
+  .hero-stats{gap:.75rem;}
+  .week-grid{grid-template-columns:1fr;}
+  .pitch-banner{flex-direction:column;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Arduino &amp; Robotics</a>
+  <div class="nav-links">
+    <a href="#beginner">Beginner</a>
+    <a href="#intermediate">Intermediate</a>
+    <a href="#advanced">Advanced</a>
+    <a href="#python">Python</a>
+    <a href="#robotics">Robotics</a>
+    <a href="#product">Product</a>
+    <a href="#references">References</a>
+    <a href="#resources">Resources</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Open Curriculum &bull; Arduino &bull; Robotics &bull; IoT</div>
+  <h1>Learn <span>Arduino & Robotics</span><br>from Zero to Expert</h1>
+  <p>A complete 28-week hands-on course — from first LED blink to ROS-powered robots, IoT stations, PCB design, and product launches.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">28</div><div class="stat-label">Weeks</div></div>
+    <div class="stat"><div class="stat-num">224</div><div class="stat-label">Lessons</div></div>
+    <div class="stat"><div class="stat-num">28</div><div class="stat-label">Projects</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Tracks</div></div>
+    <div class="stat"><div class="stat-num">Free</div><div class="stat-label">&amp; Open</div></div>
+  </div>
+  <div class="hero-ctas">
+    <a class="hero-cta" href="#beginner">Start Learning</a>
+    <a class="hero-cta outline" href="#references">References</a>
+  </div>
+</div>
+
+<!-- TRACK QUICK LINKS -->
+<div class="tracks">
+  <a class="track-badge tb-beginner" href="#beginner">Weeks 1–8: Beginner</a>
+  <a class="track-badge tb-intermediate" href="#intermediate">Weeks 9–12: Intermediate</a>
+  <a class="track-badge tb-advanced" href="#advanced">Weeks 13–16: Advanced Arduino</a>
+  <a class="track-badge tb-python" href="#python">Weeks 17–20: Python Crossover</a>
+  <a class="track-badge tb-robotics" href="#robotics">Weeks 21–24: Robotics Deep Dive</a>
+  <a class="track-badge tb-product" href="#product">Weeks 25–28: Product Thinking</a>
+</div>
+
+<!-- ============================================================
+     BEGINNER — Weeks 1–8
+     ============================================================ -->
+<section id="beginner">
+  <div class="section-header sh-beginner">
+    <span class="sh-icon">&#9889;</span>
+    <div class="sh-text">
+      <h2>Beginner — Weeks 1 to 8</h2>
+      <p>Start from scratch. Electronics, coding, sensors, motors, displays, IoT, and your first robots.</p>
+    </div>
+    <span class="sh-tag tag-beginner">Weeks 1–8</span>
+  </div>
+  <div class="week-grid">
+
+    <div class="week-card w1">
+      <div class="week-header"><div class="week-icon">&#9889;</div><div class="week-title"><h3>Week 1 — Foundations</h3><span>Electronics &amp; Basics</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Week1/Day1_Intro_Electronics_Arduino_Tinkercad.html"><span class="day-num">Day 1</span><span class="day-title">Intro to Electronics, Arduino &amp; Tinkercad</span></a>
+        <a class="day-link" href="Week1/Day2_Button_SerialMonitor_Logic.html"><span class="day-num">Day 2</span><span class="day-title">Inputs, Serial Monitor &amp; Logic</span></a>
+        <a class="day-link" href="Week1/Day3_Analog_PWM_Potentiometer.html"><span class="day-num">Day 3</span><span class="day-title">Analog Inputs, PWM &amp; Potentiometer</span></a>
+        <a class="day-link" href="Week1/Day4_Buzzer_Sound_Melody.html"><span class="day-num">Day 4</span><span class="day-title">Buzzer, Sound &amp; Melody</span></a>
+        <a class="day-link" href="Week1/Day5_LDR_Light_Sensor.html"><span class="day-num">Day 5</span><span class="day-title">LDR Light Sensor &amp; Automation</span></a>
+        <a class="day-link" href="Week1/Day6_Servo_Motor.html"><span class="day-num">Day 6</span><span class="day-title">Servo Motor Control</span></a>
+        <a class="day-link" href="Week1/Day7_LCD_Display.html"><span class="day-num">Day 7</span><span class="day-title">LCD Display</span></a>
+        <a class="day-link day-capstone" href="Week1/Day8_Week1_Capstone_Project.html"><span class="day-num">Day 8</span><span class="day-title">Capstone: Smart Environment Monitor</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w2">
+      <div class="week-header"><div class="week-icon">&#128663;</div><div class="week-title"><h3>Week 2 — Motion &amp; Communication</h3><span>Motors, Sensors &amp; Bluetooth</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Week2/Day1_Ultrasonic_Sensor.html"><span class="day-num">Day 1</span><span class="day-title">Ultrasonic Distance Sensor</span></a>
+        <a class="day-link" href="Week2/Day2_DC_Motors_L298N.html"><span class="day-num">Day 2</span><span class="day-title">DC Motors &amp; L298N Driver</span></a>
+        <a class="day-link" href="Week2/Day3_IR_Remote.html"><span class="day-num">Day 3</span><span class="day-title">IR Remote Control</span></a>
+        <a class="day-link" href="Week2/Day4_DHT11_Temperature.html"><span class="day-num">Day 4</span><span class="day-title">DHT11 Temperature &amp; Humidity</span></a>
+        <a class="day-link" href="Week2/Day5_OLED_Display.html"><span class="day-num">Day 5</span><span class="day-title">OLED Display</span></a>
+        <a class="day-link" href="Week2/Day6_Bluetooth_HC05.html"><span class="day-num">Day 6</span><span class="day-title">Bluetooth Control HC-05</span></a>
+        <a class="day-link" href="Week2/Day7_Line_Following_Robot.html"><span class="day-num">Day 7</span><span class="day-title">Line Following Robot</span></a>
+        <a class="day-link day-capstone" href="Week2/Day8_Capstone_Obstacle_Robot.html"><span class="day-num">Day 8</span><span class="day-title">Capstone: Obstacle Avoiding Robot</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w3">
+      <div class="week-header"><div class="week-icon">&#128274;</div><div class="week-title"><h3>Week 3 — Input &amp; Security</h3><span>RFID, Keypads &amp; Memory</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Week3/Day1_Keypad_Input.html"><span class="day-num">Day 1</span><span class="day-title">Keypad Input</span></a>
+        <a class="day-link" href="Week3/Day2_RFID_RC522.html"><span class="day-num">Day 2</span><span class="day-title">RFID RC522</span></a>
+        <a class="day-link" href="Week3/Day3_Stepper_Motor.html"><span class="day-num">Day 3</span><span class="day-title">Stepper Motor</span></a>
+        <a class="day-link" href="Week3/Day4_7Segment_Display.html"><span class="day-num">Day 4</span><span class="day-title">7-Segment Display</span></a>
+        <a class="day-link" href="Week3/Day5_EEPROM_Memory.html"><span class="day-num">Day 5</span><span class="day-title">EEPROM Memory</span></a>
+        <a class="day-link" href="Week3/Day6_Multi_Sensor_Project.html"><span class="day-num">Day 6</span><span class="day-title">Multi-Sensor Integration</span></a>
+        <a class="day-link" href="Week3/Day7_NeoPixel_LEDs.html"><span class="day-num">Day 7</span><span class="day-title">NeoPixel LED Strip</span></a>
+        <a class="day-link day-capstone" href="Week3/Day8_Capstone_RFID_Security.html"><span class="day-num">Day 8</span><span class="day-title">Capstone: Smart Security Dashboard</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w4">
+      <div class="week-header"><div class="week-icon">&#127760;</div><div class="week-title"><h3>Week 4 — IoT &amp; Networking</h3><span>WiFi, HTTP, MQTT &amp; Cloud</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Week4/Day1_WiFi_ESP8266.html"><span class="day-num">Day 1</span><span class="day-title">WiFi with ESP8266</span></a>
+        <a class="day-link" href="Week4/Day2_HTTP_Requests.html"><span class="day-num">Day 2</span><span class="day-title">HTTP Requests &amp; REST APIs</span></a>
+        <a class="day-link" href="Week4/Day3_ThingSpeak_IoT.html"><span class="day-num">Day 3</span><span class="day-title">ThingSpeak IoT Dashboard</span></a>
+        <a class="day-link" href="Week4/Day4_MQTT_Protocol.html"><span class="day-num">Day 4</span><span class="day-title">MQTT Protocol</span></a>
+        <a class="day-link" href="Week4/Day5_Web_Server.html"><span class="day-num">Day 5</span><span class="day-title">Web Server on Arduino</span></a>
+        <a class="day-link" href="Week4/Day6_JSON_ArduinoJson.html"><span class="day-num">Day 6</span><span class="day-title">JSON &amp; ArduinoJson</span></a>
+        <a class="day-link" href="Week4/Day7_OTA_Updates.html"><span class="day-num">Day 7</span><span class="day-title">OTA Updates &amp; NTP Time</span></a>
+        <a class="day-link day-capstone" href="Week4/Day8_Capstone_IoT_Station.html"><span class="day-num">Day 8</span><span class="day-title">Capstone: IoT Weather Station</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w5">
+      <div class="week-header"><div class="week-icon">&#128202;</div><div class="week-title"><h3>Week 5 — Advanced Sensing</h3><span>GPS, Accelerometer &amp; Logging</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Week5/Day1_Accelerometer_MPU6050.html"><span class="day-num">Day 1</span><span class="day-title">Accelerometer &amp; Gyroscope</span></a>
+        <a class="day-link" href="Week5/Day2_GPS_Module.html"><span class="day-num">Day 2</span><span class="day-title">GPS Location Tracking</span></a>
+        <a class="day-link" href="Week5/Day3_SD_Card_Logging.html"><span class="day-num">Day 3</span><span class="day-title">SD Card Data Logging</span></a>
+        <a class="day-link" href="Week5/Day4_RTC_DS3231.html"><span class="day-num">Day 4</span><span class="day-title">Real-Time Clock DS3231</span></a>
+        <a class="day-link" href="Week5/Day5_Soil_Moisture_Pump.html"><span class="day-num">Day 5</span><span class="day-title">Soil Moisture &amp; Water Pump</span></a>
+        <a class="day-link" href="Week5/Day6_Sound_Sensor.html"><span class="day-num">Day 6</span><span class="day-title">Sound Sensor &amp; Music Reaction</span></a>
+        <a class="day-link" href="Week5/Day7_Capacitive_Touch.html"><span class="day-num">Day 7</span><span class="day-title">Capacitive Touch Sensing</span></a>
+        <a class="day-link day-capstone" href="Week5/Day8_Capstone_Advanced_Station.html"><span class="day-num">Day 8</span><span class="day-title">Capstone: Advanced Sensing Station</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w6">
+      <div class="week-header"><div class="week-icon">&#128444;</div><div class="week-title"><h3>Week 6 — Displays &amp; UI</h3><span>TFT, LED Matrix &amp; Touch</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Week6/Day1_TFT_Touchscreen.html"><span class="day-num">Day 1</span><span class="day-title">TFT Touchscreen</span></a>
+        <a class="day-link" href="Week6/Day2_LED_Matrix.html"><span class="day-num">Day 2</span><span class="day-title">8x8 LED Matrix</span></a>
+        <a class="day-link" href="Week6/Day3_RGB_LED_Effects.html"><span class="day-num">Day 3</span><span class="day-title">Advanced RGB Effects</span></a>
+        <a class="day-link" href="Week6/Day4_Menu_System.html"><span class="day-num">Day 4</span><span class="day-title">Menu System Design</span></a>
+        <a class="day-link" href="Week6/Day5_Multi_Display.html"><span class="day-num">Day 5</span><span class="day-title">Multi-Display Dashboard</span></a>
+        <a class="day-link" href="Week6/Day6_Touch_Piano.html"><span class="day-num">Day 6</span><span class="day-title">Touch Piano Project</span></a>
+        <a class="day-link" href="Week6/Day7_Dashboard_Polish.html"><span class="day-num">Day 7</span><span class="day-title">Dashboard Polish &amp; UX</span></a>
+        <a class="day-link day-capstone" href="Week6/Day8_Capstone_Touch_Dashboard.html"><span class="day-num">Day 8</span><span class="day-title">Capstone: Touch UI Dashboard</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w7">
+      <div class="week-header"><div class="week-icon">&#129302;</div><div class="week-title"><h3>Week 7 — Robotics &amp; Automation</h3><span>PID, Motors &amp; Robotic Arms</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Week7/Day1_PID_Control.html"><span class="day-num">Day 1</span><span class="day-title">PID Control Theory</span></a>
+        <a class="day-link" href="Week7/Day2_Relay_Automation.html"><span class="day-num">Day 2</span><span class="day-title">Relay &amp; Home Automation</span></a>
+        <a class="day-link" href="Week7/Day3_Motor_Encoder.html"><span class="day-num">Day 3</span><span class="day-title">DC Motor with Encoder</span></a>
+        <a class="day-link" href="Week7/Day4_Stepper_Precision.html"><span class="day-num">Day 4</span><span class="day-title">Stepper Motor Precision</span></a>
+        <a class="day-link" href="Week7/Day5_Robotic_Arm_Servos.html"><span class="day-num">Day 5</span><span class="day-title">Robotic Arm with Servos</span></a>
+        <a class="day-link" href="Week7/Day6_Pick_and_Place.html"><span class="day-num">Day 6</span><span class="day-title">Pick and Place Robot</span></a>
+        <a class="day-link" href="Week7/Day7_Self_Balancing.html"><span class="day-num">Day 7</span><span class="day-title">Self-Balancing Robot Concepts</span></a>
+        <a class="day-link day-capstone" href="Week7/Day8_Capstone_Sorting.html"><span class="day-num">Day 8</span><span class="day-title">Capstone: Automated Sorter</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w8">
+      <div class="week-header"><div class="week-icon">&#127942;</div><div class="week-title"><h3>Week 8 — Final Projects</h3><span>Plan, Build &amp; Present</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Week8/Day1_Project_Planning.html"><span class="day-num">Day 1</span><span class="day-title">Final Project Planning</span></a>
+        <a class="day-link" href="Week8/Day2_Prototyping.html"><span class="day-num">Day 2</span><span class="day-title">Prototyping Techniques</span></a>
+        <a class="day-link" href="Week8/Day3_Debugging.html"><span class="day-num">Day 3</span><span class="day-title">Debugging &amp; Testing</span></a>
+        <a class="day-link" href="Week8/Day4_Build_Day1.html"><span class="day-num">Day 4</span><span class="day-title">Project Build Day 1</span></a>
+        <a class="day-link" href="Week8/Day5_Build_Day2.html"><span class="day-num">Day 5</span><span class="day-title">Project Build Day 2</span></a>
+        <a class="day-link" href="Week8/Day6_Build_Day3.html"><span class="day-num">Day 6</span><span class="day-title">Project Build Day 3</span></a>
+        <a class="day-link" href="Week8/Day7_Presentation_Prep.html"><span class="day-num">Day 7</span><span class="day-title">Presentation Skills</span></a>
+        <a class="day-link day-capstone" href="Week8/Day8_Demo_Day.html"><span class="day-num">Day 8</span><span class="day-title">Demo Day &amp; Celebration</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- ============================================================
+     INTERMEDIATE — Weeks 9–12
+     ============================================================ -->
+<section id="intermediate">
+  <div class="section-header sh-intermediate">
+    <span class="sh-icon">&#128268;</span>
+    <div class="sh-text">
+      <h2>Intermediate — Weeks 9 to 12</h2>
+      <p>PCB design with KiCad, soldering, Git &amp; GitHub, and building a public portfolio.</p>
+    </div>
+    <span class="sh-tag tag-intermediate">Weeks 9–12</span>
+  </div>
+  <div class="week-grid">
+
+    <div class="week-card w9">
+      <div class="week-header"><div class="week-icon">&#127968;</div><div class="week-title"><h3>Week 9 — PCB Design</h3><span>KiCad, Gerber &amp; Shields</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Intermediate/Week9/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Why PCBs?</span></a>
+        <a class="day-link" href="Intermediate/Week9/Day2.html"><span class="day-num">Day 2</span><span class="day-title">KiCad Schematic Editor</span></a>
+        <a class="day-link" href="Intermediate/Week9/Day3.html"><span class="day-num">Day 3</span><span class="day-title">PCB Layout &amp; Routing</span></a>
+        <a class="day-link" href="Intermediate/Week9/Day4.html"><span class="day-num">Day 4</span><span class="day-title">DRC &amp; Gerber Files</span></a>
+        <a class="day-link" href="Intermediate/Week9/Day5.html"><span class="day-num">Day 5</span><span class="day-title">3D PCB Preview &amp; BOM</span></a>
+        <a class="day-link" href="Intermediate/Week9/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Arduino Shield Design</span></a>
+        <a class="day-link" href="Intermediate/Week9/Day7.html"><span class="day-num">Day 7</span><span class="day-title">PCB Design Review</span></a>
+        <a class="day-link day-capstone" href="Intermediate/Week9/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Capstone: Complete PCB Design</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w10">
+      <div class="week-header"><div class="week-icon">&#128295;</div><div class="week-title"><h3>Week 10 — Soldering &amp; Hardware</h3><span>SMD, Multimeter &amp; Enclosures</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Intermediate/Week10/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Soldering Basics &amp; Safety</span></a>
+        <a class="day-link" href="Intermediate/Week10/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Through-hole &amp; SMD</span></a>
+        <a class="day-link" href="Intermediate/Week10/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Desoldering &amp; Repair</span></a>
+        <a class="day-link" href="Intermediate/Week10/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Testing &amp; Multimeter Skills</span></a>
+        <a class="day-link" href="Intermediate/Week10/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Wire Management</span></a>
+        <a class="day-link" href="Intermediate/Week10/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Enclosure Design</span></a>
+        <a class="day-link" href="Intermediate/Week10/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Assembly Best Practices</span></a>
+        <a class="day-link day-capstone" href="Intermediate/Week10/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Capstone: Soldered Project</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w11">
+      <div class="week-header"><div class="week-icon">&#128194;</div><div class="week-title"><h3>Week 11 — Version Control</h3><span>Git, GitHub &amp; Collaboration</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Intermediate/Week11/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Git Basics</span></a>
+        <a class="day-link" href="Intermediate/Week11/Day2.html"><span class="day-num">Day 2</span><span class="day-title">GitHub Repositories</span></a>
+        <a class="day-link" href="Intermediate/Week11/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Branching &amp; Merging</span></a>
+        <a class="day-link" href="Intermediate/Week11/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Collaborative Code</span></a>
+        <a class="day-link" href="Intermediate/Week11/Day5.html"><span class="day-num">Day 5</span><span class="day-title">README &amp; Documentation</span></a>
+        <a class="day-link" href="Intermediate/Week11/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Issues &amp; Project Boards</span></a>
+        <a class="day-link" href="Intermediate/Week11/Day7.html"><span class="day-num">Day 7</span><span class="day-title">GitHub Actions</span></a>
+        <a class="day-link day-capstone" href="Intermediate/Week11/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 11 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w12">
+      <div class="week-header"><div class="week-icon">&#127919;</div><div class="week-title"><h3>Week 12 — Portfolio &amp; Presentation</h3><span>Show Your Work to the World</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="Intermediate/Week12/Day1.html"><span class="day-num">Day 1</span><span class="day-title">What Makes a Great Project?</span></a>
+        <a class="day-link" href="Intermediate/Week12/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Technical Writing</span></a>
+        <a class="day-link" href="Intermediate/Week12/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Project Photography</span></a>
+        <a class="day-link" href="Intermediate/Week12/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Demo Videos</span></a>
+        <a class="day-link" href="Intermediate/Week12/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Hackster &amp; Instructables</span></a>
+        <a class="day-link" href="Intermediate/Week12/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Peer Review &amp; Feedback</span></a>
+        <a class="day-link" href="Intermediate/Week12/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Presentation Skills</span></a>
+        <a class="day-link day-capstone" href="Intermediate/Week12/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 12 Capstone</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- ============================================================
+     ADVANCED ARDUINO — Weeks 13–16
+     ============================================================ -->
+<section id="advanced">
+  <div class="section-header sh-advanced">
+    <span class="sh-icon">&#128293;</span>
+    <div class="sh-text">
+      <h2>Advanced Arduino — Weeks 13 to 16</h2>
+      <p>ESP32, FreeRTOS, power optimisation, and precision sensor calibration.</p>
+    </div>
+    <span class="sh-tag tag-advanced">Weeks 13–16</span>
+  </div>
+  <div class="week-grid">
+
+    <div class="week-card w13">
+      <div class="week-header"><div class="week-icon">&#128225;</div><div class="week-title"><h3>Week 13 — ESP32 Deep Dive</h3><span>Dual-Core, BLE, Camera</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="AdvancedArduino/Week13/Day1.html"><span class="day-num">Day 1</span><span class="day-title">ESP32 vs ESP8266</span></a>
+        <a class="day-link" href="AdvancedArduino/Week13/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Dual-Core Programming</span></a>
+        <a class="day-link" href="AdvancedArduino/Week13/Day3.html"><span class="day-num">Day 3</span><span class="day-title">BLE Bluetooth Low Energy</span></a>
+        <a class="day-link" href="AdvancedArduino/Week13/Day4.html"><span class="day-num">Day 4</span><span class="day-title">ESP32 Touch Pins</span></a>
+        <a class="day-link" href="AdvancedArduino/Week13/Day5.html"><span class="day-num">Day 5</span><span class="day-title">ESP32 DAC &amp; ADC</span></a>
+        <a class="day-link" href="AdvancedArduino/Week13/Day6.html"><span class="day-num">Day 6</span><span class="day-title">ESP32-CAM</span></a>
+        <a class="day-link" href="AdvancedArduino/Week13/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Deep Sleep Modes</span></a>
+        <a class="day-link day-capstone" href="AdvancedArduino/Week13/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 13 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w14">
+      <div class="week-header"><div class="week-icon">&#128256;</div><div class="week-title"><h3>Week 14 — FreeRTOS</h3><span>Tasks, Semaphores &amp; Queues</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="AdvancedArduino/Week14/Day1.html"><span class="day-num">Day 1</span><span class="day-title">What is an RTOS?</span></a>
+        <a class="day-link" href="AdvancedArduino/Week14/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Creating Tasks</span></a>
+        <a class="day-link" href="AdvancedArduino/Week14/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Semaphores</span></a>
+        <a class="day-link" href="AdvancedArduino/Week14/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Queues</span></a>
+        <a class="day-link" href="AdvancedArduino/Week14/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Event Groups</span></a>
+        <a class="day-link" href="AdvancedArduino/Week14/Day6.html"><span class="day-num">Day 6</span><span class="day-title">FreeRTOS Timers</span></a>
+        <a class="day-link" href="AdvancedArduino/Week14/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Memory Management</span></a>
+        <a class="day-link day-capstone" href="AdvancedArduino/Week14/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 14 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w15">
+      <div class="week-header"><div class="week-icon">&#128267;</div><div class="week-title"><h3>Week 15 — Power Optimisation</h3><span>Battery, Solar &amp; Sleep Modes</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="AdvancedArduino/Week15/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Measuring Power</span></a>
+        <a class="day-link" href="AdvancedArduino/Week15/Day2.html"><span class="day-num">Day 2</span><span class="day-title">ESP32 Sleep Modes</span></a>
+        <a class="day-link" href="AdvancedArduino/Week15/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Battery Selection</span></a>
+        <a class="day-link" href="AdvancedArduino/Week15/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Solar Charging</span></a>
+        <a class="day-link" href="AdvancedArduino/Week15/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Optimising Code</span></a>
+        <a class="day-link" href="AdvancedArduino/Week15/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Peripheral Management</span></a>
+        <a class="day-link" href="AdvancedArduino/Week15/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Long-Life Node Design</span></a>
+        <a class="day-link day-capstone" href="AdvancedArduino/Week15/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 15 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w16">
+      <div class="week-header"><div class="week-icon">&#128207;</div><div class="week-title"><h3>Week 16 — Sensor Calibration</h3><span>Kalman, ADC &amp; PID Tuning</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="AdvancedArduino/Week16/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Sensor Calibration Theory</span></a>
+        <a class="day-link" href="AdvancedArduino/Week16/Day2.html"><span class="day-num">Day 2</span><span class="day-title">ADC Precision</span></a>
+        <a class="day-link" href="AdvancedArduino/Week16/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Kalman Filter Basics</span></a>
+        <a class="day-link" href="AdvancedArduino/Week16/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Complementary Filter</span></a>
+        <a class="day-link" href="AdvancedArduino/Week16/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Load Cell &amp; HX711</span></a>
+        <a class="day-link" href="AdvancedArduino/Week16/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Temperature Compensation</span></a>
+        <a class="day-link" href="AdvancedArduino/Week16/Day7.html"><span class="day-num">Day 7</span><span class="day-title">PID Tuning</span></a>
+        <a class="day-link day-capstone" href="AdvancedArduino/Week16/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 16 Capstone</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- ============================================================
+     PYTHON CROSSOVER — Weeks 17–20
+     ============================================================ -->
+<section id="python">
+  <div class="section-header sh-python">
+    <span class="sh-icon">&#128013;</span>
+    <div class="sh-text">
+      <h2>Python Crossover — Weeks 17 to 20</h2>
+      <p>MicroPython on Raspberry Pi Pico, IoT with Python, OpenCV, NumPy, and dashboards.</p>
+    </div>
+    <span class="sh-tag tag-python">Weeks 17–20</span>
+  </div>
+  <div class="week-grid">
+
+    <div class="week-card w17">
+      <div class="week-header"><div class="week-icon">&#128013;</div><div class="week-title"><h3>Week 17 — MicroPython Basics</h3><span>Pico, Thonny &amp; GPIO</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="PythonCrossover/Week17/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Why Python + Hardware?</span></a>
+        <a class="day-link" href="PythonCrossover/Week17/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Pico Setup &amp; Thonny IDE</span></a>
+        <a class="day-link" href="PythonCrossover/Week17/Day3.html"><span class="day-num">Day 3</span><span class="day-title">GPIO with MicroPython</span></a>
+        <a class="day-link" href="PythonCrossover/Week17/Day4.html"><span class="day-num">Day 4</span><span class="day-title">PWM &amp; Analog in Python</span></a>
+        <a class="day-link" href="PythonCrossover/Week17/Day5.html"><span class="day-num">Day 5</span><span class="day-title">I2C &amp; OLED Display</span></a>
+        <a class="day-link" href="PythonCrossover/Week17/Day6.html"><span class="day-num">Day 6</span><span class="day-title">MicroPython vs Arduino C++</span></a>
+        <a class="day-link" href="PythonCrossover/Week17/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Python Data Structures</span></a>
+        <a class="day-link day-capstone" href="PythonCrossover/Week17/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 17 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w18">
+      <div class="week-header"><div class="week-icon">&#128276;</div><div class="week-title"><h3>Week 18 — Python Hardware Control</h3><span>Sensors, SPI &amp; NeoPixel</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="PythonCrossover/Week18/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Reading Sensors in Python</span></a>
+        <a class="day-link" href="PythonCrossover/Week18/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Servo &amp; Motor Control</span></a>
+        <a class="day-link" href="PythonCrossover/Week18/Day3.html"><span class="day-num">Day 3</span><span class="day-title">SPI Devices in MicroPython</span></a>
+        <a class="day-link" href="PythonCrossover/Week18/Day4.html"><span class="day-num">Day 4</span><span class="day-title">NeoPixel &amp; WS2812</span></a>
+        <a class="day-link" href="PythonCrossover/Week18/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Interrupts in Python</span></a>
+        <a class="day-link" href="PythonCrossover/Week18/Day6.html"><span class="day-num">Day 6</span><span class="day-title">File I/O on Pico</span></a>
+        <a class="day-link" href="PythonCrossover/Week18/Day7.html"><span class="day-num">Day 7</span><span class="day-title">UART Serial Communication</span></a>
+        <a class="day-link day-capstone" href="PythonCrossover/Week18/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 18 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w19">
+      <div class="week-header"><div class="week-icon">&#127760;</div><div class="week-title"><h3>Week 19 — Python IoT</h3><span>WiFi, MQTT &amp; Async</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="PythonCrossover/Week19/Day1.html"><span class="day-num">Day 1</span><span class="day-title">WiFi with Pico W</span></a>
+        <a class="day-link" href="PythonCrossover/Week19/Day2.html"><span class="day-num">Day 2</span><span class="day-title">HTTP Requests in Python</span></a>
+        <a class="day-link" href="PythonCrossover/Week19/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Sending Data to ThingSpeak</span></a>
+        <a class="day-link" href="PythonCrossover/Week19/Day4.html"><span class="day-num">Day 4</span><span class="day-title">MQTT with MicroPython</span></a>
+        <a class="day-link" href="PythonCrossover/Week19/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Async Programming (uasyncio)</span></a>
+        <a class="day-link" href="PythonCrossover/Week19/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Web Server on Pico W</span></a>
+        <a class="day-link" href="PythonCrossover/Week19/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Python on Raspberry Pi 4</span></a>
+        <a class="day-link day-capstone" href="PythonCrossover/Week19/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 19 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w20">
+      <div class="week-header"><div class="week-icon">&#128200;</div><div class="week-title"><h3>Week 20 — Python Data &amp; GUI</h3><span>NumPy, Matplotlib &amp; Tkinter</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="PythonCrossover/Week20/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Python + Arduino Together</span></a>
+        <a class="day-link" href="PythonCrossover/Week20/Day2.html"><span class="day-num">Day 2</span><span class="day-title">OpenCV Preview</span></a>
+        <a class="day-link" href="PythonCrossover/Week20/Day3.html"><span class="day-num">Day 3</span><span class="day-title">NumPy for Sensor Data</span></a>
+        <a class="day-link" href="PythonCrossover/Week20/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Matplotlib Dashboards</span></a>
+        <a class="day-link" href="PythonCrossover/Week20/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Tkinter GUI Apps</span></a>
+        <a class="day-link" href="PythonCrossover/Week20/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Python Project Planning</span></a>
+        <a class="day-link" href="PythonCrossover/Week20/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Build Day</span></a>
+        <a class="day-link day-capstone" href="PythonCrossover/Week20/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 20 Capstone</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- ============================================================
+     ROBOTICS DEEP DIVE — Weeks 21–24
+     ============================================================ -->
+<section id="robotics">
+  <div class="section-header sh-robotics">
+    <span class="sh-icon">&#129302;</span>
+    <div class="sh-text">
+      <h2>Robotics Deep Dive — Weeks 21 to 24</h2>
+      <p>ROS, SLAM, computer vision with OpenCV, and building fully autonomous robots.</p>
+    </div>
+    <span class="sh-tag tag-robotics">Weeks 21–24</span>
+  </div>
+  <div class="week-grid">
+
+    <div class="week-card w21">
+      <div class="week-header"><div class="week-icon">&#127970;</div><div class="week-title"><h3>Week 21 — ROS Foundations</h3><span>Architecture, rosserial &amp; RViz</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="RoboticsDeepDive/Week21/Day1.html"><span class="day-num">Day 1</span><span class="day-title">What is ROS?</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week21/Day2.html"><span class="day-num">Day 2</span><span class="day-title">ROS Architecture</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week21/Day3.html"><span class="day-num">Day 3</span><span class="day-title">ROS on Raspberry Pi</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week21/Day4.html"><span class="day-num">Day 4</span><span class="day-title">rosserial — Arduino to ROS</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week21/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Publishing Sensor Data</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week21/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Subscribing to Commands</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week21/Day7.html"><span class="day-num">Day 7</span><span class="day-title">ROS Visualization (RViz)</span></a>
+        <a class="day-link day-capstone" href="RoboticsDeepDive/Week21/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 21 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w22">
+      <div class="week-header"><div class="week-icon">&#128205;</div><div class="week-title"><h3>Week 22 — SLAM &amp; Navigation</h3><span>LIDAR, GMapping &amp; Path Planning</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="RoboticsDeepDive/Week22/Day1.html"><span class="day-num">Day 1</span><span class="day-title">What is SLAM?</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week22/Day2.html"><span class="day-num">Day 2</span><span class="day-title">LIDAR Basics</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week22/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Mapping with GMapping</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week22/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Navigation Stack</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week22/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Path Planning (A*)</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week22/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Dynamic Obstacle Avoidance</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week22/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Localisation (AMCL)</span></a>
+        <a class="day-link day-capstone" href="RoboticsDeepDive/Week22/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 22 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w23">
+      <div class="week-header"><div class="week-icon">&#128065;</div><div class="week-title"><h3>Week 23 — Computer Vision</h3><span>OpenCV, Detection &amp; ArUco</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="RoboticsDeepDive/Week23/Day1.html"><span class="day-num">Day 1</span><span class="day-title">OpenCV Introduction</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week23/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Colour Space &amp; Masking</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week23/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Contour Detection</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week23/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Object Tracking</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week23/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Edge Detection</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week23/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Face Detection</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week23/Day7.html"><span class="day-num">Day 7</span><span class="day-title">ArUco Markers</span></a>
+        <a class="day-link day-capstone" href="RoboticsDeepDive/Week23/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 23 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w24">
+      <div class="week-header"><div class="week-icon">&#128736;</div><div class="week-title"><h3>Week 24 — Full Robot Systems</h3><span>Fusion, Behaviour &amp; Demo</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="RoboticsDeepDive/Week24/Day1.html"><span class="day-num">Day 1</span><span class="day-title">System Architecture</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week24/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Sensor Fusion</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week24/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Behaviour-Based Robotics</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week24/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Mission Planning</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week24/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Safety &amp; Failsafes</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week24/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Robot Demo Day</span></a>
+        <a class="day-link" href="RoboticsDeepDive/Week24/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Performance Metrics</span></a>
+        <a class="day-link day-capstone" href="RoboticsDeepDive/Week24/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 24 Capstone</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- ============================================================
+     PRODUCT THINKING — Weeks 25–28
+     ============================================================ -->
+<section id="product">
+  <div class="section-header sh-product">
+    <span class="sh-icon">&#128640;</span>
+    <div class="sh-text">
+      <h2>Product Thinking — Weeks 25 to 28</h2>
+      <p>User research, PCB fabrication, 3D printing, testing, licensing, and launching your product.</p>
+    </div>
+    <span class="sh-tag tag-product">Weeks 25–28</span>
+  </div>
+  <div class="week-grid">
+
+    <div class="week-card w25">
+      <div class="week-header"><div class="week-icon">&#128101;</div><div class="week-title"><h3>Week 25 — Product Design</h3><span>User Research &amp; Rapid Prototyping</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="ProductThinking/Week25/Day1.html"><span class="day-num">Day 1</span><span class="day-title">User Research</span></a>
+        <a class="day-link" href="ProductThinking/Week25/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Problem Statement</span></a>
+        <a class="day-link" href="ProductThinking/Week25/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Rapid Prototyping</span></a>
+        <a class="day-link" href="ProductThinking/Week25/Day4.html"><span class="day-num">Day 4</span><span class="day-title">User Testing</span></a>
+        <a class="day-link" href="ProductThinking/Week25/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Bill of Materials</span></a>
+        <a class="day-link" href="ProductThinking/Week25/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Market Research</span></a>
+        <a class="day-link" href="ProductThinking/Week25/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Product Roadmap</span></a>
+        <a class="day-link day-capstone" href="ProductThinking/Week25/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 25 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w26">
+      <div class="week-header"><div class="week-icon">&#128247;</div><div class="week-title"><h3>Week 26 — Fabrication</h3><span>PCB Ordering, 3D Printing &amp; Assembly</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="ProductThinking/Week26/Day1.html"><span class="day-num">Day 1</span><span class="day-title">PCB Fabrication Process</span></a>
+        <a class="day-link" href="ProductThinking/Week26/Day2.html"><span class="day-num">Day 2</span><span class="day-title">JLCPCB Advanced Ordering</span></a>
+        <a class="day-link" href="ProductThinking/Week26/Day3.html"><span class="day-num">Day 3</span><span class="day-title">PCB Assembly Techniques</span></a>
+        <a class="day-link" href="ProductThinking/Week26/Day4.html"><span class="day-num">Day 4</span><span class="day-title">FDM 3D Printing Basics</span></a>
+        <a class="day-link" href="ProductThinking/Week26/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Enclosure Design in Fusion 360</span></a>
+        <a class="day-link" href="ProductThinking/Week26/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Print Settings &amp; Materials</span></a>
+        <a class="day-link" href="ProductThinking/Week26/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Assembly &amp; Fit Testing</span></a>
+        <a class="day-link day-capstone" href="ProductThinking/Week26/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 26 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w27">
+      <div class="week-header"><div class="week-icon">&#128203;</div><div class="week-title"><h3>Week 27 — Testing &amp; Documentation</h3><span>Unit Tests, Datasheets &amp; Licensing</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="ProductThinking/Week27/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Test Plan Creation</span></a>
+        <a class="day-link" href="ProductThinking/Week27/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Firmware Unit Testing</span></a>
+        <a class="day-link" href="ProductThinking/Week27/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Integration &amp; System Testing</span></a>
+        <a class="day-link" href="ProductThinking/Week27/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Regulatory Basics</span></a>
+        <a class="day-link" href="ProductThinking/Week27/Day5.html"><span class="day-num">Day 5</span><span class="day-title">User Manual Writing</span></a>
+        <a class="day-link" href="ProductThinking/Week27/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Reading Datasheets</span></a>
+        <a class="day-link" href="ProductThinking/Week27/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Open Source Licensing</span></a>
+        <a class="day-link day-capstone" href="ProductThinking/Week27/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Week 27 Capstone</span></a>
+      </div>
+    </div>
+
+    <div class="week-card w28">
+      <div class="week-header"><div class="week-icon">&#127881;</div><div class="week-title"><h3>Week 28 — Launch &amp; Graduation</h3><span>Crowdfunding, Community &amp; Next Steps</span></div></div>
+      <div class="week-days">
+        <a class="day-link" href="ProductThinking/Week28/Day1.html"><span class="day-num">Day 1</span><span class="day-title">Crowdfunding Basics</span></a>
+        <a class="day-link" href="ProductThinking/Week28/Day2.html"><span class="day-num">Day 2</span><span class="day-title">Maker Community Submission</span></a>
+        <a class="day-link" href="ProductThinking/Week28/Day3.html"><span class="day-num">Day 3</span><span class="day-title">Pitch Deck Creation</span></a>
+        <a class="day-link" href="ProductThinking/Week28/Day4.html"><span class="day-num">Day 4</span><span class="day-title">Demo Video Production</span></a>
+        <a class="day-link" href="ProductThinking/Week28/Day5.html"><span class="day-num">Day 5</span><span class="day-title">Social Media for Makers</span></a>
+        <a class="day-link" href="ProductThinking/Week28/Day6.html"><span class="day-num">Day 6</span><span class="day-title">Competition Submission</span></a>
+        <a class="day-link" href="ProductThinking/Week28/Day7.html"><span class="day-num">Day 7</span><span class="day-title">Final Presentations</span></a>
+        <a class="day-link day-capstone" href="ProductThinking/Week28/Day8.html"><span class="day-num">Day 8</span><span class="day-title">Graduation &amp; Next Steps</span></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- PITCH DECK BANNER -->
+<section style="padding-top:2rem;padding-bottom:0;max-width:1200px;margin:0 auto;padding-left:2rem;padding-right:2rem;">
+  <div class="pitch-banner">
+    <div>
+      <h3>Arduino Robotics — Class Pitch Deck</h3>
+      <p>Full presentation deck for parents, schools, and program administrators.</p>
+    </div>
+    <a class="pitch-btn" href="arduino-robotics-pitch-deck.html">View Pitch Deck</a>
+  </div>
+</section>
+
+<div class="divider" style="padding-top:2rem;"><hr></div>
+
+<!-- ============================================================
+     REFERENCES
+     ============================================================ -->
+<section id="references">
+  <div class="section-header" style="background:linear-gradient(90deg,#f0fdf4,#f0f4ff);">
+    <span class="sh-icon">&#128214;</span>
+    <div class="sh-text">
+      <h2>Reference Materials</h2>
+      <p>Official books, guides, and cheat sheets included with this course.</p>
+    </div>
+  </div>
+  <div class="ref-grid">
+    <a class="ref-card" href="reference/Arduino_Projects_Book.pdf" target="_blank">
+      <span class="ref-icon">&#128214;</span>
+      <div class="ref-info"><h4>Arduino Projects Book</h4><p>Official Arduino starter guide with 15 hands-on projects.</p><span class="ref-type type-pdf">PDF</span></div>
+    </a>
+    <a class="ref-card" href="reference/GetStartedArduino.pdf" target="_blank">
+      <span class="ref-icon">&#128218;</span>
+      <div class="ref-info"><h4>Getting Started with Arduino</h4><p>Beginner-friendly introduction to the Arduino platform.</p><span class="ref-type type-pdf">PDF</span></div>
+    </a>
+    <a class="ref-card" href="reference/ARDUINO_NOTEBOOKv6.pdf" target="_blank">
+      <span class="ref-icon">&#128211;</span>
+      <div class="ref-info"><h4>Arduino Notebook v6</h4><p>Quick reference notebook covering core Arduino functions.</p><span class="ref-type type-pdf">PDF</span></div>
+    </a>
+    <a class="ref-card" href="reference/ARDUINO%20GUIDE%20ADA%20(1).pdf" target="_blank">
+      <span class="ref-icon">&#128196;</span>
+      <div class="ref-info"><h4>Arduino Guide (Adafruit)</h4><p>Comprehensive Adafruit guide to Arduino programming and circuits.</p><span class="ref-type type-pdf">PDF</span></div>
+    </a>
+    <a class="ref-card" href="reference/Building%20Arduino%20Projects%20for%20the%20Internet%20of%20Things%20(%20PDFDrive%20).pdf" target="_blank">
+      <span class="ref-icon">&#127760;</span>
+      <div class="ref-info"><h4>Building Arduino IoT Projects</h4><p>Full book on connecting Arduino to the Internet of Things.</p><span class="ref-type type-pdf">PDF</span></div>
+    </a>
+    <a class="ref-card" href="reference/electronicsProductionDesignRecitation2021.pdf" target="_blank">
+      <span class="ref-icon">&#128268;</span>
+      <div class="ref-info"><h4>Electronics Production &amp; Design</h4><p>MIT-style recitation notes on electronics production and PCB design.</p><span class="ref-type type-pdf">PDF</span></div>
+    </a>
+    <a class="ref-card" href="reference/Arduino_Tinkercad_Electronics.html" target="_blank">
+      <span class="ref-icon">&#128187;</span>
+      <div class="ref-info"><h4>Arduino &amp; Tinkercad Reference</h4><p>Interactive HTML reference for Tinkercad circuit simulation.</p><span class="ref-type type-html">HTML</span></div>
+    </a>
+  </div>
+</section>
+
+<div class="divider"><hr></div>
+
+<!-- ============================================================
+     ONLINE RESOURCES
+     ============================================================ -->
+<section id="resources">
+  <div class="section-header" style="background:linear-gradient(90deg,#eff6ff,#f0f4ff);">
+    <span class="sh-icon">&#128279;</span>
+    <div class="sh-text">
+      <h2>Online Resources</h2>
+      <p>Essential websites, simulators, and tools for every Arduino learner.</p>
+    </div>
+  </div>
+  <div class="resource-grid">
+    <a class="resource-card" href="https://www.arduino.cc/reference/en/" target="_blank" rel="noopener"><span class="ri">&#128196;</span><span>Arduino Language Reference</span></a>
+    <a class="resource-card" href="https://www.tinkercad.com/circuits" target="_blank" rel="noopener"><span class="ri">&#128187;</span><span>Tinkercad Circuits Simulator</span></a>
+    <a class="resource-card" href="https://wokwi.com/" target="_blank" rel="noopener"><span class="ri">&#127918;</span><span>Wokwi Arduino Simulator</span></a>
+    <a class="resource-card" href="https://www.arduino.cc/en/software" target="_blank" rel="noopener"><span class="ri">&#11015;</span><span>Arduino IDE Download</span></a>
+    <a class="resource-card" href="https://docs.arduino.cc/" target="_blank" rel="noopener"><span class="ri">&#128218;</span><span>Arduino Documentation</span></a>
+    <a class="resource-card" href="https://www.arduino.cc/en/Tutorial/HomePage" target="_blank" rel="noopener"><span class="ri">&#127891;</span><span>Official Arduino Tutorials</span></a>
+    <a class="resource-card" href="https://randomnerdtutorials.com/" target="_blank" rel="noopener"><span class="ri">&#128295;</span><span>Random Nerd Tutorials</span></a>
+    <a class="resource-card" href="https://www.instructables.com/circuits/arduino/projects/" target="_blank" rel="noopener"><span class="ri">&#128161;</span><span>Instructables Arduino</span></a>
+    <a class="resource-card" href="https://hackster.io/arduino" target="_blank" rel="noopener"><span class="ri">&#128172;</span><span>Hackster.io Arduino</span></a>
+    <a class="resource-card" href="https://www.kicad.org/" target="_blank" rel="noopener"><span class="ri">&#128268;</span><span>KiCad PCB Design</span></a>
+    <a class="resource-card" href="https://fritzing.org/" target="_blank" rel="noopener"><span class="ri">&#9889;</span><span>Fritzing Circuit Designer</span></a>
+    <a class="resource-card" href="https://platformio.org/" target="_blank" rel="noopener"><span class="ri">&#128296;</span><span>PlatformIO IDE</span></a>
+    <a class="resource-card" href="https://micropython.org/" target="_blank" rel="noopener"><span class="ri">&#128013;</span><span>MicroPython Official</span></a>
+    <a class="resource-card" href="https://www.raspberrypi.com/documentation/microcontrollers/micropython.html" target="_blank" rel="noopener"><span class="ri">&#127928;</span><span>Pico MicroPython Docs</span></a>
+    <a class="resource-card" href="https://wiki.ros.org/" target="_blank" rel="noopener"><span class="ri">&#129302;</span><span>ROS Wiki</span></a>
+    <a class="resource-card" href="https://docs.opencv.org/4.x/" target="_blank" rel="noopener"><span class="ri">&#128065;</span><span>OpenCV Documentation</span></a>
+    <a class="resource-card" href="https://www.jlcpcb.com/" target="_blank" rel="noopener"><span class="ri">&#128268;</span><span>JLCPCB PCB Fabrication</span></a>
+    <a class="resource-card" href="https://www.autodesk.com/products/fusion-360/" target="_blank" rel="noopener"><span class="ri">&#128247;</span><span>Fusion 360 (3D Design)</span></a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><strong>Arduino &amp; Robotics Teaching Curriculum</strong> &mdash; Open source &amp; free for educators and learners.</p>
+  <p style="margin-top:.5rem;">28 Weeks &bull; 224 Lessons &bull; 6 Tracks &bull; <a href="https://github.com/selvakumarvr/robotics" target="_blank" rel="noopener">github.com/selvakumarvr/robotics</a> &bull; <a href="https://selvakumarvr.github.io/robotics/" target="_blank" rel="noopener">Live Site</a></p>
+</footer>
+
+</body>
+</html>

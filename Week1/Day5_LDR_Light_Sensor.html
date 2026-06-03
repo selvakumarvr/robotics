@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 Day 5 — LDR Light Sensor & Automation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent:#d97706; --accent-light:#fbbf24; --accent-glow:rgba(217,119,6,0.18);
+            --accent2:#0ea5e9; --accent3:#8b5cf6; --accent4:#10b981; --accent5:#ec4899;
+            --warning:#f59e0b; --danger:#ef4444;
+            --text-primary:#1c1107; --text-muted:#94a3b8;
+            --font-display:'Baloo 2',cursive; --font-body:'Nunito',sans-serif; --font-code:'Fira Code',monospace;
+            --title-size:clamp(1.8rem,5vw,3.6rem); --h2-size:clamp(1.3rem,3.5vw,2.2rem);
+            --h3-size:clamp(1rem,2.5vw,1.4rem); --body-size:clamp(0.78rem,1.5vw,1.05rem);
+            --small-size:clamp(0.68rem,1.1vw,0.88rem); --code-size:clamp(0.62rem,1.05vw,0.83rem);
+            --slide-padding:clamp(1.5rem,4vw,4rem); --content-gap:clamp(0.8rem,2vw,1.6rem);
+            --elem-gap:clamp(0.3rem,1vw,0.7rem); --radius:16px; --ease-out:cubic-bezier(0.16,1,0.3,1);
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;scroll-snap-type:y mandatory;height:100%;overflow-x:hidden;}
+        body{font-family:var(--font-body);background:#fffbeb;color:var(--text-primary);overflow-x:hidden;height:100%;line-height:1.5;}
+        .slide{width:100vw;height:100vh;height:100dvh;padding:var(--slide-padding);scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+        .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center;max-height:100%;overflow:hidden;gap:var(--content-gap);}
+        .progress-bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-light),var(--accent4));z-index:1000;transition:width 0.3s ease;}
+        .nav-dots{position:fixed;right:clamp(0.5rem,1.5vw,1.5rem);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:100;}
+        .nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(217,119,6,0.2);cursor:pointer;transition:all 0.3s ease;border:none;padding:0;}
+        .nav-dot.active{background:var(--accent);transform:scale(1.5);}
+        .nav-dot:hover{background:var(--accent-light);}
+        .slide-counter{position:fixed;bottom:clamp(0.5rem,2vw,1.2rem);right:clamp(0.5rem,2vw,1.2rem);font-family:var(--font-code);font-size:var(--small-size);color:var(--text-muted);z-index:100;background:rgba(255,255,255,0.85);padding:3px 10px;border-radius:20px;}
+        h1{font-family:var(--font-display);font-size:var(--title-size);font-weight:800;line-height:1.15;}
+        h2{font-family:var(--font-display);font-size:var(--h2-size);font-weight:700;line-height:1.2;color:var(--accent);}
+        h3{font-family:var(--font-display);font-size:var(--h3-size);font-weight:700;line-height:1.3;}
+        p,li{font-size:var(--body-size);line-height:1.65;color:#334155;}
+        strong{font-weight:700;}
+        .accent{color:var(--accent);} .accent2{color:var(--accent2);} .accent3{color:var(--accent3);} .accent4{color:var(--accent4);}
+        .bg-dots{background-image:radial-gradient(rgba(217,119,6,0.07) 1.5px,transparent 1.5px);background-size:28px 28px;}
+        .bg-white{background:#ffffff;}
+        .bg-amber{background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 50%,#fde68a 100%);}
+        .bg-sky{background:linear-gradient(135deg,#e0f2fe 0%,#bae6fd 50%,#7dd3fc 100%);}
+        .bg-green{background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 50%,#a7f3d0 100%);}
+        .card{background:#fff;border-radius:var(--radius);padding:clamp(0.8rem,2vw,1.4rem);border:2px solid rgba(217,119,6,0.1);box-shadow:0 2px 12px rgba(217,119,6,0.06);transition:all 0.3s ease;}
+        .card:hover{border-color:rgba(217,119,6,0.25);box-shadow:0 6px 24px rgba(217,119,6,0.12);transform:translateY(-2px);}
+        .card-amber{border-left:4px solid var(--accent);background:linear-gradient(135deg,#fff 80%,#fffbeb);}
+        .card-sky{border-left:4px solid var(--accent2);background:linear-gradient(135deg,#fff 80%,#e0f2fe);}
+        .card-purple{border-left:4px solid var(--accent3);background:linear-gradient(135deg,#fff 80%,#f3e8ff);}
+        .card-green{border-left:4px solid var(--accent4);background:linear-gradient(135deg,#fff 80%,#ecfdf5);}
+        .card-pink{border-left:4px solid var(--accent5);background:linear-gradient(135deg,#fff 80%,#fdf2f8);}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:var(--content-gap);align-items:start;}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--elem-gap);}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--elem-gap);}
+        @media(max-width:768px){.two-col,.grid-3{grid-template-columns:1fr 1fr;}}
+        .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:var(--small-size);font-weight:700;}
+        .badge-amber{background:#fef3c7;color:var(--accent);}
+        .badge-sky{background:#e0f2fe;color:var(--accent2);}
+        .badge-purple{background:#f3e8ff;color:var(--accent3);}
+        .badge-green{background:#ecfdf5;color:var(--accent4);}
+        .badge-pink{background:#fdf2f8;color:var(--accent5);}
+        .section-label{font-family:var(--font-code);font-size:var(--small-size);letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+        .divider{height:3px;width:60px;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent-light));}
+        .subtitle{font-size:clamp(0.9rem,2vw,1.3rem);color:#475569;font-weight:500;}
+        .code-block{background:#1c1107;border-radius:12px;padding:clamp(0.8rem,2vw,1.4rem);font-family:var(--font-code);font-size:var(--code-size);color:#fde68a;overflow-x:auto;border:2px solid rgba(251,191,36,0.25);}
+        .code-block .kw{color:#f0abfc;} .code-block .fn{color:#67e8f9;} .code-block .num{color:#fcd34d;}
+        .code-block .cmt{color:#6ee7b7;font-style:italic;} .code-block .str{color:#f9a8d4;} .code-block .pin{color:#fb923c;} .code-block .typ{color:#a5f3fc;}
+        .code-block pre{white-space:pre;line-height:1.8;}
+        .step{display:flex;align-items:flex-start;gap:clamp(0.5rem,1.5vw,1rem);padding:clamp(0.5rem,1.2vw,0.9rem);background:#fff;border-radius:12px;border:2px solid rgba(217,119,6,0.12);}
+        .step-num{min-width:clamp(28px,3.5vw,40px);height:clamp(28px,3.5vw,40px);border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:var(--body-size);flex-shrink:0;font-family:var(--font-display);}
+        .quiz-option{padding:clamp(0.5rem,1.2vw,0.85rem) clamp(0.8rem,2vw,1.2rem);border-radius:10px;background:#fff;border:2px solid rgba(217,119,6,0.15);cursor:pointer;font-size:var(--body-size);font-weight:600;color:#334155;transition:all 0.2s ease;text-align:left;font-family:var(--font-body);}
+        .quiz-option:hover{border-color:var(--accent);background:#fffbeb;transform:translateX(4px);}
+        .quiz-option.correct{background:#d1fae5;border-color:var(--accent4);color:#065f46;}
+        .quiz-option.wrong{background:#fee2e2;border-color:var(--danger);color:#991b1b;}
+        .quiz-feedback{font-size:var(--body-size);font-weight:700;padding:0.5em 1em;border-radius:10px;display:none;margin-top:0.5em;}
+        .quiz-feedback.show{display:block;}
+        .reveal,.reveal-right,.reveal-scale,.reveal-up{opacity:0;transition:opacity 0.6s var(--ease-out),transform 0.6s var(--ease-out);}
+        .reveal{transform:translateY(24px);} .reveal-right{transform:translateX(24px);} .reveal-scale{transform:scale(0.92);} .reveal-up{transform:translateY(-20px);}
+        .reveal.visible,.reveal-right.visible,.reveal-scale.visible,.reveal-up.visible{opacity:1;transform:none;}
+        [data-delay="1"]{transition-delay:0.1s;} [data-delay="2"]{transition-delay:0.2s;} [data-delay="3"]{transition-delay:0.3s;} [data-delay="4"]{transition-delay:0.4s;}
+        .big-emoji{font-size:clamp(3rem,8vw,6rem);line-height:1;display:block;text-align:center;}
+        .hl-amber{background:#fef3c7;border-left:4px solid var(--accent);color:#92400e;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-sky{background:#e0f2fe;border-left:4px solid var(--accent2);color:#0369a1;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-green{background:#ecfdf5;border-left:4px solid var(--accent4);color:#065f46;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-yellow{background:#fffbeb;border-left:4px solid var(--warning);color:#92400e;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-purple{background:#f3e8ff;border-left:4px solid var(--accent3);color:#6d28d9;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .section-tag{display:inline-flex;align-items:center;gap:0.4em;padding:0.3em 0.9em;border-radius:30px;font-size:var(--small-size);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.4em;}
+        .tag-day{background:#fef3c7;color:var(--accent);border:2px solid #fde68a;}
+        .tag-hw{background:#fff7ed;color:#f97316;border:2px solid #fed7aa;}
+        .tag-quiz{background:#f3e8ff;color:var(--accent3);border:2px solid #c4b5fd;}
+        .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.25;pointer-events:none;}
+        /* LDR visual */
+        .ldr-sim{display:flex;flex-direction:column;gap:0.4em;}
+        .ldr-row{display:flex;align-items:center;gap:0.5em;}
+        .sun-icon{font-size:clamp(1rem,2vw,1.5rem);min-width:30px;text-align:center;}
+        .ldr-track{flex:1;height:14px;background:#e2e8f0;border-radius:20px;overflow:hidden;}
+        .ldr-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--accent),var(--accent-light));}
+        .ldr-val{font-family:var(--font-code);font-size:var(--small-size);color:#64748b;min-width:40px;}
+        .led-indicator{width:18px;height:18px;border-radius:50%;flex-shrink:0;}
+    </style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">1 / 15</div>
+
+<!-- SLIDE 1: TITLE -->
+<section class="slide bg-amber">
+    <div class="blob" style="width:300px;height:300px;background:#fde68a;top:-80px;right:-80px;"></div>
+    <div class="blob" style="width:200px;height:200px;background:#bbf7d0;bottom:-60px;left:-60px;"></div>
+    <div class="slide-content" style="align-items:flex-start;">
+        <span class="section-tag tag-day reveal-up">Week 1 · Day 5</span>
+        <h1 class="reveal" style="margin-top:0.2em;">See the <span class="accent">Light!</span></h1>
+        <p class="subtitle reveal" data-delay="2">LDR sensors, threshold logic, and automatic night lamps — let your Arduino sense the world</p>
+        <div class="divider reveal" data-delay="3" style="margin-top:0.8em;"></div>
+        <div class="reveal" data-delay="4" style="display:flex;gap:0.8em;flex-wrap:wrap;margin-top:0.5em;">
+            <span class="badge badge-amber">LDR Sensor</span>
+            <span class="badge badge-sky">Voltage Divider</span>
+            <span class="badge badge-purple">Threshold Logic</span>
+            <span class="badge badge-green">Automation</span>
+            <span class="badge badge-pink">Night Lamp Project</span>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 2: RECAP -->
+<section class="slide bg-dots" style="background-color:#fffbeb;">
+    <div class="slide-content">
+        <span class="section-label reveal">Quick Recap</span>
+        <h2 class="reveal" data-delay="1">What We Learned in Day 4</h2>
+        <div class="grid-2 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-pink"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">🔔</div><div><h3 style="font-size:var(--body-size);">Piezo Buzzer</h3><p style="font-size:var(--small-size);">Wired to Pin 8 — uses tone() to vibrate at a set frequency</p></div></div></div>
+            <div class="card card-amber"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">🎵</div><div><h3 style="font-size:var(--body-size);">tone() &amp; noTone()</h3><p style="font-size:var(--small-size);">Play a frequency. Higher Hz = higher pitch. noTone() stops it</p></div></div></div>
+            <div class="card card-purple"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">📋</div><div><h3 style="font-size:var(--body-size);">Arrays</h3><p style="font-size:var(--small-size);">int arr[] = {…} — list of values. First index is always 0</p></div></div></div>
+            <div class="card card-green"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">🎶</div><div><h3 style="font-size:var(--body-size);">Melody Project</h3><p style="font-size:var(--small-size);">Stored notes &amp; durations in arrays, played with a for loop</p></div></div></div>
+        </div>
+        <div class="hl-amber reveal" data-delay="3" style="font-size:var(--small-size);">Today we add our first <strong>real sensor</strong> — an LDR that detects light levels, so Arduino can make automatic decisions!</div>
+    </div>
+</section>
+
+<!-- SLIDE 3: AGENDA -->
+<section class="slide bg-dots" style="background-color:#fffbeb;">
+    <div class="slide-content">
+        <span class="section-label reveal">Today's Agenda</span>
+        <h2 class="reveal" data-delay="1">What We'll Do Today</h2>
+        <div class="reveal" data-delay="2" style="display:flex;flex-direction:column;gap:0.45em;margin-top:0.3em;">
+            <div class="step"><div class="step-num">1</div><div><h3 style="font-size:var(--body-size);">What is an LDR?</h3><p style="font-size:var(--small-size);">Light Dependent Resistor — resistance changes with light</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent2);">2</div><div><h3 style="font-size:var(--body-size);">Voltage Divider Circuit</h3><p style="font-size:var(--small-size);">Pair LDR with a fixed resistor to get a readable voltage on A0</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent3);">3</div><div><h3 style="font-size:var(--body-size);">Reading the LDR</h3><p style="font-size:var(--small-size);">analogRead(A0) returns 0–1023 based on brightness</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent4);">4</div><div><h3 style="font-size:var(--body-size);">Threshold &amp; Automation</h3><p style="font-size:var(--small-size);">if (lightVal &lt; 400) → turn on LED automatically!</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent5);">5</div><div><h3 style="font-size:var(--body-size);">Project: Automatic Night Lamp</h3><p style="font-size:var(--small-size);">LED turns on when it gets dark, off when it's bright</p></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 4: SECTION DIVIDER — LDR -->
+<section class="slide" style="background:linear-gradient(135deg,#d97706 0%,#fbbf24 50%,#fde68a 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#fde68a;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">☀️</span>
+        <p class="section-label reveal" data-delay="1" style="color:#fffbeb;margin-top:0.5em;">Part 1</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">The LDR<br>Light Sensor</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#fef3c7;margin-top:0.5em;">A resistor that changes value based on how much light hits it</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#fde68a);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 5: LDR EXPLAINED + VOLTAGE DIVIDER -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">LDR — Light Dependent Resistor</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-amber">
+                    <h3 style="font-size:var(--body-size);">How it works</h3>
+                    <p style="font-size:var(--small-size);">In <strong class="accent">bright light</strong>: low resistance (~100Ω) → lots of current flows.<br>In <strong>darkness</strong>: high resistance (~1MΩ) → very little current.</p>
+                </div>
+                <div class="card card-sky">
+                    <h3 style="font-size:var(--body-size);">Voltage Divider — required!</h3>
+                    <p style="font-size:var(--small-size);">LDR alone can't connect directly. Pair with a 10kΩ resistor to create a voltage between 0V–5V that Arduino can read.</p>
+                    <div style="background:#1c1107;border-radius:8px;padding:0.5em;margin-top:0.4em;font-family:var(--font-code);font-size:var(--small-size);color:#fde68a;line-height:1.9;">
+                        <div style="color:#fb923c;">5V</div>
+                        <div>&nbsp;↓</div>
+                        <div style="color:#fcd34d;">LDR</div>
+                        <div>&nbsp;↓ ← A0 reads here</div>
+                        <div style="color:#fcd34d;">10kΩ Resistor</div>
+                        <div>&nbsp;↓</div>
+                        <div style="color:#6ee7b7;">GND</div>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card" style="background:#fffbeb;border:2px solid #fde68a;">
+                    <p style="font-size:var(--small-size);font-weight:800;color:var(--accent);margin-bottom:0.5em;">What analogRead returns:</p>
+                    <div class="ldr-sim">
+                        <div class="ldr-row"><span class="sun-icon">🌑</span><div class="ldr-track"><div class="ldr-fill" style="width:5%;"></div></div><span class="ldr-val">~50</span><div class="led-indicator" style="background:#fbbf24;box-shadow:0 0 8px #fbbf24;"></div></div>
+                        <div class="ldr-row"><span class="sun-icon">🌥</span><div class="ldr-track"><div class="ldr-fill" style="width:35%;"></div></div><span class="ldr-val">~350</span><div class="led-indicator" style="background:#fbbf24;box-shadow:0 0 4px #fbbf24;opacity:0.7;"></div></div>
+                        <div class="ldr-row"><span class="sun-icon">☁️</span><div class="ldr-track"><div class="ldr-fill" style="width:55%;"></div></div><span class="ldr-val">~550</span><div class="led-indicator" style="background:#e2e8f0;"></div></div>
+                        <div class="ldr-row"><span class="sun-icon">🌤</span><div class="ldr-track"><div class="ldr-fill" style="width:75%;"></div></div><span class="ldr-val">~750</span><div class="led-indicator" style="background:#e2e8f0;"></div></div>
+                        <div class="ldr-row"><span class="sun-icon">☀️</span><div class="ldr-track"><div class="ldr-fill" style="width:98%;"></div></div><span class="ldr-val">~980</span><div class="led-indicator" style="background:#e2e8f0;"></div></div>
+                    </div>
+                    <p style="font-size:0.68rem;color:#64748b;margin-top:0.3em;">Bright light = high reading. Dark = low reading. Yellow = LED on.</p>
+                </div>
+                <div class="hl-yellow" style="font-size:var(--small-size);">The exact threshold depends on your environment! Always use Serial Monitor to find the right value for your room.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 6: SECTION DIVIDER — THRESHOLD -->
+<section class="slide" style="background:linear-gradient(135deg,#0ea5e9 0%,#38bdf8 50%,#7dd3fc 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:240px;height:240px;background:#bae6fd;bottom:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🎯</span>
+        <p class="section-label reveal" data-delay="1" style="color:#e0f2fe;margin-top:0.5em;">Part 2</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Threshold<br>&amp; Automation</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#bae6fd;margin-top:0.5em;">Set a light level — if it drops below it, take action automatically!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#bae6fd);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 7: READING + THRESHOLD -->
+<section class="slide bg-dots" style="background-color:#f0f9ff;">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent2);">Reading LDR &amp; Setting a Threshold</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="code-block" style="font-size:var(--small-size);">
+<pre><span class="cmt">// Step 1: find your threshold</span>
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);
+}
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="typ">int</span> light = <span class="fn">analogRead</span>(<span class="pin">A0</span>);
+  <span class="fn">Serial</span>.<span class="fn">println</span>(light);
+  <span class="fn">delay</span>(<span class="num">200</span>);
+}</pre>
+                </div>
+                <div class="hl-amber" style="font-size:var(--small-size);">Run this first! Cover the LDR with your hand, then shine a torch on it. Note the dark value and bright value — pick a threshold in the middle.</div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="code-block" style="font-size:var(--small-size);">
+<pre><span class="cmt">// Step 2: use the threshold</span>
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">ldrPin</span> = <span class="pin">A0</span>;
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">ledPin</span> = <span class="num">13</span>;
+<span class="kw">const</span> <span class="typ">int</span> THRESHOLD = <span class="num">400</span>;
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="typ">int</span> light = <span class="fn">analogRead</span>(<span class="pin">ldrPin</span>);
+
+  <span class="kw">if</span> (light &lt; THRESHOLD) {
+    <span class="fn">digitalWrite</span>(<span class="pin">ledPin</span>, <span class="pin">HIGH</span>);
+    <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"Dark - LED ON"</span>);
+  } <span class="kw">else</span> {
+    <span class="fn">digitalWrite</span>(<span class="pin">ledPin</span>, <span class="pin">LOW</span>);
+    <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"Bright - LED OFF"</span>);
+  }
+  <span class="fn">delay</span>(<span class="num">100</span>);
+}</pre>
+                </div>
+                <div class="hl-sky" style="font-size:var(--small-size);">Using <code style="font-family:var(--font-code);background:#e0f2fe;">const int THRESHOLD = 400</code> makes it easy to change. UPPERCASE names for constants is a common coding convention!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 8: SECTION DIVIDER — PROJECT -->
+<section class="slide" style="background:linear-gradient(135deg,#10b981 0%,#34d399 50%,#6ee7b7 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:240px;height:240px;background:#a7f3d0;top:5%;left:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🌙</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ecfdf5;margin-top:0.5em;">Part 3 — Project</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Automatic<br>Night Lamp</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#d1fae5;margin-top:0.5em;">Gets dark → LED turns on. Gets bright → LED turns off. All automatic!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#a7f3d0);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 9: FULL PROJECT CODE -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent4);">Full Night Lamp Code</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1" style="font-size:clamp(0.58rem,0.95vw,0.78rem);">
+<pre><span class="kw">const</span> <span class="typ">int</span> <span class="pin">ldrPin</span>  = <span class="pin">A0</span>;
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">ledPin</span>  = <span class="num">9</span>;   <span class="cmt">// PWM for dim</span>
+<span class="kw">const</span> <span class="typ">int</span> THRESHOLD = <span class="num">400</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(<span class="pin">ledPin</span>, <span class="pin">OUTPUT</span>);
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="typ">int</span> light = <span class="fn">analogRead</span>(<span class="pin">ldrPin</span>);
+
+  <span class="cmt">// Map darkness to LED brightness</span>
+  <span class="typ">int</span> brightness = <span class="fn">map</span>(light,
+    <span class="num">0</span>, THRESHOLD, <span class="num">255</span>, <span class="num">0</span>);
+  brightness = <span class="fn">constrain</span>(brightness,
+    <span class="num">0</span>, <span class="num">255</span>);
+
+  <span class="fn">analogWrite</span>(<span class="pin">ledPin</span>, brightness);
+
+  <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"Light: "</span>);
+  <span class="fn">Serial</span>.<span class="fn">print</span>(light);
+  <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"  LED: "</span>);
+  <span class="fn">Serial</span>.<span class="fn">println</span>(brightness);
+
+  <span class="fn">delay</span>(<span class="num">100</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-amber">
+                    <h3 style="font-size:var(--body-size);">map() — inverted this time!</h3>
+                    <p style="font-size:var(--small-size);">map(light, 0, THRESHOLD, <strong>255, 0</strong>) — notice the output is reversed! Less light = more brightness.</p>
+                </div>
+                <div class="card card-sky">
+                    <h3 style="font-size:var(--body-size);">constrain(value, min, max)</h3>
+                    <p style="font-size:var(--small-size);">Clamps a value between min and max. Prevents negative or >255 values from causing problems.</p>
+                    <div class="code-block" style="margin-top:0.3em;font-size:var(--small-size);"><pre><span class="fn">constrain</span>(<span class="num">300</span>,<span class="num">0</span>,<span class="num">255</span>) <span class="cmt">→ 255</span>
+<span class="fn">constrain</span>(<span class="num">-5</span>,<span class="num">0</span>,<span class="num">255</span>)  <span class="cmt">→ 0</span></pre></div>
+                </div>
+                <div class="card card-green">
+                    <h3 style="font-size:var(--body-size);">Smooth dimming!</h3>
+                    <p style="font-size:var(--small-size);">Instead of just ON/OFF, the LED fades smoothly — darker room = brighter LED. Like a real smart lamp!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDES 10-15: remaining slides -->
+<!-- SLIDE 10: WIRING -->
+<section class="slide bg-dots" style="background-color:#fffbeb;">
+    <div class="slide-content">
+        <h2 class="reveal">Night Lamp Wiring in Tinkercad</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.45em;">
+                <div class="step"><div class="step-num">1</div><div><h3 style="font-size:var(--small-size);">Add Arduino + Breadboard</h3></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent2);">2</div><div><h3 style="font-size:var(--small-size);">Add Photoresistor (LDR)</h3><p style="font-size:var(--small-size);">Search "Photoresistor" in Tinkercad components.</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent3);">3</div><div><h3 style="font-size:var(--small-size);">Voltage Divider</h3><p style="font-size:var(--small-size);">LDR: one leg → 5V. Other leg → A0 AND → 10kΩ → GND.</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent4);">4</div><div><h3 style="font-size:var(--small-size);">LED + 220Ω on Pin 9</h3><p style="font-size:var(--small-size);">Same as Day 3 LED circuit — LED Anode → resistor → Pin 9. Cathode → GND.</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent5);">5</div><div><h3 style="font-size:var(--small-size);">Simulate!</h3><p style="font-size:var(--small-size);">Click the LDR slider in Tinkercad to change light value while running.</p></div></div>
+            </div>
+            <div class="reveal-right" data-delay="2">
+                <div style="background:#1c1107;border-radius:12px;padding:0.8em;font-family:var(--font-code);font-size:var(--small-size);color:#fde68a;border:2px solid rgba(251,191,36,0.25);line-height:2;">
+                    <div style="color:#64748b;">Full wiring:</div>
+                    <div style="color:#fb923c;">5V → LDR leg 1</div>
+                    <div style="color:#fcd34d;">LDR leg 2 → A0</div>
+                    <div style="color:#fcd34d;">LDR leg 2 → 10kΩ → GND</div>
+                    <div style="color:#94a3b8;margin:0.2em 0;">──────────────</div>
+                    <div style="color:#fb923c;">Pin 9 → 220Ω</div>
+                    <div style="color:#f9a8d4;">220Ω → LED (+)</div>
+                    <div style="color:#6ee7b7;">LED (−) → GND</div>
+                </div>
+                <div class="hl-green" style="margin-top:0.6em;font-size:var(--small-size);">The 10kΩ resistor forms the lower half of the voltage divider. Without it, the pin would be floating and give random readings!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 11: ELSE IF CHAIN -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Bonus: else if — Multiple Conditions</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="typ">int</span> light = <span class="fn">analogRead</span>(<span class="pin">A0</span>);
+
+<span class="kw">if</span> (light &lt; <span class="num">200</span>) {
+  <span class="cmt">// Very dark</span>
+  <span class="fn">digitalWrite</span>(<span class="pin">ledPin</span>, <span class="pin">HIGH</span>);
+  <span class="fn">tone</span>(<span class="num">8</span>, <span class="num">500</span>, <span class="num">200</span>);  <span class="cmt">// beep!</span>
+} <span class="kw">else if</span> (light &lt; <span class="num">500</span>) {
+  <span class="cmt">// Medium light</span>
+  <span class="fn">analogWrite</span>(<span class="pin">ledPin</span>, <span class="num">100</span>);
+  <span class="fn">noTone</span>(<span class="num">8</span>);
+} <span class="kw">else</span> {
+  <span class="cmt">// Bright — LED off</span>
+  <span class="fn">digitalWrite</span>(<span class="pin">ledPin</span>, <span class="pin">LOW</span>);
+  <span class="fn">noTone</span>(<span class="num">8</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-amber"><h3 style="font-size:var(--body-size);">else if</h3><p style="font-size:var(--small-size);">Chain multiple conditions. Arduino checks each one in order and runs the FIRST one that's true.</p></div>
+                <div class="card card-sky"><h3 style="font-size:var(--body-size);">3 zones of behaviour</h3><div style="display:flex;flex-direction:column;gap:0.3em;margin-top:0.4em;font-size:var(--small-size);">
+                    <div style="background:#fde68a;border-radius:6px;padding:0.3em 0.6em;">🌑 Dark (&lt;200): Full bright + beep</div>
+                    <div style="background:#fef3c7;border-radius:6px;padding:0.3em 0.6em;">🌥 Medium (&lt;500): Dim glow</div>
+                    <div style="background:#ecfdf5;border-radius:6px;padding:0.3em 0.6em;">☀️ Bright (else): LED off</div>
+                </div></div>
+                <div class="hl-amber" style="font-size:var(--small-size);">This combines Day 4 (buzzer) + Day 5 (LDR) — you're already building multi-sensor systems!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 12: HOMEWORK -->
+<section class="slide bg-amber">
+    <div class="blob" style="width:230px;height:230px;background:#fde68a;top:-60px;right:-60px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-hw reveal">Homework</span>
+        <h2 class="reveal" data-delay="1">Your Homework Challenges</h2>
+        <div class="grid-3 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-amber"><div style="font-size:1.4em;margin-bottom:0.4em;">1</div><h3 style="font-size:var(--body-size);color:var(--accent);">3-Zone Night Lamp</h3><p style="font-size:var(--small-size);">Add a third brightness zone. Use else if to create dim, medium, and full brightness levels based on darkness.</p></div>
+            <div class="card card-sky"><div style="font-size:1.4em;margin-bottom:0.4em;">2</div><h3 style="font-size:var(--body-size);color:var(--accent2);">LDR + Buzzer Alarm</h3><p style="font-size:var(--small-size);">Make a light alarm — when it suddenly gets dark (someone covers the sensor), play a 3-beep alarm sound.</p></div>
+            <div class="card card-green"><div style="font-size:1.4em;margin-bottom:0.4em;">3</div><h3 style="font-size:var(--body-size);color:var(--accent4);">Research Task</h3><p style="font-size:var(--small-size);">Find 3 real products that use light sensors for automation. Describe what they detect and what action they trigger.</p></div>
+        </div>
+        <div class="reveal" data-delay="3" style="margin-top:0.5em;"><div class="hl-yellow" style="font-size:var(--small-size);"><strong>Bonus:</strong> Add a potentiometer to let the user set the threshold manually — turn the knob to decide when the light turns on!</div></div>
+    </div>
+</section>
+
+<!-- SLIDE 13: constrain + map recap -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">New Functions This Week</h2>
+        <div class="grid-2 reveal" data-delay="1" style="margin-top:0.3em;">
+            <div class="card card-amber"><h3 style="font-size:var(--body-size);">map(val, fl, fh, tl, th)</h3><p style="font-size:var(--small-size);">Scale a value from one range to another.<br>map(512, 0, 1023, 0, 255) → 127</p></div>
+            <div class="card card-sky"><h3 style="font-size:var(--body-size);">constrain(val, min, max)</h3><p style="font-size:var(--small-size);">Clamp a value. constrain(300, 0, 255) → 255. Prevents out-of-range errors.</p></div>
+            <div class="card card-purple"><h3 style="font-size:var(--body-size);">analogRead(A0)</h3><p style="font-size:var(--small-size);">Read analog voltage on A0–A5. Returns 0–1023. No pinMode needed for analog input pins.</p></div>
+            <div class="card card-green"><h3 style="font-size:var(--body-size);">else if (condition)</h3><p style="font-size:var(--small-size);">Extend if/else to check multiple conditions. Checked in order — first true match wins.</p></div>
+        </div>
+        <div class="hl-amber reveal" data-delay="2" style="font-size:var(--small-size);margin-top:0.4em;"><strong>You now know:</strong> digitalWrite, analogWrite, digitalRead, analogRead, tone, noTone, map, constrain, Serial.println — that's a huge toolkit!</div>
+    </div>
+</section>
+
+<!-- SLIDE 14: SECTION DIVIDER QUIZ -->
+<section class="slide" style="background:linear-gradient(135deg,#8b5cf6 0%,#a78bfa 50%,#c4b5fd 100%);text-align:center;align-items:center;">
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🧠</span>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Quiz Time!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ede9fe;">Test your Day 5 knowledge!</p>
+    </div>
+</section>
+
+<!-- SLIDE 15: QUIZ -->
+<section class="slide" style="background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);">
+    <div class="slide-content">
+        <span class="section-tag tag-quiz reveal">Quick Quiz</span>
+        <h2 class="reveal" data-delay="1">Test Your Knowledge!</h2>
+        <div class="two-col reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q1. In bright light, an LDR has…?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'correct')">A) Low resistance</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) High resistance</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) No resistance</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 10kΩ always</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q2. What does constrain(300, 0, 255) return?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 300</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) 255</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) 0</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 127</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q3. Why use a 10kΩ resistor with an LDR?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) To protect the LDR from breaking</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) To create a voltage divider for analogRead</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) To make the LDR brighter</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) To increase the light reading</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q4. What value does analogRead return in complete darkness?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 1023</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) 255</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) Close to 0</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 512</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const slides=document.querySelectorAll('.slide'),progressBar=document.getElementById('progressBar'),navDotsContainer=document.getElementById('navDots'),slideCounter=document.getElementById('slideCounter'),total=slides.length;let current=0;
+    slides.forEach((_,i)=>{const dot=document.createElement('button');dot.className='nav-dot'+(i===0?' active':'');dot.setAttribute('aria-label',`Slide ${i+1}`);dot.addEventListener('click',()=>scrollToSlide(i));navDotsContainer.appendChild(dot);});
+    function updateUI(i){current=i;progressBar.style.width=(total>1?(i/(total-1))*100:100)+'%';slideCounter.textContent=`${i+1} / ${total}`;document.querySelectorAll('.nav-dot').forEach((d,j)=>d.classList.toggle('active',j===i));revealSlide(i);}
+    function scrollToSlide(i){slides[i].scrollIntoView({behavior:'smooth'});}
+    const obs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting&&en.intersectionRatio>=0.5)updateUI(Array.from(slides).indexOf(en.target));});},{threshold:0.5});
+    slides.forEach(s=>obs.observe(s));
+    function revealSlide(i){slides[i].querySelectorAll('.reveal,.reveal-right,.reveal-scale,.reveal-up').forEach(el=>el.classList.add('visible'));}
+    document.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();if(current<total-1)scrollToSlide(current+1);}else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();if(current>0)scrollToSlide(current-1);}});
+    window.addEventListener('load',()=>updateUI(0));
+    function answer(btn,result){const g=btn.closest('.card');g.querySelectorAll('.quiz-option').forEach(b=>{b.style.pointerEvents='none';if(b.getAttribute('onclick').includes("'correct'"))b.classList.add('correct');});const f=g.querySelector('.quiz-feedback');if(result==='correct'){btn.classList.add('correct');f.textContent='Correct!';f.style.background='#d1fae5';f.style.color='#065f46';}else{btn.classList.add('wrong');f.textContent='Not quite — check the green answer!';f.style.background='#fee2e2';f.style.color='#991b1b';}f.classList.add('show');}
+</script>
+</body>
+</html>

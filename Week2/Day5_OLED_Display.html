@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 Day 5 — OLED Display</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--navy:#1e3a5f;--blue:#2563eb;--blue-dark:#1d4ed8;--blue-light:#dbeafe;--sky:#0ea5e9;--sky-light:#e0f2fe;--indigo:#6366f1;--indigo-light:#e0e7ff;--green:#10b981;--slate:#1e293b;--slate-mid:#475569;}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;height:100%;}
+body{font-family:'Nunito',sans-serif;background:#f0f4ff;color:var(--slate);}
+.slide{scroll-snap-align:start;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem;position:relative;overflow:hidden;}
+h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+code,pre{font-family:'Fira Code',monospace;}
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--sky));transition:width .4s;z-index:100;}
+#nav-dots{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:100;}
+.dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;}
+.dot.active{background:var(--blue);transform:scale(1.3);}
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.reveal-delay-1{transition-delay:.1s;}.reveal-delay-2{transition-delay:.2s;}.reveal-delay-3{transition-delay:.3s;}
+.slide-title{background:linear-gradient(135deg,#0f172a,#1e3a5f,#2563eb);}
+.slide-title h1{font-size:clamp(2rem,5vw,3.5rem);color:#fff;text-align:center;line-height:1.2;}
+.subtitle{font-size:clamp(1rem,2.5vw,1.4rem);color:#93c5fd;text-align:center;margin-top:1rem;}
+.badge{display:inline-block;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:.4rem 1.2rem;border-radius:999px;font-size:.9rem;font-weight:700;margin-bottom:1.5rem;}
+.wave{position:absolute;bottom:0;left:0;width:100%;opacity:.3;}
+.card{background:#fff;border-radius:1.2rem;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.08);border-left:5px solid var(--blue);}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;width:100%;max-width:900px;}
+.card h3{font-size:1.1rem;color:var(--slate);margin-bottom:.4rem;}
+.card p{font-size:.9rem;color:var(--slate-mid);line-height:1.5;}
+.card-icon{font-size:2rem;margin-bottom:.5rem;}
+.code-block{background:#0f172a;border-radius:1rem;padding:1.5rem;width:100%;max-width:800px;overflow-x:auto;}
+.code-block pre{color:#e2e8f0;font-size:.82rem;line-height:1.7;}
+.kw{color:#7dd3fc;}.fn{color:#86efac;}.cm{color:#64748b;}.str{color:#fde68a;}.num{color:#fb923c;}
+.steps{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:800px;}
+.step{display:flex;align-items:flex-start;gap:1rem;background:#fff;padding:1.2rem 1.5rem;border-radius:1rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.step-num{min-width:2.2rem;height:2.2rem;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;}
+.step-text h4{font-size:1rem;color:var(--slate);margin-bottom:.2rem;}
+.step-text p{font-size:.88rem;color:var(--slate-mid);}
+.wire-table{width:100%;max-width:650px;border-collapse:collapse;}
+.wire-table th{background:var(--blue);color:#fff;padding:.7rem 1rem;text-align:left;font-family:'Baloo 2',sans-serif;}
+.wire-table td{padding:.7rem 1rem;border-bottom:1px solid #e2e8f0;font-size:.9rem;}
+.wire-table tr:nth-child(even) td{background:#f0f4ff;}
+.pin{display:inline-block;padding:.2rem .6rem;border-radius:.4rem;font-family:'Fira Code',monospace;font-size:.82rem;font-weight:600;}
+.pin-vcc{background:#fee2e2;color:#b91c1c;}.pin-gnd{background:#1e293b;color:#fff;}.pin-data{background:#dbeafe;color:#1e40af;}.pin-out{background:#dcfce7;color:#166534;}
+.hw-list{display:flex;flex-direction:column;gap:.8rem;width:100%;max-width:700px;}
+.hw-item{display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem 1.4rem;border-radius:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.hw-badge{padding:.25rem .8rem;border-radius:999px;font-size:.75rem;font-weight:700;white-space:nowrap;}
+.hw-easy{background:#dcfce7;color:#166534;}.hw-medium{background:#fef9c3;color:#854d0e;}.hw-hard{background:#fee2e2;color:#991b1b;}.hw-bonus{background:#ede9fe;color:#5b21b6;}
+.quiz-q{background:#fff;border-radius:1.2rem;padding:1.8rem;width:100%;max-width:750px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.quiz-q h3{font-size:1.15rem;margin-bottom:1.2rem;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+.opt{padding:.9rem 1.2rem;border-radius:.8rem;border:2px solid #e2e8f0;cursor:pointer;font-size:.9rem;font-family:'Nunito',sans-serif;background:#fff;transition:all .2s;text-align:left;}
+.opt:hover{border-color:var(--blue);background:var(--blue-light);}
+.opt.correct{background:#dcfce7;border-color:#16a34a;color:#166534;font-weight:700;}
+.opt.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b;}
+.quiz-nav{display:flex;gap:1rem;margin-top:1.5rem;justify-content:center;}
+.btn{padding:.7rem 1.8rem;border-radius:999px;border:none;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1rem;transition:all .2s;}
+.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:var(--blue-dark);}
+#quiz-score{text-align:center;font-size:1.3rem;font-weight:700;margin-top:1rem;color:var(--blue-dark);}
+.slide-header{text-align:center;margin-bottom:2rem;}
+.slide-header h2{font-size:clamp(1.6rem,3.5vw,2.4rem);color:var(--slate);}
+.slide-header p{color:var(--slate-mid);margin-top:.4rem;}
+.tag{display:inline-block;background:var(--blue-light);color:var(--blue-dark);padding:.2rem .8rem;border-radius:999px;font-size:.78rem;font-weight:700;margin-bottom:.5rem;}
+.oled-mockup{background:#000;border-radius:.8rem;padding:1.2rem;width:260px;height:140px;display:flex;flex-direction:column;justify-content:center;border:3px solid #374151;position:relative;}
+.oled-line{color:#fff;font-family:'Fira Code',monospace;font-size:.9rem;line-height:1.8;}
+.oled-mockup::before{content:'OLED 128×64';position:absolute;top:-1.5rem;left:50%;transform:translateX(-50%);color:var(--slate-mid);font-size:.75rem;white-space:nowrap;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="nav-dots"></div>
+
+<!-- Slide 1 -->
+<div class="slide slide-title">
+  <div class="badge reveal">Week 2 · Day 5</div>
+  <h1 class="reveal reveal-delay-1">OLED Display</h1>
+  <p class="subtitle reveal reveal-delay-2">Tiny screen, massive cool factor — SSD1306 128×64!</p>
+  <div style="display:flex;gap:1.5rem;margin-top:2rem;flex-wrap:wrap;justify-content:center;" class="reveal reveal-delay-3">
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">I2C Protocol</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">Adafruit SSD1306</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">Draw & Print</span>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 100"><path fill="#f0f4ff" d="M0,60 C360,100 1080,0 1440,60 L1440,100 L0,100 Z"/></svg>
+</div>
+
+<!-- Slide 2: OLED vs LCD -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">OLED vs LCD</div>
+    <h2>Why OLED is Awesome</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card" style="border-color:var(--blue);">
+      <div class="card-icon">🖤</div>
+      <h3>True Black</h3>
+      <p>OLED pixels turn <strong>completely off</strong> for black — perfect contrast, no backlight needed</p>
+    </div>
+    <div class="card" style="border-color:var(--sky);">
+      <div class="card-icon">🔌</div>
+      <h3>Only 2 Wires!</h3>
+      <p>Uses I2C protocol — just SDA and SCL pins. LCD needs 6+ wires. HUGE wiring advantage!</p>
+    </div>
+    <div class="card" style="border-color:var(--indigo);">
+      <div class="card-icon">🎨</div>
+      <h3>Draw Anything</h3>
+      <p>Draw pixels, lines, circles, rectangles, bitmaps — full graphics capability!</p>
+    </div>
+    <div class="card" style="border-color:var(--green);">
+      <div class="card-icon">📐</div>
+      <h3>128 × 64 pixels</h3>
+      <p>128 columns × 64 rows of pixels. Small but crisp! I2C address: 0x3C (most common)</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: I2C Wiring -->
+<div class="slide" style="background:linear-gradient(135deg,#f0f4ff,#dbeafe);">
+  <div class="slide-header reveal">
+    <div class="tag">Wiring</div>
+    <h2>I2C — The 2-Wire Protocol</h2>
+  </div>
+  <table class="wire-table reveal reveal-delay-1">
+    <tr><th>OLED Pin</th><th>Arduino Uno</th><th>Notes</th></tr>
+    <tr><td><span class="pin pin-vcc">VCC</span></td><td>3.3V or 5V</td><td>Check your module's voltage!</td></tr>
+    <tr><td><span class="pin pin-gnd">GND</span></td><td>GND</td><td>Common ground</td></tr>
+    <tr><td><span class="pin pin-data">SDA</span></td><td>A4 (Pin 18)</td><td>I2C Data line</td></tr>
+    <tr><td><span class="pin pin-out">SCL</span></td><td>A5 (Pin 19)</td><td>I2C Clock line</td></tr>
+  </table>
+  <div class="card reveal reveal-delay-2" style="max-width:650px;margin-top:1.5rem;border-color:var(--sky);">
+    <p>💡 <strong>I2C (eye-squared-C)</strong> is a 2-wire bus where multiple devices share SDA+SCL. Each device has a unique address (OLED = 0x3C). You can chain multiple I2C devices on the same 2 wires!</p>
+  </div>
+</div>
+
+<!-- Slide 4: Libraries -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Setup</div>
+    <h2>Installing the Libraries</h2>
+  </div>
+  <div class="steps reveal reveal-delay-1">
+    <div class="step"><div class="step-num">1</div><div class="step-text"><h4>Adafruit SSD1306</h4><p>Arduino IDE → Sketch → Include Library → Manage Libraries → Search "SSD1306" → Install "Adafruit SSD1306"</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text"><h4>Adafruit GFX Library</h4><p>Also install "Adafruit GFX Library" — it's the graphics engine that SSD1306 depends on</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text"><h4>Wire Library</h4><p>Already built into Arduino — handles I2C communication automatically</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text"><h4>Tinkercad Note</h4><p>Tinkercad doesn't support OLED natively — use the Arduino IDE with a real OLED, or use Wokwi.com (free online simulator with OLED support!)</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 5: Core Code -->
+<div class="slide" style="background:linear-gradient(135deg,#f0f4ff,#dbeafe);">
+  <div class="slide-header reveal">
+    <div class="tag">Code</div>
+    <h2>Hello World on OLED</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1">
+    <pre><span class="kw">#include</span> <span class="str">&lt;Wire.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;Adafruit_GFX.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;Adafruit_SSD1306.h&gt;</span>
+
+<span class="kw">#define</span> SCREEN_WIDTH <span class="num">128</span>
+<span class="kw">#define</span> SCREEN_HEIGHT <span class="num">64</span>
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, <span class="num">-1</span>);
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  display.<span class="fn">begin</span>(SSD1306_SWITCHCAPVCC, <span class="num">0x3C</span>);
+  display.<span class="fn">clearDisplay</span>();
+  display.<span class="fn">setTextSize</span>(<span class="num">2</span>);          <span class="cm">// Font size (1, 2, 3...)</span>
+  display.<span class="fn">setTextColor</span>(WHITE);
+  display.<span class="fn">setCursor</span>(<span class="num">10</span>, <span class="num">20</span>);       <span class="cm">// x, y pixel position</span>
+  display.<span class="fn">println</span>(<span class="str">"Hello!"</span>);
+  display.<span class="fn">display</span>();               <span class="cm">// Send buffer to screen!</span>
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() { }</pre>
+  </div>
+  <div class="card reveal reveal-delay-2" style="max-width:700px;margin-top:1rem;border-color:var(--blue);">
+    <p>⚠️ <strong>Always call display.display()</strong> after drawing! All drawing commands write to a buffer in RAM. display() sends the buffer to the screen.</p>
+  </div>
+</div>
+
+<!-- Slide 6: Drawing -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Graphics</div>
+    <h2>Drawing Shapes & Graphics</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1" style="font-size:.78rem;">
+    <pre><span class="cm">// Draw a rectangle</span>
+display.<span class="fn">drawRect</span>(<span class="num">10</span>, <span class="num">10</span>, <span class="num">50</span>, <span class="num">30</span>, WHITE);  <span class="cm">// x,y,w,h,color</span>
+display.<span class="fn">fillRect</span>(<span class="num">70</span>, <span class="num">10</span>, <span class="num">50</span>, <span class="num">30</span>, WHITE);  <span class="cm">// Filled!</span>
+
+<span class="cm">// Draw a circle</span>
+display.<span class="fn">drawCircle</span>(<span class="num">64</span>, <span class="num">32</span>, <span class="num">20</span>, WHITE);   <span class="cm">// x,y,radius,color</span>
+display.<span class="fn">fillCircle</span>(<span class="num">20</span>, <span class="num">50</span>, <span class="num">10</span>, WHITE);
+
+<span class="cm">// Draw a line</span>
+display.<span class="fn">drawLine</span>(<span class="num">0</span>, <span class="num">0</span>, <span class="num">127</span>, <span class="num">63</span>, WHITE); <span class="cm">// x0,y0,x1,y1</span>
+
+<span class="cm">// Draw a progress bar</span>
+<span class="kw">int</span> progress = <span class="num">75</span>;  <span class="cm">// 0–100%</span>
+display.<span class="fn">drawRect</span>(<span class="num">0</span>, <span class="num">54</span>, <span class="num">128</span>, <span class="num">10</span>, WHITE);
+display.<span class="fn">fillRect</span>(<span class="num">0</span>, <span class="num">54</span>, progress * <span class="num">128</span> / <span class="num">100</span>, <span class="num">10</span>, WHITE);
+
+display.<span class="fn">display</span>();  <span class="cm">// Don't forget!</span></pre>
+  </div>
+</div>
+
+<!-- Slide 7: Project - Sensor Dashboard -->
+<div class="slide" style="background:linear-gradient(135deg,#f0f4ff,#dbeafe);">
+  <div class="slide-header reveal">
+    <div class="tag">Project</div>
+    <h2>Sensor Dashboard on OLED</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card">
+      <div class="card-icon">📡</div><h3>What to Display</h3>
+      <p>Show potentiometer value as a progress bar + number, and a button status indicator</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔄</div><h3>Update Loop</h3>
+      <p>clearDisplay() → draw all elements → display() every 100ms for smooth updates</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎨</div><h3>Layout Tips</h3>
+      <p>Top area: title text (size 1). Middle: big value (size 2–3). Bottom: progress bar. Keep it clean!</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div><h3>Performance</h3>
+      <p>Full screen update takes ~20ms. For fast animations, only redraw changed areas using fillRect to erase old values</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8: Homework -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Homework</div>
+    <h2>Take It Further!</h2>
+  </div>
+  <div class="hw-list reveal reveal-delay-1">
+    <div class="hw-item"><span class="hw-badge hw-easy">Easy</span><p>Display a countdown from 10 to 0, updating every second with a large font (size 3)</p></div>
+    <div class="hw-item"><span class="hw-badge hw-medium">Medium</span><p>Create an animated bouncing ball — a circle that bounces off the edges of the 128×64 display</p></div>
+    <div class="hw-item"><span class="hw-badge hw-hard">Hard</span><p>Combine OLED + DHT11 for a weather dashboard: temperature gauge bar + humidity bar + comfort icon</p></div>
+    <div class="hw-item"><span class="hw-badge hw-bonus">Bonus</span><p>Display custom bitmap icons (8×8 pixel art) using progmem arrays and display.drawBitmap()</p></div>
+  </div>
+</div>
+
+<!-- Slide 9: Quiz -->
+<div class="slide" style="background:linear-gradient(135deg,#f0f4ff,#dbeafe);">
+  <div class="slide-header reveal">
+    <div class="tag">Quiz Time!</div>
+    <h2>Test Your Knowledge</h2>
+  </div>
+  <div id="quiz-container" class="reveal reveal-delay-1">
+    <div class="quiz-q" id="q-display"><h3 id="q-text"></h3><div class="options" id="q-options"></div></div>
+    <div class="quiz-nav"><button class="btn btn-blue" onclick="nextQ()">Next Question →</button></div>
+    <div id="quiz-score"></div>
+  </div>
+</div>
+
+<!-- Slide 10: Summary -->
+<div class="slide" style="background:linear-gradient(135deg,#0f172a,#1e3a5f,#2563eb);">
+  <div class="slide-header reveal" style="color:#fff;">
+    <div class="tag" style="background:rgba(255,255,255,.2);color:#fff;">Day 5 Complete!</div>
+    <h2 style="color:#fff;">What You Learned Today</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1" style="max-width:800px;">
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🖥️</div><h3 style="color:#93c5fd;">SSD1306 OLED</h3><p style="color:#bfdbfe;">128×64 pixel display using I2C — only 2 signal wires (SDA + SCL)</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">📡</div><h3 style="color:#93c5fd;">I2C Protocol</h3><p style="color:#bfdbfe;">2-wire bus, multiple devices share SDA/SCL, each at a unique address</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🎨</div><h3 style="color:#93c5fd;">Drawing Functions</h3><p style="color:#bfdbfe;">print, drawRect, fillRect, drawCircle, drawLine — full graphics toolkit</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">💾</div><h3 style="color:#93c5fd;">Buffer System</h3><p style="color:#bfdbfe;">Draw to buffer → call display.display() to push to screen</p>
+    </div>
+  </div>
+  <p class="reveal reveal-delay-2" style="color:#93c5fd;margin-top:1.5rem;font-size:1.1rem;">Tomorrow: Bluetooth Control — phone-controlled Arduino! 📱</p>
+</div>
+
+<script>
+const questions=[
+  {q:"How many signal wires does I2C need?",opts:["1","2","4","6"],ans:1},
+  {q:"What is the default I2C address of most SSD1306 OLED displays?",opts:["0x27","0x3C","0x40","0xFF"],ans:1},
+  {q:"After drawing shapes, what function must you call to show them?",opts:["display.show()","display.flush()","display.display()","display.render()"],ans:2},
+  {q:"What is the resolution of the SSD1306 OLED?",opts:["64×32","128×64","256×128","16×2"],ans:1},
+];
+let qIdx=0,score=0,answered=false;
+function showQ(){
+  if(qIdx>=questions.length){document.getElementById('q-display').style.display='none';document.getElementById('quiz-score').innerHTML=`🎉 You scored ${score}/${questions.length}!`;return;}
+  const q=questions[qIdx];document.getElementById('q-text').textContent=`Q${qIdx+1}: ${q.q}`;
+  const opts=document.getElementById('q-options');opts.innerHTML='';answered=false;
+  q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>{if(answered)return;answered=true;b.classList.add(i===q.ans?'correct':'wrong');if(i===q.ans)score++;};opts.appendChild(b);});
+}
+function nextQ(){qIdx++;showQ();}
+showQ();
+const slides=document.querySelectorAll('.slide');
+const dotsEl=document.getElementById('nav-dots');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>slides[i].scrollIntoView({behavior:'smooth'});dotsEl.appendChild(d);});
+const dots=document.querySelectorAll('.dot');
+const prog=document.getElementById('progress');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const i=[...slides].indexOf(e.target);dots.forEach((d,j)=>d.classList.toggle('active',i===j));prog.style.width=`${((i+1)/slides.length)*100}%`;e.target.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}});},{threshold:0.5});
+slides.forEach(s=>obs.observe(s));
+document.addEventListener('keydown',e=>{const active=[...slides].findIndex(s=>s.getBoundingClientRect().top>-10&&s.getBoundingClientRect().top<window.innerHeight/2);if(e.key==='ArrowDown'||e.key===' ')slides[Math.min(active+1,slides.length-1)].scrollIntoView({behavior:'smooth'});if(e.key==='ArrowUp')slides[Math.max(active-1,0)].scrollIntoView({behavior:'smooth'});});
+</script>
+</body>
+</html>

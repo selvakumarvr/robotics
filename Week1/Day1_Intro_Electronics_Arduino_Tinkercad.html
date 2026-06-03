@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 Day 1 — Intro to Electronics, Arduino & Tinkercad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           CSS CUSTOM PROPERTIES — LIGHT KIDS THEME
+           ======================================== */
+        :root {
+            --bg-primary:     #f0f4ff;
+            --bg-secondary:   #e8efff;
+            --bg-card:        #ffffff;
+            --bg-card-hover:  #f5f8ff;
+            --text-primary:   #1e1b4b;
+            --text-secondary: #4338ca;
+            --text-muted:     #94a3b8;
+            --accent:         #4f46e5;   /* indigo */
+            --accent-light:   #818cf8;
+            --accent-glow:    rgba(79,70,229,0.18);
+            --accent2:        #f97316;   /* orange */
+            --accent2-glow:   rgba(249,115,22,0.18);
+            --accent3:        #10b981;   /* green */
+            --accent4:        #ec4899;   /* pink */
+            --accent5:        #8b5cf6;   /* purple */
+            --warning:        #f59e0b;
+            --danger:         #ef4444;
+            --font-display:   'Baloo 2', cursive;
+            --font-body:      'Nunito', sans-serif;
+            --font-code:      'Fira Code', monospace;
+            --title-size:     clamp(1.8rem, 5vw, 3.6rem);
+            --h2-size:        clamp(1.3rem, 3.5vw, 2.2rem);
+            --h3-size:        clamp(1rem, 2.5vw, 1.4rem);
+            --body-size:      clamp(0.78rem, 1.5vw, 1.05rem);
+            --small-size:     clamp(0.68rem, 1.1vw, 0.88rem);
+            --code-size:      clamp(0.65rem, 1.1vw, 0.88rem);
+            --slide-padding:  clamp(1.5rem, 4vw, 4rem);
+            --content-gap:    clamp(0.8rem, 2vw, 1.6rem);
+            --elem-gap:       clamp(0.3rem, 1vw, 0.7rem);
+            --radius:         16px;
+            --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ========================================
+           BASE
+           ======================================== */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            height: 100%;
+            line-height: 1.5;
+        }
+
+        /* ========================================
+           SLIDES
+           ======================================== */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            padding: var(--slide-padding);
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+            gap: var(--content-gap);
+        }
+
+        /* ========================================
+           PROGRESS BAR
+           ======================================== */
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent4), var(--accent2));
+            z-index: 1000;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        /* ========================================
+           NAV DOTS
+           ======================================== */
+        .nav-dots {
+            position: fixed;
+            right: clamp(0.5rem, 1.5vw, 1.5rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(79,70,229,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none; padding: 0;
+        }
+
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+            transform: scale(1.5);
+        }
+
+        .nav-dot:hover { background: var(--accent-light); }
+
+        /* ========================================
+           SLIDE COUNTER
+           ======================================== */
+        .slide-counter {
+            position: fixed;
+            bottom: clamp(0.5rem, 2vw, 1.2rem);
+            right: clamp(0.5rem, 2vw, 1.2rem);
+            font-family: var(--font-code);
+            font-size: var(--small-size);
+            color: var(--text-muted);
+            z-index: 100;
+            background: rgba(255,255,255,0.8);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        /* ========================================
+           TYPOGRAPHY
+           ======================================== */
+        h1 {
+            font-family: var(--font-display);
+            font-size: var(--title-size);
+            font-weight: 800;
+            line-height: 1.15;
+            color: var(--text-primary);
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: var(--h2-size);
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--accent);
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: var(--h3-size);
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        p, li {
+            font-size: var(--body-size);
+            line-height: 1.65;
+            color: #334155;
+        }
+
+        .accent  { color: var(--accent); }
+        .accent2 { color: var(--accent2); }
+        .accent3 { color: var(--accent3); }
+        .accent4 { color: var(--accent4); }
+        .accent5 { color: var(--accent5); }
+        strong   { font-weight: 700; }
+
+        /* ========================================
+           BACKGROUNDS
+           ======================================== */
+        .bg-dots {
+            background-image: radial-gradient(rgba(79,70,229,0.08) 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+        }
+
+        .bg-white  { background: #ffffff; }
+        .bg-indigo { background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 50%, #c7d2fe 100%); }
+        .bg-orange { background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%); }
+        .bg-green  { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%); }
+        .bg-pink   { background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%); }
+        .bg-teal   { background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 50%, #99f6e4 100%); }
+
+        /* ========================================
+           CARDS
+           ======================================== */
+        .card {
+            background: #ffffff;
+            border-radius: var(--radius);
+            padding: clamp(0.8rem, 2vw, 1.4rem);
+            border: 2px solid rgba(79,70,229,0.1);
+            box-shadow: 0 2px 12px rgba(79,70,229,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(79,70,229,0.25);
+            box-shadow: 0 6px 24px rgba(79,70,229,0.12);
+            transform: translateY(-2px);
+        }
+
+        .card-indigo  { border-left: 4px solid var(--accent);  background: linear-gradient(135deg,#fff 80%,#ede9fe); }
+        .card-orange  { border-left: 4px solid var(--accent2); background: linear-gradient(135deg,#fff 80%,#fff7ed); }
+        .card-green   { border-left: 4px solid var(--accent3); background: linear-gradient(135deg,#fff 80%,#ecfdf5); }
+        .card-pink    { border-left: 4px solid var(--accent4); background: linear-gradient(135deg,#fff 80%,#fdf2f8); }
+        .card-purple  { border-left: 4px solid var(--accent5); background: linear-gradient(135deg,#fff 80%,#ede9fe); }
+
+        /* ========================================
+           LAYOUT HELPERS
+           ======================================== */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--content-gap);
+            align-items: start;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--elem-gap);
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--elem-gap);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--elem-gap);
+        }
+
+        @media (max-width: 768px) {
+            .two-col, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* ========================================
+           ICON CIRCLES
+           ======================================== */
+        .icon-circle {
+            width: clamp(36px, 5vw, 52px);
+            height: clamp(36px, 5vw, 52px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1rem, 2.5vw, 1.6rem);
+            flex-shrink: 0;
+        }
+
+        .icon-indigo { background: #ede9fe; }
+        .icon-orange { background: #fff7ed; }
+        .icon-green  { background: #ecfdf5; }
+        .icon-pink   { background: #fdf2f8; }
+        .icon-purple { background: #f3e8ff; }
+
+        /* ========================================
+           BADGE / PILL
+           ======================================== */
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: var(--small-size);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .badge-indigo { background: #ede9fe; color: var(--accent); }
+        .badge-orange { background: #fff7ed; color: var(--accent2); }
+        .badge-green  { background: #ecfdf5; color: var(--accent3); }
+        .badge-pink   { background: #fdf2f8; color: var(--accent4); }
+
+        /* ========================================
+           SECTION DIVIDER
+           ======================================== */
+        .section-label {
+            font-family: var(--font-code);
+            font-size: var(--small-size);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .divider {
+            height: 3px;
+            width: 60px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent4));
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.3rem);
+            color: #475569;
+            font-weight: 500;
+        }
+
+        /* ========================================
+           CODE BLOCK
+           ======================================== */
+        .code-block {
+            background: #1e1b4b;
+            border-radius: 12px;
+            padding: clamp(0.8rem, 2vw, 1.4rem);
+            font-family: var(--font-code);
+            font-size: var(--code-size);
+            color: #c7d2fe;
+            overflow-x: auto;
+            border: 2px solid rgba(129,140,248,0.3);
+            box-shadow: 0 4px 16px rgba(79,70,229,0.15);
+        }
+
+        .code-block .kw  { color: #f0abfc; }
+        .code-block .fn  { color: #67e8f9; }
+        .code-block .num { color: #fcd34d; }
+        .code-block .cmt { color: #6ee7b7; font-style: italic; }
+        .code-block .str { color: #f9a8d4; }
+        .code-block .pin { color: #fb923c; }
+        .code-block pre  { white-space: pre; line-height: 1.8; }
+
+        /* ========================================
+           BULLET LIST
+           ======================================== */
+        .bullet-list { list-style: none; padding: 0; }
+        .bullet-list li {
+            padding: clamp(0.2rem, 0.6vw, 0.4rem) 0;
+            padding-left: 1.4em;
+            position: relative;
+            font-size: var(--body-size);
+        }
+        .bullet-list li::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .check-list { list-style: none; padding: 0; }
+        .check-list li {
+            padding: clamp(0.25rem, 0.6vw, 0.5rem) 0;
+            padding-left: 1.8em;
+            position: relative;
+            font-size: var(--body-size);
+        }
+        .check-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent3);
+            font-weight: 900;
+        }
+
+        /* ========================================
+           STEP BLOCKS
+           ======================================== */
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(0.5rem, 1.5vw, 1rem);
+            padding: clamp(0.5rem, 1.2vw, 0.9rem);
+            background: #ffffff;
+            border-radius: 12px;
+            border: 2px solid rgba(79,70,229,0.1);
+        }
+
+        .step-num {
+            min-width: clamp(28px, 3.5vw, 40px);
+            height: clamp(28px, 3.5vw, 40px);
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: var(--body-size);
+            flex-shrink: 0;
+            font-family: var(--font-display);
+        }
+
+        /* ========================================
+           QUIZ STYLES
+           ======================================== */
+        .quiz-option {
+            padding: clamp(0.5rem, 1.2vw, 0.85rem) clamp(0.8rem, 2vw, 1.2rem);
+            border-radius: 10px;
+            background: #fff;
+            border: 2px solid rgba(79,70,229,0.12);
+            cursor: pointer;
+            font-size: var(--body-size);
+            font-weight: 600;
+            color: #334155;
+            transition: all 0.2s ease;
+            text-align: left;
+            font-family: var(--font-body);
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent);
+            background: #ede9fe;
+            transform: translateX(4px);
+        }
+
+        .quiz-option.correct {
+            background: #d1fae5;
+            border-color: var(--accent3);
+            color: #065f46;
+        }
+
+        .quiz-option.wrong {
+            background: #fee2e2;
+            border-color: var(--danger);
+            color: #991b1b;
+        }
+
+        .quiz-feedback {
+            font-size: var(--body-size);
+            font-weight: 700;
+            padding: 0.5em 1em;
+            border-radius: 10px;
+            display: none;
+            margin-top: 0.5em;
+        }
+
+        .quiz-feedback.show { display: block; }
+
+        /* ========================================
+           REVEAL ANIMATIONS
+           ======================================== */
+        .reveal, .reveal-right, .reveal-scale, .reveal-up {
+            opacity: 0;
+            transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+        }
+
+        .reveal        { transform: translateY(24px); }
+        .reveal-right  { transform: translateX(24px); }
+        .reveal-scale  { transform: scale(0.92); }
+        .reveal-up     { transform: translateY(-20px); }
+
+        .reveal.visible, .reveal-right.visible,
+        .reveal-scale.visible, .reveal-up.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* stagger delays */
+        [data-delay="1"] { transition-delay: 0.1s; }
+        [data-delay="2"] { transition-delay: 0.2s; }
+        [data-delay="3"] { transition-delay: 0.3s; }
+        [data-delay="4"] { transition-delay: 0.4s; }
+        [data-delay="5"] { transition-delay: 0.5s; }
+        [data-delay="6"] { transition-delay: 0.6s; }
+
+        /* ========================================
+           BIG EMOJI
+           ======================================== */
+        .big-emoji {
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 1;
+            display: block;
+            text-align: center;
+            filter: drop-shadow(0 4px 12px rgba(79,70,229,0.15));
+        }
+
+        /* ========================================
+           HIGHLIGHT BOX
+           ======================================== */
+        .highlight-box {
+            border-radius: 14px;
+            padding: clamp(0.7rem, 1.5vw, 1.2rem);
+            font-size: var(--body-size);
+            font-weight: 600;
+        }
+
+        .hl-indigo { background: #ede9fe; border-left: 4px solid var(--accent);  color: #3730a3; }
+        .hl-orange { background: #fff7ed; border-left: 4px solid var(--accent2); color: #9a3412; }
+        .hl-green  { background: #ecfdf5; border-left: 4px solid var(--accent3); color: #065f46; }
+        .hl-pink   { background: #fdf2f8; border-left: 4px solid var(--accent4); color: #9d174d; }
+        .hl-yellow { background: #fffbeb; border-left: 4px solid var(--warning);  color: #92400e; }
+
+        /* ========================================
+           FORMULA
+           ======================================== */
+        .formula {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        /* ========================================
+           HOMEWORK / QUIZ HEADER TAGS
+           ======================================== */
+        .section-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4em;
+            padding: 0.3em 0.9em;
+            border-radius: 30px;
+            font-size: var(--small-size);
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 0.4em;
+        }
+
+        .tag-hw    { background: #fff7ed; color: var(--accent2); border: 2px solid #fed7aa; }
+        .tag-quiz  { background: #ede9fe; color: var(--accent);  border: 2px solid #c4b5fd; }
+        .tag-tip   { background: #ecfdf5; color: var(--accent3); border: 2px solid #6ee7b7; }
+
+        /* ========================================
+           COMPONENT VISUAL
+           ======================================== */
+        .component-box {
+            background: #fff;
+            border-radius: 12px;
+            border: 2px solid rgba(79,70,229,0.15);
+            padding: clamp(0.5rem, 1.5vw, 1rem);
+            text-align: center;
+            transition: all 0.25s ease;
+        }
+
+        .component-box:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 20px rgba(79,70,229,0.12);
+            transform: translateY(-3px);
+        }
+
+        .component-icon {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            line-height: 1;
+            margin-bottom: 0.3em;
+        }
+
+        .component-name {
+            font-weight: 800;
+            font-size: var(--small-size);
+            color: var(--text-primary);
+            font-family: var(--font-display);
+        }
+
+        .component-desc {
+            font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+            color: #64748b;
+            margin-top: 0.2em;
+        }
+
+        /* ========================================
+           DECORATIVE BLOBS
+           ======================================== */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Nav dots -->
+<div class="nav-dots" id="navDots"></div>
+
+<!-- Slide counter -->
+<div class="slide-counter" id="slideCounter">1 / 14</div>
+
+
+<!-- ============================================
+     SLIDE 1: TITLE
+     ============================================ -->
+<section class="slide bg-indigo" id="slide-0">
+    <div class="blob" style="width:350px;height:350px;background:#818cf8;top:-80px;right:-80px;"></div>
+    <div class="blob" style="width:250px;height:250px;background:#f9a8d4;bottom:-60px;left:-60px;"></div>
+    <div class="slide-content" style="align-items:flex-start;">
+        <div class="reveal-up">
+            <span class="section-tag tag-quiz">Week 1 · Day 1</span>
+        </div>
+        <h1 class="reveal" style="margin-top:0.2em;">
+            Hello, <span class="accent">Electronics</span>!<br>
+            Meet <span class="accent2">Arduino</span> &amp; <span class="accent5">Tinkercad</span>
+        </h1>
+        <p class="subtitle reveal" data-delay="2">Your first step into the world of making things with technology — no experience needed!</p>
+        <div class="divider reveal" data-delay="3" style="margin-top:0.8em;"></div>
+        <div class="reveal" data-delay="4" style="display:flex;gap:0.8em;flex-wrap:wrap;margin-top:0.5em;">
+            <span class="badge badge-indigo">Electronics Basics</span>
+            <span class="badge badge-orange">What is Arduino?</span>
+            <span class="badge badge-green">Tinkercad Setup</span>
+            <span class="badge badge-pink">First Project!</span>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 2: TODAY'S AGENDA
+     ============================================ -->
+<section class="slide bg-dots" id="slide-1" style="background-color:#f0f4ff;">
+    <div class="slide-content">
+        <span class="section-label reveal">Today's Agenda</span>
+        <h2 class="reveal">What We'll Do Today</h2>
+        <div class="grid-2 reveal" data-delay="1" style="margin-top:0.3em;">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Intro to Electronics</h3>
+                    <p style="font-size:var(--small-size);">What is electricity? Key concepts and components</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent2);">2</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">What is a Microcontroller?</h3>
+                    <p style="font-size:var(--small-size);">Tiny brains in everyday devices</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent5);">3</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Meet the Arduino</h3>
+                    <p style="font-size:var(--small-size);">Board tour — what's all that stuff on it?</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent3);">4</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Tinkercad Setup</h3>
+                    <p style="font-size:var(--small-size);">Create account &amp; tour the simulator</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent4);">5</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">First Project: LED Blink!</h3>
+                    <p style="font-size:var(--small-size);">Wire a circuit and write your first code</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:#f59e0b;">6</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Homework + Quiz</h3>
+                    <p style="font-size:var(--small-size);">Challenge yourself before next class!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 3: SECTION DIVIDER — ELECTRONICS
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#6366f1 0%,#818cf8 50%,#a5b4fc 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:300px;height:300px;background:#c7d2fe;top:10%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">⚡</span>
+        <p class="section-label reveal" data-delay="1" style="color:#c7d2fe;margin-top:0.5em;">Part 1</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Electronics<br>Basics</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#e0e7ff;margin-top:0.5em;">Understanding electricity, circuits, and key components</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#c7d2fe);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 4: WHAT IS ELECTRONICS?
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#f0f4ff;" id="slide-3">
+    <div class="slide-content">
+        <h2 class="reveal">What is Electronics?</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div>
+                <p class="reveal" data-delay="1" style="margin-bottom:0.6em;">
+                    Electronics is the art of <strong class="accent">controlling the flow of electricity</strong> to make things happen — lights blink, music plays, robots move!
+                </p>
+                <p class="reveal" data-delay="2" style="margin-bottom:0.6em;">
+                    Everything around you uses electronics: your phone, your TV, your microwave — they all use tiny circuits to do their jobs.
+                </p>
+                <div class="hl-indigo reveal" data-delay="3">
+                    <strong>Think of it like water pipes:</strong> Electricity flows through wires like water through pipes. Components control how much flows and where it goes.
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.6em;">
+                <div class="component-box">
+                    <div class="component-icon">📱</div>
+                    <div class="component-name">Your Phone</div>
+                    <div class="component-desc">Billions of tiny electronic switches</div>
+                </div>
+                <div class="component-box">
+                    <div class="component-icon">🎮</div>
+                    <div class="component-name">Game Controller</div>
+                    <div class="component-desc">Buttons, rumble motors, wireless chips</div>
+                </div>
+                <div class="component-box">
+                    <div class="component-icon">🚗</div>
+                    <div class="component-name">Smart Car</div>
+                    <div class="component-desc">Sensors, motors, microcontrollers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 5: KEY COMPONENTS
+     ============================================ -->
+<section class="slide bg-white" id="slide-4">
+    <div class="slide-content">
+        <h2 class="reveal">Key Components You'll Use</h2>
+        <div class="grid-4 reveal" data-delay="1" style="margin-top:0.3em;">
+            <div class="component-box card-indigo">
+                <div class="component-icon">💡</div>
+                <div class="component-name">LED</div>
+                <div class="component-desc">Light Emitting Diode — it glows when electricity passes through it</div>
+            </div>
+            <div class="component-box card-orange">
+                <div class="component-icon">🔴</div>
+                <div class="component-name">Resistor</div>
+                <div class="component-desc">Slows down current to protect other parts from burning out</div>
+            </div>
+            <div class="component-box card-green">
+                <div class="component-icon">🟦</div>
+                <div class="component-name">Breadboard</div>
+                <div class="component-desc">A reusable board for building circuits without soldering</div>
+            </div>
+            <div class="component-box card-pink">
+                <div class="component-icon">🔌</div>
+                <div class="component-name">Jumper Wires</div>
+                <div class="component-desc">Coloured cables that connect components together</div>
+            </div>
+        </div>
+        <div class="two-col reveal" data-delay="2" style="margin-top:0.5em;">
+            <div class="hl-orange">
+                <strong>LED legs:</strong> Long leg (+) = Anode (power), Short leg (−) = Cathode (ground). Always needs a resistor!
+            </div>
+            <div class="hl-yellow">
+                <strong>Breadboard rows:</strong> Holes in the same row are connected. Power rails run along the sides.
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 6: SECTION DIVIDER — MICROCONTROLLER
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fdba74 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:280px;height:280px;background:#fed7aa;bottom:5%;left:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🧠</span>
+        <p class="section-label reveal" data-delay="1" style="color:#fff7ed;margin-top:0.5em;">Part 2</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">What is a<br>Microcontroller?</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ffedd5;margin-top:0.5em;">The tiny brain that reads sensors and controls the world</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#fed7aa);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 7: MICROCONTROLLER EXPLAINED
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#fff7ed;" id="slide-6">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent2);">A Tiny Computer — On One Chip!</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div>
+                <p class="reveal" data-delay="1" style="margin-bottom:0.6em;">
+                    A <strong class="accent2">microcontroller</strong> is a small computer on a single chip. It has a processor, memory, and programmable pins — all in one tiny package.
+                </p>
+                <div class="reveal" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                    <div class="step">
+                        <div class="step-num" style="background:var(--accent2);">👀</div>
+                        <div>
+                            <h3 style="font-size:var(--small-size);">Read Inputs</h3>
+                            <p style="font-size:var(--small-size);">Sensors: buttons, temperature, light, distance</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num" style="background:var(--accent2);">⚙️</div>
+                        <div>
+                            <h3 style="font-size:var(--small-size);">Process Information</h3>
+                            <p style="font-size:var(--small-size);">Run your code to make decisions</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num" style="background:var(--accent2);">🔊</div>
+                        <div>
+                            <h3 style="font-size:var(--small-size);">Control Outputs</h3>
+                            <p style="font-size:var(--small-size);">LEDs, motors, buzzers, displays, servos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2">
+                <div class="card" style="text-align:center;padding:1.2em;">
+                    <p style="font-size:clamp(3rem,7vw,5rem);line-height:1;">🤖</p>
+                    <h3 style="color:var(--accent2);margin-top:0.3em;">Found in everyday things!</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4em;margin-top:0.6em;font-size:var(--small-size);">
+                        <span class="badge badge-orange">Traffic Lights</span>
+                        <span class="badge badge-orange">Washing Machines</span>
+                        <span class="badge badge-orange">Microwaves</span>
+                        <span class="badge badge-orange">TV Remotes</span>
+                        <span class="badge badge-orange">Smart Watches</span>
+                        <span class="badge badge-orange">Cars</span>
+                    </div>
+                </div>
+                <div class="hl-orange reveal" data-delay="3" style="margin-top:0.6em;font-size:var(--small-size);">
+                    <strong>Arduino uses the ATmega328P</strong> microcontroller chip — an 8-bit processor running at 16 MHz. Slow compared to a phone, but perfect for blinking LEDs!
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 8: MEET THE ARDUINO UNO
+     ============================================ -->
+<section class="slide bg-white" id="slide-7">
+    <div class="slide-content">
+        <h2 class="reveal">Meet the Arduino Uno</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-indigo">
+                    <div style="display:flex;align-items:center;gap:0.6em;">
+                        <div class="icon-circle icon-indigo">📌</div>
+                        <div>
+                            <h3 style="font-size:var(--small-size);">14 Digital Pins</h3>
+                            <p style="font-size:var(--small-size);">Read/write HIGH or LOW (on/off). Pins 0-13.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-orange">
+                    <div style="display:flex;align-items:center;gap:0.6em;">
+                        <div class="icon-circle icon-orange">〰️</div>
+                        <div>
+                            <h3 style="font-size:var(--small-size);">6 Analog Pins (A0–A5)</h3>
+                            <p style="font-size:var(--small-size);">Read values between 0 and 1023 from sensors.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-green">
+                    <div style="display:flex;align-items:center;gap:0.6em;">
+                        <div class="icon-circle icon-green">⚡</div>
+                        <div>
+                            <h3 style="font-size:var(--small-size);">Power Pins</h3>
+                            <p style="font-size:var(--small-size);">5V, 3.3V, and GND (ground) to power your circuits.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-purple">
+                    <div style="display:flex;align-items:center;gap:0.6em;">
+                        <div class="icon-circle icon-purple">💾</div>
+                        <div>
+                            <h3 style="font-size:var(--small-size);">USB Port</h3>
+                            <p style="font-size:var(--small-size);">Upload your code and power the board from your computer.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="text-align:center;">
+                <div style="background:#f0f4ff;border-radius:16px;padding:1.5em;border:3px dashed rgba(79,70,229,0.2);">
+                    <p style="font-size:clamp(5rem,12vw,8rem);line-height:1;">🔵</p>
+                    <p style="font-size:var(--small-size);color:#64748b;margin-top:0.4em;">Arduino Uno R3 — the most popular board for beginners</p>
+                    <div class="hl-indigo" style="margin-top:0.8em;font-size:var(--small-size);">
+                        <strong>Built-in LED on Pin 13!</strong> You can blink it without any extra wires.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 9: SECTION DIVIDER — TINKERCAD
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#10b981 0%,#34d399 50%,#6ee7b7 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:280px;height:280px;background:#a7f3d0;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">💻</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ecfdf5;margin-top:0.5em;">Part 3</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Setting Up<br>Tinkercad</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#d1fae5;margin-top:0.5em;">Simulate circuits online — no hardware needed to start!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#a7f3d0);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 10: TINKERCAD SETUP STEPS
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#ecfdf5;" id="slide-9">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent3);">Get Tinkercad Ready — 5 Steps</h2>
+        <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;margin-top:0.3em;">
+            <div class="step">
+                <div class="step-num" style="background:var(--accent3);">1</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Go to <span class="accent3">tinkercad.com</span></h3>
+                    <p style="font-size:var(--small-size);">Open any browser — Chrome, Firefox, or Edge. No download needed!</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent3);">2</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Click "Join Now" or "Sign In"</h3>
+                    <p style="font-size:var(--small-size);">Create a free Autodesk account with your email, or sign in with Google.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent3);">3</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Click "Circuits" in the sidebar</h3>
+                    <p style="font-size:var(--small-size);">This is where we'll build our circuits — not 3D design, not Codeblocks.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent3);">4</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Click "Create new Circuit"</h3>
+                    <p style="font-size:var(--small-size);">A new blank workspace opens — your digital workbench!</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent3);">5</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Explore the interface</h3>
+                    <p style="font-size:var(--small-size);">Canvas (middle), Components panel (right), Start Simulation button (top right).</p>
+                </div>
+            </div>
+        </div>
+        <div class="hl-green reveal" data-delay="2" style="font-size:var(--small-size);margin-top:0.4em;">
+            Tinkercad is free forever for students. You can share circuits with your teacher by clicking the "Share" button!
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 11: SECTION DIVIDER — FIRST PROJECT
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#ec4899 0%,#f472b6 50%,#f9a8d4 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#fbcfe8;bottom:5%;left:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">💡</span>
+        <p class="section-label reveal" data-delay="1" style="color:#fdf2f8;margin-top:0.5em;">Part 4 — First Project</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">LED Blink<br>in Tinkercad!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#fce7f3;margin-top:0.5em;">Wire a circuit, write code, and watch your LED blink — all in your browser</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#fbcfe8);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 12: WIRE THE CIRCUIT
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#fdf2f8;" id="slide-11">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent4);">Step-by-Step: Wire Your LED Circuit</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.45em;">
+                <div class="step">
+                    <div class="step-num" style="background:var(--accent4);">1</div>
+                    <div>
+                        <h3 style="font-size:var(--small-size);">Add Arduino Uno</h3>
+                        <p style="font-size:var(--small-size);">Search "Arduino Uno" in the components panel → drag it onto the canvas.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num" style="background:var(--accent4);">2</div>
+                    <div>
+                        <h3 style="font-size:var(--small-size);">Add a Resistor (220Ω)</h3>
+                        <p style="font-size:var(--small-size);">Drag a resistor onto the canvas. Click it → change value to <strong>220 Ohms</strong>.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num" style="background:var(--accent4);">3</div>
+                    <div>
+                        <h3 style="font-size:var(--small-size);">Add an LED</h3>
+                        <p style="font-size:var(--small-size);">Drag an LED onto the canvas. Anode (+) long leg, Cathode (−) short leg.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num" style="background:var(--accent4);">4</div>
+                    <div>
+                        <h3 style="font-size:var(--small-size);">Connect the wires</h3>
+                        <p style="font-size:var(--small-size);">Pin 13 → Resistor → LED Anode (+) → LED Cathode (−) → GND on Arduino</p>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card" style="text-align:center;">
+                    <p style="font-size:var(--small-size);font-weight:700;color:var(--accent4);margin-bottom:0.5em;">Circuit Diagram</p>
+                    <div style="background:#1e1b4b;border-radius:10px;padding:1em;font-family:var(--font-code);font-size:var(--small-size);color:#c7d2fe;text-align:left;line-height:2;">
+                        <span style="color:#fb923c;">Arduino Pin 13</span><br>
+                        &nbsp;&nbsp;&nbsp;↓<br>
+                        <span style="color:#fcd34d;">Resistor 220Ω</span><br>
+                        &nbsp;&nbsp;&nbsp;↓<br>
+                        <span style="color:#f9a8d4;">LED Anode (+)</span><br>
+                        &nbsp;&nbsp;&nbsp;↓<br>
+                        <span style="color:#f9a8d4;">LED Cathode (−)</span><br>
+                        &nbsp;&nbsp;&nbsp;↓<br>
+                        <span style="color:#6ee7b7;">Arduino GND</span>
+                    </div>
+                </div>
+                <div class="hl-pink" style="font-size:var(--small-size);">
+                    <strong>Why 220Ω?</strong> Arduino gives 5V. LED needs ~2V at 20mA. (5−2) / 0.02 = 150Ω. We use 220Ω for safety!
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 13: THE BLINK CODE
+     ============================================ -->
+<section class="slide bg-white" id="slide-12">
+    <div class="slide-content">
+        <h2 class="reveal">The Blink Code — Explained!</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="cmt">// setup() runs once when Arduino starts</span>
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(<span class="num">13</span>, <span class="pin">OUTPUT</span>);
+  <span class="cmt">// Pin 13 will control the LED</span>
+}
+
+<span class="cmt">// loop() runs forever, over and over</span>
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="fn">digitalWrite</span>(<span class="num">13</span>, <span class="pin">HIGH</span>); <span class="cmt">// LED ON</span>
+  <span class="fn">delay</span>(<span class="num">1000</span>);            <span class="cmt">// wait 1 sec</span>
+  <span class="fn">digitalWrite</span>(<span class="num">13</span>, <span class="pin">LOW</span>);  <span class="cmt">// LED OFF</span>
+  <span class="fn">delay</span>(<span class="num">1000</span>);            <span class="cmt">// wait 1 sec</span>
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-indigo">
+                    <h3 style="font-size:var(--small-size);">setup()</h3>
+                    <p style="font-size:var(--small-size);">Runs <strong>once</strong> at the start. Use it to set pin modes and initialize things.</p>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--small-size);">loop()</h3>
+                    <p style="font-size:var(--small-size);">Runs <strong>forever</strong> in a loop. Your main logic goes here.</p>
+                </div>
+                <div class="card card-green">
+                    <h3 style="font-size:var(--small-size);">pinMode(13, OUTPUT)</h3>
+                    <p style="font-size:var(--small-size);">Tells Arduino that pin 13 will send power out.</p>
+                </div>
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--small-size);">digitalWrite(13, HIGH/LOW)</h3>
+                    <p style="font-size:var(--small-size);">Turns the pin ON (5V) or OFF (0V).</p>
+                </div>
+                <div class="card card-pink">
+                    <h3 style="font-size:var(--small-size);">delay(1000)</h3>
+                    <p style="font-size:var(--small-size);">Pause for 1000 milliseconds = 1 second.</p>
+                </div>
+            </div>
+        </div>
+        <div class="hl-green reveal" data-delay="3" style="font-size:var(--small-size);">
+            In Tinkercad: click "Code" → choose "Text" → paste the code above → click "Start Simulation"!
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 14: HOMEWORK
+     ============================================ -->
+<section class="slide bg-orange" id="slide-13">
+    <div class="blob" style="width:250px;height:250px;background:#fed7aa;top:-60px;right:-60px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-hw reveal">Homework</span>
+        <h2 class="reveal" data-delay="1" style="color:var(--accent2);">Your Homework Challenges</h2>
+        <div class="grid-3 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-orange">
+                <div class="icon-circle icon-orange" style="margin-bottom:0.4em;">1</div>
+                <h3 style="font-size:var(--body-size);color:var(--accent2);">Blink Faster / Slower</h3>
+                <p style="font-size:var(--small-size);">Change the <code style="background:#fff7ed;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">delay()</code> values. Try 200ms, 500ms, 2000ms. What happens?</p>
+            </div>
+            <div class="card card-pink">
+                <div class="icon-circle icon-pink" style="margin-bottom:0.4em;">2</div>
+                <h3 style="font-size:var(--body-size);color:var(--accent4);">Add a Second LED</h3>
+                <p style="font-size:var(--small-size);">Add another LED on Pin 12. Make them blink alternately — one on while the other is off.</p>
+            </div>
+            <div class="card card-purple">
+                <div class="icon-circle icon-purple" style="margin-bottom:0.4em;">3</div>
+                <h3 style="font-size:var(--body-size);color:var(--accent5);">Research Task</h3>
+                <p style="font-size:var(--small-size);">Find 3 real-world devices that use a microcontroller and write 1 sentence about what each microcontroller does in that device.</p>
+            </div>
+        </div>
+        <div class="reveal" data-delay="3" style="margin-top:0.5em;">
+            <div class="hl-yellow" style="font-size:var(--small-size);">
+                <strong>Bonus Challenge:</strong> Make an SOS pattern in Morse code using blinks: 3 short, 3 long, 3 short blinks!
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 15: QUIZ
+     ============================================ -->
+<section class="slide bg-indigo" id="slide-14">
+    <div class="blob" style="width:220px;height:220px;background:#c4b5fd;top:-50px;left:-50px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-quiz reveal">Quick Quiz</span>
+        <h2 class="reveal" data-delay="1">Test Your Knowledge!</h2>
+        <div class="two-col reveal" data-delay="2" style="margin-top:0.3em;">
+
+            <!-- Q1 -->
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q1. What does the <code style="background:#ede9fe;padding:1px 5px;border-radius:4px;font-family:var(--font-code);">loop()</code> function do?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) Runs once at startup</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) Runs forever in a loop</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) Turns on a pin</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Sets pin direction</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q2. Why do we use a resistor with an LED?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) To make it brighter</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) To change the colour</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) To limit current and prevent burning</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) To make it blink faster</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q3. What is a microcontroller?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) A type of battery</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) A very large computer</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) A tiny computer on a single chip</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) A type of resistor</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q4. <code style="background:#ede9fe;padding:1px 5px;border-radius:4px;font-family:var(--font-code);">delay(500)</code> pauses for how long?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 5 seconds</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) 0.5 seconds (500 ms)</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) 500 seconds</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 1 second</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const navDotsContainer = document.getElementById('navDots');
+    const slideCounter = document.getElementById('slideCounter');
+    const total = slides.length;
+    let current = 0;
+    let isScrolling = false;
+
+    // Build nav dots
+    slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', `Slide ${i + 1}`);
+        dot.addEventListener('click', () => scrollToSlide(i));
+        navDotsContainer.appendChild(dot);
+    });
+
+    function updateUI(index) {
+        current = index;
+        const pct = total > 1 ? (index / (total - 1)) * 100 : 100;
+        progressBar.style.width = pct + '%';
+        slideCounter.textContent = `${index + 1} / ${total}`;
+        document.querySelectorAll('.nav-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === index);
+        });
+        revealSlide(index);
+    }
+
+    function scrollToSlide(index) {
+        slides[index].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Intersection Observer for scroll tracking
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                const idx = Array.from(slides).indexOf(entry.target);
+                updateUI(idx);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    slides.forEach(s => observer.observe(s));
+
+    // Reveal animations
+    function revealSlide(index) {
+        const slide = slides[index];
+        slide.querySelectorAll('.reveal, .reveal-right, .reveal-scale, .reveal-up').forEach(el => {
+            el.classList.add('visible');
+        });
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            if (current < total - 1) scrollToSlide(current + 1);
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            if (current > 0) scrollToSlide(current - 1);
+        }
+    });
+
+    // Reveal first slide on load
+    window.addEventListener('load', () => {
+        updateUI(0);
+    });
+
+    // Quiz logic
+    function answer(btn, result) {
+        const group = btn.closest('.card');
+        const buttons = group.querySelectorAll('.quiz-option');
+        const feedback = group.querySelector('.quiz-feedback');
+
+        // Disable all buttons in this group
+        buttons.forEach(b => {
+            b.style.pointerEvents = 'none';
+            if (b.getAttribute('onclick').includes("'correct'")) {
+                b.classList.add('correct');
+            }
+        });
+
+        if (result === 'correct') {
+            btn.classList.add('correct');
+            feedback.textContent = 'Correct! Great work!';
+            feedback.style.background = '#d1fae5';
+            feedback.style.color = '#065f46';
+        } else {
+            btn.classList.add('wrong');
+            feedback.textContent = 'Not quite — the green answer is correct!';
+            feedback.style.background = '#fee2e2';
+            feedback.style.color = '#991b1b';
+        }
+        feedback.classList.add('show');
+    }
+</script>
+
+</body>
+</html>

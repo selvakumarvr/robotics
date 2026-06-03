@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 Day 7 — Line Following Robot</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--green:#10b981;--green-dark:#059669;--green-light:#d1fae5;--lime:#84cc16;--lime-light:#ecfccb;--emerald:#34d399;--yellow:#eab308;--yellow-light:#fef9c3;--slate:#1e293b;--slate-mid:#475569;}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;height:100%;}
+body{font-family:'Nunito',sans-serif;background:#f0fdf4;color:var(--slate);}
+.slide{scroll-snap-align:start;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem;position:relative;overflow:hidden;}
+h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+code,pre{font-family:'Fira Code',monospace;}
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--green),var(--lime));transition:width .4s;z-index:100;}
+#nav-dots{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:100;}
+.dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;}
+.dot.active{background:var(--green);transform:scale(1.3);}
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.reveal-delay-1{transition-delay:.1s;}.reveal-delay-2{transition-delay:.2s;}.reveal-delay-3{transition-delay:.3s;}
+.slide-title{background:linear-gradient(135deg,#064e3b,#065f46,#10b981);}
+.slide-title h1{font-size:clamp(2rem,5vw,3.5rem);color:#fff;text-align:center;line-height:1.2;}
+.subtitle{font-size:clamp(1rem,2.5vw,1.4rem);color:#6ee7b7;text-align:center;margin-top:1rem;}
+.badge{display:inline-block;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:.4rem 1.2rem;border-radius:999px;font-size:.9rem;font-weight:700;margin-bottom:1.5rem;}
+.wave{position:absolute;bottom:0;left:0;width:100%;opacity:.3;}
+.card{background:#fff;border-radius:1.2rem;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.08);border-left:5px solid var(--green);}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;width:100%;max-width:900px;}
+.card h3{font-size:1.1rem;color:var(--slate);margin-bottom:.4rem;}
+.card p{font-size:.9rem;color:var(--slate-mid);line-height:1.5;}
+.card-icon{font-size:2rem;margin-bottom:.5rem;}
+.code-block{background:#0f172a;border-radius:1rem;padding:1.5rem;width:100%;max-width:800px;overflow-x:auto;}
+.code-block pre{color:#e2e8f0;font-size:.82rem;line-height:1.7;}
+.kw{color:#7dd3fc;}.fn{color:#86efac;}.cm{color:#64748b;}.str{color:#fde68a;}.num{color:#fb923c;}
+.steps{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:800px;}
+.step{display:flex;align-items:flex-start;gap:1rem;background:#fff;padding:1.2rem 1.5rem;border-radius:1rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.step-num{min-width:2.2rem;height:2.2rem;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;}
+.step-text h4{font-size:1rem;color:var(--slate);margin-bottom:.2rem;}
+.step-text p{font-size:.88rem;color:var(--slate-mid);}
+.hw-list{display:flex;flex-direction:column;gap:.8rem;width:100%;max-width:700px;}
+.hw-item{display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem 1.4rem;border-radius:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.hw-badge{padding:.25rem .8rem;border-radius:999px;font-size:.75rem;font-weight:700;white-space:nowrap;}
+.hw-easy{background:#dcfce7;color:#166534;}.hw-medium{background:#fef9c3;color:#854d0e;}.hw-hard{background:#fee2e2;color:#991b1b;}.hw-bonus{background:#ede9fe;color:#5b21b6;}
+.quiz-q{background:#fff;border-radius:1.2rem;padding:1.8rem;width:100%;max-width:750px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.quiz-q h3{font-size:1.15rem;margin-bottom:1.2rem;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+.opt{padding:.9rem 1.2rem;border-radius:.8rem;border:2px solid #e2e8f0;cursor:pointer;font-size:.9rem;font-family:'Nunito',sans-serif;background:#fff;transition:all .2s;text-align:left;}
+.opt:hover{border-color:var(--green);background:var(--green-light);}
+.opt.correct{background:#dcfce7;border-color:#16a34a;color:#166534;font-weight:700;}
+.opt.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b;}
+.quiz-nav{display:flex;gap:1rem;margin-top:1.5rem;justify-content:center;}
+.btn{padding:.7rem 1.8rem;border-radius:999px;border:none;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1rem;transition:all .2s;}
+.btn-green{background:var(--green);color:#fff;}.btn-green:hover{background:var(--green-dark);}
+#quiz-score{text-align:center;font-size:1.3rem;font-weight:700;margin-top:1rem;color:var(--green-dark);}
+.slide-header{text-align:center;margin-bottom:2rem;}
+.slide-header h2{font-size:clamp(1.6rem,3.5vw,2.4rem);color:var(--slate);}
+.slide-header p{color:var(--slate-mid);margin-top:.4rem;}
+.tag{display:inline-block;background:var(--green-light);color:var(--green-dark);padding:.2rem .8rem;border-radius:999px;font-size:.78rem;font-weight:700;margin-bottom:.5rem;}
+.logic-table{width:100%;max-width:700px;border-collapse:collapse;}
+.logic-table th{background:var(--green);color:#fff;padding:.7rem 1rem;text-align:left;font-family:'Baloo 2',sans-serif;}
+.logic-table td{padding:.7rem 1rem;border-bottom:1px solid #e2e8f0;font-size:.9rem;text-align:center;}
+.logic-table tr:nth-child(even) td{background:#f0fdf4;}
+.sensor-on{background:#d1fae5;color:#065f46;padding:.2rem .6rem;border-radius:.3rem;font-weight:700;}
+.sensor-off{background:#fee2e2;color:#991b1b;padding:.2rem .6rem;border-radius:.3rem;font-weight:700;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="nav-dots"></div>
+
+<!-- Slide 1 -->
+<div class="slide slide-title">
+  <div class="badge reveal">Week 2 · Day 7</div>
+  <h1 class="reveal reveal-delay-1">Line Following<br>Robot</h1>
+  <p class="subtitle reveal reveal-delay-2">Building a self-navigating robot using IR sensors!</p>
+  <div style="display:flex;gap:1.5rem;margin-top:2rem;flex-wrap:wrap;justify-content:center;" class="reveal reveal-delay-3">
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">IR Sensor x2</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">L298N Motors</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">Navigation Logic</span>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 100"><path fill="#f0fdf4" d="M0,60 C360,100 1080,0 1440,60 L1440,100 L0,100 Z"/></svg>
+</div>
+
+<!-- Slide 2: How IR sensors work for line following -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">The Sensors</div>
+    <h2>IR Sensors for Line Detection</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card" style="border-color:var(--green);">
+      <div class="card-icon">🔴</div>
+      <h3>IR LED + Phototransistor</h3>
+      <p>Each sensor emits IR light downward. Light reflects off white surfaces, barely reflects off black</p>
+    </div>
+    <div class="card" style="border-color:var(--lime);">
+      <div class="card-icon">⬜</div>
+      <h3>White Surface</h3>
+      <p>IR reflects back → sensor output = <strong>LOW</strong> (0) — "I see white/no line"</p>
+    </div>
+    <div class="card" style="border-color:#1e293b;">
+      <div class="card-icon">⬛</div>
+      <h3>Black Line</h3>
+      <p>IR absorbed → no reflection → sensor output = <strong>HIGH</strong> (1) — "I'm on the line!"</p>
+    </div>
+    <div class="card" style="border-color:var(--yellow);">
+      <div class="card-icon">🤖</div>
+      <h3>Two Sensors</h3>
+      <p>Left sensor + Right sensor positioned to straddle the line. Use their states to steer!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: Navigation Logic -->
+<div class="slide" style="background:linear-gradient(135deg,#f0fdf4,#d1fae5);">
+  <div class="slide-header reveal">
+    <div class="tag">Logic</div>
+    <h2>The Navigation Truth Table</h2>
+  </div>
+  <table class="logic-table reveal reveal-delay-1">
+    <tr><th>Left Sensor</th><th>Right Sensor</th><th>Meaning</th><th>Action</th></tr>
+    <tr><td><span class="sensor-off">LOW (0)</span></td><td><span class="sensor-off">LOW (0)</span></td><td>Both on white → on track</td><td>➡️ Go FORWARD</td></tr>
+    <tr><td><span class="sensor-on">HIGH (1)</span></td><td><span class="sensor-off">LOW (0)</span></td><td>Left on black → drifted left</td><td>↪️ Turn RIGHT</td></tr>
+    <tr><td><span class="sensor-off">LOW (0)</span></td><td><span class="sensor-on">HIGH (1)</span></td><td>Right on black → drifted right</td><td>↩️ Turn LEFT</td></tr>
+    <tr><td><span class="sensor-on">HIGH (1)</span></td><td><span class="sensor-on">HIGH (1)</span></td><td>Both on black → intersection</td><td>➡️ Go FORWARD</td></tr>
+  </table>
+  <div class="card reveal reveal-delay-2" style="max-width:650px;margin-top:1rem;border-color:var(--green);">
+    <p>This is <strong>reactive navigation</strong> — the robot constantly corrects itself based on sensor feedback. It's a simple but powerful form of autonomous control!</p>
+  </div>
+</div>
+
+<!-- Slide 4: Wiring -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Wiring</div>
+    <h2>Full Robot Wiring</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card"><div class="card-icon">👁️</div><h3>Left IR Sensor OUT</h3><p>→ Digital Pin 2</p></div>
+    <div class="card"><div class="card-icon">👁️</div><h3>Right IR Sensor OUT</h3><p>→ Digital Pin 3</p></div>
+    <div class="card"><div class="card-icon">⚙️</div><h3>Left Motor (A)</h3><p>IN1→Pin 4, IN2→Pin 5, ENA→Pin 6 (PWM)</p></div>
+    <div class="card"><div class="card-icon">⚙️</div><h3>Right Motor (B)</h3><p>IN3→Pin 7, IN4→Pin 8, ENB→Pin 9 (PWM)</p></div>
+  </div>
+  <div class="card reveal reveal-delay-2" style="max-width:700px;margin-top:1rem;border-color:var(--yellow);">
+    <p>💡 Both IR sensors share VCC (5V) and GND. Their VCC indicator LED shows power, and the OUT indicator LED glows when black is detected. Use the onboard potentiometer to adjust sensitivity!</p>
+  </div>
+</div>
+
+<!-- Slide 5: Full Code -->
+<div class="slide" style="background:linear-gradient(135deg,#f0fdf4,#d1fae5);">
+  <div class="slide-header reveal">
+    <div class="tag">Full Code</div>
+    <h2>Line Follower Program</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1" style="font-size:.73rem;">
+    <pre><span class="cm">// Motor A (Left)</span>
+<span class="kw">const int</span> in1=<span class="num">4</span>,in2=<span class="num">5</span>,ena=<span class="num">6</span>;
+<span class="cm">// Motor B (Right)</span>
+<span class="kw">const int</span> in3=<span class="num">7</span>,in4=<span class="num">8</span>,enb=<span class="num">9</span>;
+<span class="cm">// IR Sensors</span>
+<span class="kw">const int</span> leftSensor=<span class="num">2</span>, rightSensor=<span class="num">3</span>;
+<span class="kw">const int</span> SPEED = <span class="num">180</span>;
+
+<span class="kw">void</span> <span class="fn">forward</span>(){ <span class="fn">digitalWrite</span>(in1,HIGH);<span class="fn">digitalWrite</span>(in2,LOW);<span class="fn">analogWrite</span>(ena,SPEED);<span class="fn">digitalWrite</span>(in3,HIGH);<span class="fn">digitalWrite</span>(in4,LOW);<span class="fn">analogWrite</span>(enb,SPEED); }
+<span class="kw">void</span> <span class="fn">turnLeft</span>(){ <span class="fn">digitalWrite</span>(in1,LOW);<span class="fn">digitalWrite</span>(in2,LOW);<span class="fn">analogWrite</span>(ena,<span class="num">0</span>);<span class="fn">digitalWrite</span>(in3,HIGH);<span class="fn">digitalWrite</span>(in4,LOW);<span class="fn">analogWrite</span>(enb,SPEED); }
+<span class="kw">void</span> <span class="fn">turnRight</span>(){ <span class="fn">digitalWrite</span>(in1,HIGH);<span class="fn">digitalWrite</span>(in2,LOW);<span class="fn">analogWrite</span>(ena,SPEED);<span class="fn">digitalWrite</span>(in3,LOW);<span class="fn">digitalWrite</span>(in4,LOW);<span class="fn">analogWrite</span>(enb,<span class="num">0</span>); }
+<span class="kw">void</span> <span class="fn">stopAll</span>(){ <span class="fn">analogWrite</span>(ena,<span class="num">0</span>);<span class="fn">analogWrite</span>(enb,<span class="num">0</span>); }
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(in1,OUTPUT);<span class="fn">pinMode</span>(in2,OUTPUT);<span class="fn">pinMode</span>(ena,OUTPUT);
+  <span class="fn">pinMode</span>(in3,OUTPUT);<span class="fn">pinMode</span>(in4,OUTPUT);<span class="fn">pinMode</span>(enb,OUTPUT);
+  <span class="fn">pinMode</span>(leftSensor,INPUT);<span class="fn">pinMode</span>(rightSensor,INPUT);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">int</span> L = <span class="fn">digitalRead</span>(leftSensor);
+  <span class="kw">int</span> R = <span class="fn">digitalRead</span>(rightSensor);
+  <span class="kw">if</span>      (!L && !R) <span class="fn">forward</span>();    <span class="cm">// On track</span>
+  <span class="kw">else if</span> ( L && !R) <span class="fn">turnRight</span>();  <span class="cm">// Drifted left</span>
+  <span class="kw">else if</span> (!L &&  R) <span class="fn">turnLeft</span>();   <span class="cm">// Drifted right</span>
+  <span class="kw">else</span>               <span class="fn">forward</span>();    <span class="cm">// Intersection</span>
+}</pre>
+  </div>
+</div>
+
+<!-- Slide 6: Functions explained -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Code Pattern</div>
+    <h2>Writing Reusable Motor Functions</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card" style="border-color:var(--green);">
+      <h3>Why use functions?</h3>
+      <p>forward(), turnLeft(), turnRight() — write once, call anywhere. Cleaner than copying 6 lines every time!</p>
+    </div>
+    <div class="card" style="border-color:var(--lime);">
+      <h3>void functions</h3>
+      <p>Functions that don't return a value use <code>void</code>. They just DO something (set pins, print, etc.)</p>
+    </div>
+    <div class="card" style="border-color:var(--yellow);">
+      <h3>Function parameters</h3>
+      <p>Add a speed parameter: <code>void forward(int speed)</code> for more flexibility — use in Week 3!</p>
+    </div>
+    <div class="card" style="border-color:#3b82f6;">
+      <h3>Modular design</h3>
+      <p>The same motor functions can be reused in Day 8's obstacle-avoiding robot. Write once, reuse everywhere!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7: Homework -->
+<div class="slide" style="background:linear-gradient(135deg,#f0fdf4,#d1fae5);">
+  <div class="slide-header reveal">
+    <div class="tag">Homework</div>
+    <h2>Take It Further!</h2>
+  </div>
+  <div class="hw-list reveal reveal-delay-1">
+    <div class="hw-item"><span class="hw-badge hw-easy">Easy</span><p>Add Serial.println() to log what the robot is doing (FORWARD / LEFT / RIGHT) each loop</p></div>
+    <div class="hw-item"><span class="hw-badge hw-medium">Medium</span><p>Make the turning speed different from the forward speed — tighter turns by reducing one motor to 50%</p></div>
+    <div class="hw-item"><span class="hw-badge hw-hard">Hard</span><p>Add a "stop at end" feature: if both sensors are HIGH for &gt;500ms → stop (end of track detected)</p></div>
+    <div class="hw-item"><span class="hw-badge hw-bonus">Bonus</span><p>Use 3 IR sensors (left, centre, right) for smoother following and handle more complex track shapes</p></div>
+  </div>
+</div>
+
+<!-- Slide 8: Quiz -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Quiz Time!</div>
+    <h2>Test Your Knowledge</h2>
+  </div>
+  <div id="quiz-container" class="reveal reveal-delay-1">
+    <div class="quiz-q" id="q-display"><h3 id="q-text"></h3><div class="options" id="q-options"></div></div>
+    <div class="quiz-nav"><button class="btn btn-green" onclick="nextQ()">Next Question →</button></div>
+    <div id="quiz-score"></div>
+  </div>
+</div>
+
+<!-- Slide 9: Summary -->
+<div class="slide" style="background:linear-gradient(135deg,#064e3b,#065f46,#10b981);">
+  <div class="slide-header reveal" style="color:#fff;">
+    <div class="tag" style="background:rgba(255,255,255,.2);color:#fff;">Day 7 Complete!</div>
+    <h2 style="color:#fff;">What You Learned Today</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1" style="max-width:800px;">
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">👁️</div><h3 style="color:#6ee7b7;">IR Sensors</h3><p style="color:#a7f3d0;">Detect black vs white via IR reflection. LOW=white, HIGH=black</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🧭</div><h3 style="color:#6ee7b7;">Navigation Logic</h3><p style="color:#a7f3d0;">2 sensors → 4 states → 3 actions: forward, turn left, turn right</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">📦</div><h3 style="color:#6ee7b7;">Motor Functions</h3><p style="color:#a7f3d0;">Wrap motor pin logic in named functions for clean, reusable code</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🤖</div><h3 style="color:#6ee7b7;">Autonomous Robot!</h3><p style="color:#a7f3d0;">Your first fully self-navigating robot — no human control needed!</p>
+    </div>
+  </div>
+  <p class="reveal reveal-delay-2" style="color:#6ee7b7;margin-top:1.5rem;font-size:1.1rem;">Tomorrow: Week 2 Capstone — Obstacle Avoiding Robot! 🚗💨</p>
+</div>
+
+<script>
+const questions=[
+  {q:"When an IR line sensor is over a BLACK line, its output is:",opts:["LOW (0)","HIGH (1)","Floating","3.3V"],ans:1},
+  {q:"If the LEFT sensor detects black, the robot has drifted:",opts:["Right","Left","Forward","Backward"],ans:1},
+  {q:"What advantage do motor functions (forward, turnLeft) give?",opts:["Faster speed","Reusable, readable code","Lower power usage","More pins available"],ans:1},
+  {q:"What happens when BOTH IR sensors detect black?",opts:["Robot stops","Robot reverses","Intersection — go forward","Robot spins"],ans:2},
+];
+let qIdx=0,score=0,answered=false;
+function showQ(){
+  if(qIdx>=questions.length){document.getElementById('q-display').style.display='none';document.getElementById('quiz-score').innerHTML=`🎉 You scored ${score}/${questions.length}!`;return;}
+  const q=questions[qIdx];document.getElementById('q-text').textContent=`Q${qIdx+1}: ${q.q}`;
+  const opts=document.getElementById('q-options');opts.innerHTML='';answered=false;
+  q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>{if(answered)return;answered=true;b.classList.add(i===q.ans?'correct':'wrong');if(i===q.ans)score++;};opts.appendChild(b);});
+}
+function nextQ(){qIdx++;showQ();}
+showQ();
+const slides=document.querySelectorAll('.slide');
+const dotsEl=document.getElementById('nav-dots');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>slides[i].scrollIntoView({behavior:'smooth'});dotsEl.appendChild(d);});
+const dots=document.querySelectorAll('.dot');
+const prog=document.getElementById('progress');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const i=[...slides].indexOf(e.target);dots.forEach((d,j)=>d.classList.toggle('active',i===j));prog.style.width=`${((i+1)/slides.length)*100}%`;e.target.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}});},{threshold:0.5});
+slides.forEach(s=>obs.observe(s));
+document.addEventListener('keydown',e=>{const active=[...slides].findIndex(s=>s.getBoundingClientRect().top>-10&&s.getBoundingClientRect().top<window.innerHeight/2);if(e.key==='ArrowDown'||e.key===' ')slides[Math.min(active+1,slides.length-1)].scrollIntoView({behavior:'smooth'});if(e.key==='ArrowUp')slides[Math.max(active-1,0)].scrollIntoView({behavior:'smooth'});});
+</script>
+</body>
+</html>

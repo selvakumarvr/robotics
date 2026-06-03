@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 Day 2 — Inputs, Serial Monitor & Logic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:     #f0f4ff;
+            --bg-secondary:   #e8efff;
+            --bg-card:        #ffffff;
+            --text-primary:   #1e1b4b;
+            --text-secondary: #4338ca;
+            --text-muted:     #94a3b8;
+            --accent:         #4f46e5;
+            --accent-light:   #818cf8;
+            --accent-glow:    rgba(79,70,229,0.18);
+            --accent2:        #f97316;
+            --accent2-glow:   rgba(249,115,22,0.18);
+            --accent3:        #10b981;
+            --accent4:        #ec4899;
+            --accent5:        #8b5cf6;
+            --warning:        #f59e0b;
+            --danger:         #ef4444;
+            --font-display:   'Baloo 2', cursive;
+            --font-body:      'Nunito', sans-serif;
+            --font-code:      'Fira Code', monospace;
+            --title-size:     clamp(1.8rem, 5vw, 3.6rem);
+            --h2-size:        clamp(1.3rem, 3.5vw, 2.2rem);
+            --h3-size:        clamp(1rem, 2.5vw, 1.4rem);
+            --body-size:      clamp(0.78rem, 1.5vw, 1.05rem);
+            --small-size:     clamp(0.68rem, 1.1vw, 0.88rem);
+            --code-size:      clamp(0.65rem, 1.1vw, 0.88rem);
+            --slide-padding:  clamp(1.5rem, 4vw, 4rem);
+            --content-gap:    clamp(0.8rem, 2vw, 1.6rem);
+            --elem-gap:       clamp(0.3rem, 1vw, 0.7rem);
+            --radius:         16px;
+            --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            height: 100%;
+            line-height: 1.5;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            padding: var(--slide-padding);
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+            gap: var(--content-gap);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent2), var(--accent4), var(--accent3));
+            z-index: 1000;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px var(--accent2-glow);
+        }
+
+        .nav-dots {
+            position: fixed;
+            right: clamp(0.5rem, 1.5vw, 1.5rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(249,115,22,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none; padding: 0;
+        }
+        .nav-dot.active {
+            background: var(--accent2);
+            box-shadow: 0 0 8px var(--accent2-glow);
+            transform: scale(1.5);
+        }
+        .nav-dot:hover { background: #fb923c; }
+
+        .slide-counter {
+            position: fixed;
+            bottom: clamp(0.5rem, 2vw, 1.2rem);
+            right: clamp(0.5rem, 2vw, 1.2rem);
+            font-family: var(--font-code);
+            font-size: var(--small-size);
+            color: var(--text-muted);
+            z-index: 100;
+            background: rgba(255,255,255,0.85);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        h1 { font-family:var(--font-display); font-size:var(--title-size); font-weight:800; line-height:1.15; color:var(--text-primary); }
+        h2 { font-family:var(--font-display); font-size:var(--h2-size); font-weight:700; line-height:1.2; color:var(--accent2); }
+        h3 { font-family:var(--font-display); font-size:var(--h3-size); font-weight:700; line-height:1.3; color:var(--text-primary); }
+        p, li { font-size:var(--body-size); line-height:1.65; color:#334155; }
+        .accent  { color:var(--accent); }
+        .accent2 { color:var(--accent2); }
+        .accent3 { color:var(--accent3); }
+        .accent4 { color:var(--accent4); }
+        .accent5 { color:var(--accent5); }
+        strong { font-weight:700; }
+
+        .bg-dots {
+            background-image: radial-gradient(rgba(249,115,22,0.07) 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+        }
+        .bg-white  { background:#ffffff; }
+        .bg-indigo { background:linear-gradient(135deg,#ede9fe 0%,#ddd6fe 50%,#c7d2fe 100%); }
+        .bg-orange { background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 50%,#fed7aa 100%); }
+        .bg-green  { background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 50%,#a7f3d0 100%); }
+        .bg-pink   { background:linear-gradient(135deg,#fdf2f8 0%,#fce7f3 50%,#fbcfe8 100%); }
+
+        .card {
+            background:#fff;
+            border-radius:var(--radius);
+            padding:clamp(0.8rem,2vw,1.4rem);
+            border:2px solid rgba(249,115,22,0.1);
+            box-shadow:0 2px 12px rgba(249,115,22,0.06);
+            transition:all 0.3s ease;
+        }
+        .card:hover { border-color:rgba(249,115,22,0.25); box-shadow:0 6px 24px rgba(249,115,22,0.12); transform:translateY(-2px); }
+        .card-indigo  { border-left:4px solid var(--accent);  background:linear-gradient(135deg,#fff 80%,#ede9fe); }
+        .card-orange  { border-left:4px solid var(--accent2); background:linear-gradient(135deg,#fff 80%,#fff7ed); }
+        .card-green   { border-left:4px solid var(--accent3); background:linear-gradient(135deg,#fff 80%,#ecfdf5); }
+        .card-pink    { border-left:4px solid var(--accent4); background:linear-gradient(135deg,#fff 80%,#fdf2f8); }
+        .card-purple  { border-left:4px solid var(--accent5); background:linear-gradient(135deg,#fff 80%,#ede9fe); }
+
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:var(--content-gap); align-items:start; }
+        .grid-3  { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--elem-gap); }
+        .grid-4  { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--elem-gap); }
+        .grid-2  { display:grid; grid-template-columns:1fr 1fr; gap:var(--elem-gap); }
+        @media (max-width:768px) { .two-col, .grid-3, .grid-4 { grid-template-columns:1fr 1fr; } }
+
+        .icon-circle {
+            width:clamp(36px,5vw,52px); height:clamp(36px,5vw,52px);
+            border-radius:50%; display:flex; align-items:center; justify-content:center;
+            font-size:clamp(1rem,2.5vw,1.6rem); flex-shrink:0;
+        }
+        .icon-indigo { background:#ede9fe; }
+        .icon-orange { background:#fff7ed; }
+        .icon-green  { background:#ecfdf5; }
+        .icon-pink   { background:#fdf2f8; }
+        .icon-purple { background:#f3e8ff; }
+
+        .badge { display:inline-block; padding:3px 12px; border-radius:20px; font-size:var(--small-size); font-weight:700; letter-spacing:0.04em; }
+        .badge-indigo { background:#ede9fe; color:var(--accent); }
+        .badge-orange { background:#fff7ed; color:var(--accent2); }
+        .badge-green  { background:#ecfdf5; color:var(--accent3); }
+        .badge-pink   { background:#fdf2f8; color:var(--accent4); }
+        .badge-purple { background:#f3e8ff; color:var(--accent5); }
+
+        .section-label { font-family:var(--font-code); font-size:var(--small-size); letter-spacing:0.15em; text-transform:uppercase; color:var(--accent2); font-weight:600; }
+        .divider { height:3px; width:60px; border-radius:4px; background:linear-gradient(90deg,var(--accent2),var(--accent4)); }
+        .subtitle { font-size:clamp(0.9rem,2vw,1.3rem); color:#475569; font-weight:500; }
+
+        .code-block {
+            background:#1e1b4b;
+            border-radius:12px;
+            padding:clamp(0.8rem,2vw,1.4rem);
+            font-family:var(--font-code);
+            font-size:var(--code-size);
+            color:#c7d2fe;
+            overflow-x:auto;
+            border:2px solid rgba(129,140,248,0.3);
+            box-shadow:0 4px 16px rgba(79,70,229,0.15);
+        }
+        .code-block .kw  { color:#f0abfc; }
+        .code-block .fn  { color:#67e8f9; }
+        .code-block .num { color:#fcd34d; }
+        .code-block .cmt { color:#6ee7b7; font-style:italic; }
+        .code-block .str { color:#f9a8d4; }
+        .code-block .pin { color:#fb923c; }
+        .code-block .typ { color:#a5f3fc; }
+        .code-block pre  { white-space:pre; line-height:1.8; }
+
+        .bullet-list { list-style:none; padding:0; }
+        .bullet-list li { padding:clamp(0.2rem,0.6vw,0.4rem) 0; padding-left:1.4em; position:relative; font-size:var(--body-size); }
+        .bullet-list li::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:8px; height:8px; border-radius:50%; background:var(--accent2); }
+
+        .check-list { list-style:none; padding:0; }
+        .check-list li { padding:clamp(0.25rem,0.6vw,0.5rem) 0; padding-left:1.8em; position:relative; font-size:var(--body-size); }
+        .check-list li::before { content:'✓'; position:absolute; left:0; color:var(--accent3); font-weight:900; }
+
+        .step {
+            display:flex; align-items:flex-start; gap:clamp(0.5rem,1.5vw,1rem);
+            padding:clamp(0.5rem,1.2vw,0.9rem);
+            background:#fff; border-radius:12px;
+            border:2px solid rgba(249,115,22,0.12);
+        }
+        .step-num {
+            min-width:clamp(28px,3.5vw,40px); height:clamp(28px,3.5vw,40px);
+            border-radius:50%; background:var(--accent2); color:#fff;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; font-size:var(--body-size); flex-shrink:0;
+            font-family:var(--font-display);
+        }
+
+        .quiz-option {
+            padding:clamp(0.5rem,1.2vw,0.85rem) clamp(0.8rem,2vw,1.2rem);
+            border-radius:10px; background:#fff; border:2px solid rgba(249,115,22,0.15);
+            cursor:pointer; font-size:var(--body-size); font-weight:600;
+            color:#334155; transition:all 0.2s ease; text-align:left;
+            font-family:var(--font-body);
+        }
+        .quiz-option:hover { border-color:var(--accent2); background:#fff7ed; transform:translateX(4px); }
+        .quiz-option.correct { background:#d1fae5; border-color:var(--accent3); color:#065f46; }
+        .quiz-option.wrong   { background:#fee2e2; border-color:var(--danger);  color:#991b1b; }
+        .quiz-feedback { font-size:var(--body-size); font-weight:700; padding:0.5em 1em; border-radius:10px; display:none; margin-top:0.5em; }
+        .quiz-feedback.show { display:block; }
+
+        .reveal, .reveal-right, .reveal-scale, .reveal-up {
+            opacity:0;
+            transition:opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+        }
+        .reveal        { transform:translateY(24px); }
+        .reveal-right  { transform:translateX(24px); }
+        .reveal-scale  { transform:scale(0.92); }
+        .reveal-up     { transform:translateY(-20px); }
+        .reveal.visible, .reveal-right.visible, .reveal-scale.visible, .reveal-up.visible { opacity:1; transform:none; }
+
+        [data-delay="1"] { transition-delay:0.1s; }
+        [data-delay="2"] { transition-delay:0.2s; }
+        [data-delay="3"] { transition-delay:0.3s; }
+        [data-delay="4"] { transition-delay:0.4s; }
+        [data-delay="5"] { transition-delay:0.5s; }
+        [data-delay="6"] { transition-delay:0.6s; }
+
+        .big-emoji { font-size:clamp(3rem,8vw,6rem); line-height:1; display:block; text-align:center; filter:drop-shadow(0 4px 12px rgba(249,115,22,0.2)); }
+
+        .highlight-box { border-radius:14px; padding:clamp(0.7rem,1.5vw,1.2rem); font-size:var(--body-size); font-weight:600; }
+        .hl-indigo { background:#ede9fe; border-left:4px solid var(--accent);  color:#3730a3; }
+        .hl-orange { background:#fff7ed; border-left:4px solid var(--accent2); color:#9a3412; }
+        .hl-green  { background:#ecfdf5; border-left:4px solid var(--accent3); color:#065f46; }
+        .hl-pink   { background:#fdf2f8; border-left:4px solid var(--accent4); color:#9d174d; }
+        .hl-yellow { background:#fffbeb; border-left:4px solid var(--warning);  color:#92400e; }
+
+        .section-tag { display:inline-flex; align-items:center; gap:0.4em; padding:0.3em 0.9em; border-radius:30px; font-size:var(--small-size); font-weight:800; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.4em; }
+        .tag-hw   { background:#fff7ed; color:var(--accent2); border:2px solid #fed7aa; }
+        .tag-quiz { background:#ede9fe; color:var(--accent);  border:2px solid #c4b5fd; }
+        .tag-tip  { background:#ecfdf5; color:var(--accent3); border:2px solid #6ee7b7; }
+        .tag-day  { background:#fff7ed; color:var(--accent2); border:2px solid #fed7aa; }
+
+        .blob { position:absolute; border-radius:50%; filter:blur(60px); opacity:0.25; pointer-events:none; }
+
+        /* Serial monitor preview */
+        .serial-screen {
+            background:#0f172a;
+            border-radius:10px;
+            padding:clamp(0.6rem,1.5vw,1rem);
+            font-family:var(--font-code);
+            font-size:var(--small-size);
+            color:#86efac;
+            border:2px solid rgba(134,239,172,0.3);
+            box-shadow:0 0 20px rgba(134,239,172,0.1);
+        }
+        .serial-screen .prompt { color:#64748b; }
+        .serial-line { line-height:2; }
+
+        /* Button diagram */
+        .circuit-ascii {
+            background:#1e1b4b;
+            border-radius:10px;
+            padding:clamp(0.7rem,1.5vw,1rem);
+            font-family:var(--font-code);
+            font-size:var(--small-size);
+            color:#c7d2fe;
+            line-height:1.9;
+            border:2px solid rgba(129,140,248,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">1 / 15</div>
+
+
+<!-- ============================================
+     SLIDE 1: TITLE
+     ============================================ -->
+<section class="slide bg-orange">
+    <div class="blob" style="width:320px;height:320px;background:#fdba74;top:-80px;right:-80px;"></div>
+    <div class="blob" style="width:220px;height:220px;background:#f9a8d4;bottom:-60px;left:-60px;"></div>
+    <div class="slide-content" style="align-items:flex-start;">
+        <div class="reveal-up">
+            <span class="section-tag tag-day">Week 1 · Day 2</span>
+        </div>
+        <h1 class="reveal" style="margin-top:0.2em;color:#1e1b4b;">
+            Make Arduino<br><span class="accent2">Listen!</span>
+        </h1>
+        <p class="subtitle reveal" data-delay="2">Buttons, Serial Monitor, Variables &amp; Logic — turning your Arduino into something that reacts</p>
+        <div class="divider reveal" data-delay="3" style="margin-top:0.8em;"></div>
+        <div class="reveal" data-delay="4" style="display:flex;gap:0.8em;flex-wrap:wrap;margin-top:0.5em;">
+            <span class="badge badge-orange">Serial Monitor</span>
+            <span class="badge badge-purple">Variables</span>
+            <span class="badge badge-indigo">Push Button</span>
+            <span class="badge badge-green">if / else Logic</span>
+            <span class="badge badge-pink">LED Toggle Project</span>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 2: DAY 1 RECAP
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#fff7ed;">
+    <div class="slide-content">
+        <span class="section-label reveal">Quick Recap</span>
+        <h2 class="reveal" data-delay="1">What We Learned in Day 1</h2>
+        <div class="grid-2 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-indigo">
+                <div style="display:flex;align-items:center;gap:0.6em;">
+                    <div class="icon-circle icon-indigo">⚡</div>
+                    <div>
+                        <h3 style="font-size:var(--body-size);">Electronics Basics</h3>
+                        <p style="font-size:var(--small-size);">Voltage, current, resistance — LED + resistor wiring on a breadboard</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-orange">
+                <div style="display:flex;align-items:center;gap:0.6em;">
+                    <div class="icon-circle icon-orange">🧠</div>
+                    <div>
+                        <h3 style="font-size:var(--body-size);">Microcontrollers &amp; Arduino</h3>
+                        <p style="font-size:var(--small-size);">A tiny computer on a chip — reads inputs, runs code, controls outputs</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-green">
+                <div style="display:flex;align-items:center;gap:0.6em;">
+                    <div class="icon-circle icon-green">💻</div>
+                    <div>
+                        <h3 style="font-size:var(--body-size);">Tinkercad Setup</h3>
+                        <p style="font-size:var(--small-size);">Created an account, explored the Circuits workspace and simulator</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-pink">
+                <div style="display:flex;align-items:center;gap:0.6em;">
+                    <div class="icon-circle icon-pink">💡</div>
+                    <div>
+                        <h3 style="font-size:var(--body-size);">First Project: LED Blink</h3>
+                        <p style="font-size:var(--small-size);"><code style="background:#fdf2f8;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">setup()</code>, <code style="background:#fdf2f8;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">loop()</code>, <code style="background:#fdf2f8;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">digitalWrite()</code>, <code style="background:#fdf2f8;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">delay()</code></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hl-orange reveal" data-delay="3" style="font-size:var(--small-size);">
+            Today we go further — instead of just sending commands <strong>out</strong>, we'll teach Arduino to <strong>read inputs</strong> and make decisions!
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 3: AGENDA
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#f0f4ff;">
+    <div class="slide-content">
+        <span class="section-label reveal">Today's Agenda</span>
+        <h2 class="reveal" data-delay="1" style="color:var(--accent);">What We'll Do Today</h2>
+        <div class="reveal" data-delay="2" style="display:flex;flex-direction:column;gap:0.45em;margin-top:0.3em;">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div><h3 style="font-size:var(--body-size);">Serial Monitor</h3><p style="font-size:var(--small-size);">Talk to your Arduino — print messages and see what's happening</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent5);">2</div>
+                <div><h3 style="font-size:var(--body-size);">Variables &amp; Data Types</h3><p style="font-size:var(--small-size);">Store information in your code using int, bool, and const</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent3);">3</div>
+                <div><h3 style="font-size:var(--body-size);">Push Button Basics</h3><p style="font-size:var(--small-size);">How a button works + INPUT_PULLUP wiring in Tinkercad</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent4);">4</div>
+                <div><h3 style="font-size:var(--body-size);">if / else Logic</h3><p style="font-size:var(--small-size);">Make decisions in code — if this happens, do that</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:#f59e0b;">5</div>
+                <div><h3 style="font-size:var(--body-size);">Project: Button-Controlled LED Toggle</h3><p style="font-size:var(--small-size);">Press once — LED on. Press again — LED off. Like a real light switch!</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 4: SECTION DIVIDER — SERIAL MONITOR
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fdba74 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:280px;height:280px;background:#fed7aa;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">📟</span>
+        <p class="section-label reveal" data-delay="1" style="color:#fff7ed;margin-top:0.5em;">Part 1</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">The Serial<br>Monitor</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ffedd5;margin-top:0.5em;">A text window between your computer and Arduino — your debugging superpower!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#fed7aa);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 5: WHAT IS THE SERIAL MONITOR?
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#fff7ed;">
+    <div class="slide-content">
+        <h2 class="reveal">What is the Serial Monitor?</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div>
+                <p class="reveal" data-delay="1" style="margin-bottom:0.6em;">
+                    The Serial Monitor is a window that lets your Arduino <strong class="accent2">send text messages</strong> to your computer while it's running. It's like a walkie-talkie between your code and you!
+                </p>
+                <div class="reveal" data-delay="2" style="display:flex;flex-direction:column;gap:0.4em;">
+                    <div class="card card-orange">
+                        <h3 style="font-size:var(--small-size);">Serial.begin(9600)</h3>
+                        <p style="font-size:var(--small-size);">Put in <code style="background:#fff7ed;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">setup()</code>. Starts communication at 9600 baud (bits per second).</p>
+                    </div>
+                    <div class="card card-green">
+                        <h3 style="font-size:var(--small-size);">Serial.println("Hello!")</h3>
+                        <p style="font-size:var(--small-size);">Prints a line of text to the monitor. <code style="background:#ecfdf5;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">println</code> adds a new line after each message.</p>
+                    </div>
+                    <div class="card card-indigo">
+                        <h3 style="font-size:var(--small-size);">Serial.print(value)</h3>
+                        <p style="font-size:var(--small-size);">Prints a value (number or variable) without jumping to a new line.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2">
+                <p style="font-size:var(--small-size);font-weight:700;color:var(--accent2);margin-bottom:0.4em;">What it looks like in Tinkercad:</p>
+                <div class="serial-screen">
+                    <div class="serial-line"><span class="prompt">COM3 | 9600 baud</span></div>
+                    <div class="serial-line">LED is ON</div>
+                    <div class="serial-line">LED is OFF</div>
+                    <div class="serial-line">LED is ON</div>
+                    <div class="serial-line">LED is OFF</div>
+                    <div class="serial-line" style="color:#64748b;">_</div>
+                </div>
+                <div class="hl-orange" style="margin-top:0.6em;font-size:var(--small-size);">
+                    In Tinkercad: click <strong>"Serial Monitor"</strong> at the bottom of the screen during simulation to see output!
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 6: SERIAL MONITOR CODE
+     ============================================ -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent2);">Serial Monitor in Code</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="cmt">// Serial Monitor + LED Blink</span>
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);  <span class="cmt">// start serial</span>
+  <span class="fn">pinMode</span>(<span class="num">13</span>, <span class="pin">OUTPUT</span>);
+  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"Arduino is ready!"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="fn">digitalWrite</span>(<span class="num">13</span>, <span class="pin">HIGH</span>);
+  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"LED is ON"</span>);
+  <span class="fn">delay</span>(<span class="num">1000</span>);
+
+  <span class="fn">digitalWrite</span>(<span class="num">13</span>, <span class="pin">LOW</span>);
+  <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"LED is OFF"</span>);
+  <span class="fn">delay</span>(<span class="num">1000</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--small-size);">Why is Serial.begin() in setup()?</h3>
+                    <p style="font-size:var(--small-size);">We only need to start the serial connection once. setup() runs once — perfect!</p>
+                </div>
+                <div class="card card-green">
+                    <h3 style="font-size:var(--small-size);">What's 9600?</h3>
+                    <p style="font-size:var(--small-size);">The "baud rate" — how fast data is sent. 9600 bits per second is the standard beginner speed. Both Arduino and Monitor must match!</p>
+                </div>
+                <div class="card card-indigo">
+                    <h3 style="font-size:var(--small-size);">Printing numbers too</h3>
+                    <p style="font-size:var(--small-size);">You can print sensor values: <code style="background:#ede9fe;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">Serial.println(analogRead(A0));</code></p>
+                </div>
+                <div class="hl-green" style="font-size:var(--small-size);">
+                    <strong>Try it!</strong> Add a <code style="background:#ecfdf5;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">Serial.println()</code> to your Day 1 blink code and watch the monitor!
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 7: SECTION DIVIDER — VARIABLES
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#8b5cf6 0%,#a78bfa 50%,#c4b5fd 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#ddd6fe;bottom:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">📦</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ede9fe;margin-top:0.5em;">Part 2</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Variables &amp;<br>Data Types</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ede9fe;margin-top:0.5em;">Boxes that hold information in your code — numbers, true/false, and more</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#c4b5fd);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 8: VARIABLES IN ARDUINO
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#f5f3ff;">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent5);">Variables — Boxes for Your Data</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-purple">
+                    <div style="display:flex;align-items:center;gap:0.6em;">
+                        <div class="icon-circle icon-purple" style="font-size:1.2em;">🔢</div>
+                        <div>
+                            <h3 style="font-size:var(--body-size);color:var(--accent5);">int — Whole Numbers</h3>
+                            <p style="font-size:var(--small-size);">Stores integers like -5, 0, 13, 255</p>
+                            <code style="font-family:var(--font-code);font-size:var(--small-size);background:#f3e8ff;padding:2px 6px;border-radius:4px;color:#6d28d9;">int ledPin = 13;</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-green">
+                    <div style="display:flex;align-items:center;gap:0.6em;">
+                        <div class="icon-circle icon-green" style="font-size:1.2em;">✅</div>
+                        <div>
+                            <h3 style="font-size:var(--body-size);color:var(--accent3);">bool — True or False</h3>
+                            <p style="font-size:var(--small-size);">Only two possible values: <code style="background:#ecfdf5;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">true</code> or <code style="background:#ecfdf5;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">false</code></p>
+                            <code style="font-family:var(--font-code);font-size:var(--small-size);background:#ecfdf5;padding:2px 6px;border-radius:4px;color:#065f46;">bool ledState = false;</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-orange">
+                    <div style="display:flex;align-items:center;gap:0.6em;">
+                        <div class="icon-circle icon-orange" style="font-size:1.2em;">🔒</div>
+                        <div>
+                            <h3 style="font-size:var(--body-size);color:var(--accent2);">const — Fixed Values</h3>
+                            <p style="font-size:var(--small-size);">A variable that never changes. Good for pin numbers!</p>
+                            <code style="font-family:var(--font-code);font-size:var(--small-size);background:#fff7ed;padding:2px 6px;border-radius:4px;color:#9a3412;">const int btnPin = 2;</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2">
+                <div class="card" style="background:#f5f3ff;border:2px solid #c4b5fd;padding:1em;">
+                    <p style="font-size:var(--small-size);font-weight:800;color:var(--accent5);margin-bottom:0.6em;">Think of variables like labelled boxes:</p>
+                    <div style="display:flex;flex-direction:column;gap:0.4em;">
+                        <div style="background:#fff;border:2px solid #c4b5fd;border-radius:8px;padding:0.4em 0.7em;font-family:var(--font-code);font-size:var(--small-size);">
+                            <span style="color:#f0abfc;">int</span> <span style="color:#67e8f9;">score</span> = <span style="color:#fcd34d;">0</span>;
+                        </div>
+                        <div style="text-align:center;font-size:0.75em;color:#94a3b8;">A box called "score" holding the number 0</div>
+                        <div style="background:#fff;border:2px solid #c4b5fd;border-radius:8px;padding:0.4em 0.7em;font-family:var(--font-code);font-size:var(--small-size);">
+                            <span style="color:#f0abfc;">bool</span> <span style="color:#67e8f9;">isOn</span> = <span style="color:#fcd34d;">false</span>;
+                        </div>
+                        <div style="text-align:center;font-size:0.75em;color:#94a3b8;">A box called "isOn" holding false</div>
+                    </div>
+                </div>
+                <div class="hl-indigo" style="margin-top:0.6em;font-size:var(--small-size);">
+                    <strong>Rule:</strong> Always declare the type first, then the name, then the value.<br>
+                    <code style="font-family:var(--font-code);">type name = value;</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 9: SECTION DIVIDER — PUSH BUTTON
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#10b981 0%,#34d399 50%,#6ee7b7 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#a7f3d0;top:5%;left:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🔘</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ecfdf5;margin-top:0.5em;">Part 3</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Push Button<br>Inputs</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#d1fae5;margin-top:0.5em;">Read a button press with digitalRead() and INPUT_PULLUP</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#a7f3d0);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 10: HOW A BUTTON WORKS
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#ecfdf5;">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent3);">How a Push Button Works</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-green">
+                    <h3 style="font-size:var(--body-size);">Not Pressed = Open Circuit</h3>
+                    <p style="font-size:var(--small-size);">The two legs are NOT connected. No current flows. Arduino reads <strong class="accent3">HIGH</strong>.</p>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">Pressed = Closed Circuit</h3>
+                    <p style="font-size:var(--small-size);">The two legs ARE connected. Current flows to GND. Arduino reads <strong class="accent2">LOW</strong>.</p>
+                </div>
+                <div class="hl-yellow" style="font-size:var(--small-size);">
+                    <strong>Confusing but true:</strong> With INPUT_PULLUP, pressing the button gives you LOW, not HIGH. This is normal! The internal resistor pulls the pin HIGH when not pressed.
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2">
+                <p style="font-size:var(--small-size);font-weight:700;color:var(--accent3);margin-bottom:0.4em;">Wiring with INPUT_PULLUP (no external resistor needed!):</p>
+                <div class="circuit-ascii">
+                    <div style="color:#fb923c;">Arduino Pin 2</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+                    <div style="color:#f9a8d4;">Button Leg 1</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|</div>
+                    <div style="color:#f9a8d4;">Button Leg 2</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+                    <div style="color:#6ee7b7;">Arduino GND</div>
+                </div>
+                <div class="hl-green" style="margin-top:0.6em;font-size:var(--small-size);">
+                    <strong>INPUT_PULLUP</strong> activates a built-in resistor inside the Arduino — no external 10kΩ resistor needed on the breadboard! Simpler circuit.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 11: DIGITALREAD + IF/ELSE
+     ============================================ -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent3);">digitalRead() + if / else</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="kw">const</span> <span class="typ">int</span> <span class="pin">btnPin</span> = <span class="num">2</span>;
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">ledPin</span> = <span class="num">13</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(<span class="pin">btnPin</span>, <span class="pin">INPUT_PULLUP</span>);
+  <span class="fn">pinMode</span>(<span class="pin">ledPin</span>, <span class="pin">OUTPUT</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="typ">int</span> btn = <span class="fn">digitalRead</span>(<span class="pin">btnPin</span>);
+
+  <span class="kw">if</span> (btn == <span class="pin">LOW</span>) {
+    <span class="cmt">// Button IS pressed</span>
+    <span class="fn">digitalWrite</span>(<span class="pin">ledPin</span>, <span class="pin">HIGH</span>);
+  } <span class="kw">else</span> {
+    <span class="cmt">// Button NOT pressed</span>
+    <span class="fn">digitalWrite</span>(<span class="pin">ledPin</span>, <span class="pin">LOW</span>);
+  }
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-green">
+                    <h3 style="font-size:var(--small-size);">digitalRead(btnPin)</h3>
+                    <p style="font-size:var(--small-size);">Reads pin 2 — returns <code style="background:#ecfdf5;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">HIGH</code> (1) or <code style="background:#ecfdf5;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">LOW</code> (0) and stores it in <code style="background:#ecfdf5;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">btn</code>.</p>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--small-size);">if (btn == LOW)</h3>
+                    <p style="font-size:var(--small-size);">If the button is pressed (LOW with INPUT_PULLUP), run the code inside <code style="background:#fff7ed;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">{ }</code>.</p>
+                </div>
+                <div class="card card-indigo">
+                    <h3 style="font-size:var(--small-size);">else</h3>
+                    <p style="font-size:var(--small-size);">If the condition is NOT true, run this instead. Like a fork in the road!</p>
+                </div>
+                <div class="hl-green" style="font-size:var(--small-size);">
+                    <strong>Hold the button</strong> → LED stays ON. <strong>Release</strong> → LED turns OFF. Simple and satisfying!
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 12: SECTION DIVIDER — PROJECT
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#ec4899 0%,#f472b6 50%,#f9a8d4 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:240px;height:240px;background:#fbcfe8;bottom:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🔨</span>
+        <p class="section-label reveal" data-delay="1" style="color:#fdf2f8;margin-top:0.5em;">Part 4 — Project</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Button-Controlled<br>LED Toggle!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#fce7f3;margin-top:0.5em;">Press once to turn ON — press again to turn OFF. A real light switch!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#fbcfe8);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 13: PROJECT CODE + WIRING
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#fdf2f8;">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent4);">Full Project: Toggle LED with Button</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1" style="font-size:clamp(0.58rem,0.95vw,0.78rem);">
+<pre><span class="kw">const</span> <span class="typ">int</span> <span class="pin">btnPin</span> = <span class="num">2</span>;
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">ledPin</span> = <span class="num">13</span>;
+<span class="typ">bool</span> ledState = <span class="kw">false</span>;   <span class="cmt">// tracks ON/OFF</span>
+<span class="typ">bool</span> lastBtn  = <span class="pin">HIGH</span>;   <span class="cmt">// last button state</span>
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(<span class="pin">btnPin</span>, <span class="pin">INPUT_PULLUP</span>);
+  <span class="fn">pinMode</span>(<span class="pin">ledPin</span>, <span class="pin">OUTPUT</span>);
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="typ">bool</span> btn = <span class="fn">digitalRead</span>(<span class="pin">btnPin</span>);
+
+  <span class="cmt">// Detect button press (HIGH→LOW transition)</span>
+  <span class="kw">if</span> (btn == <span class="pin">LOW</span> && lastBtn == <span class="pin">HIGH</span>) {
+    ledState = !ledState;          <span class="cmt">// flip state</span>
+    <span class="fn">digitalWrite</span>(<span class="pin">ledPin</span>, ledState);
+
+    <span class="kw">if</span> (ledState) {
+      <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"LED ON"</span>);
+    } <span class="kw">else</span> {
+      <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"LED OFF"</span>);
+    }
+  }
+
+  lastBtn = btn;  <span class="cmt">// save for next loop</span>
+  <span class="fn">delay</span>(<span class="num">50</span>);       <span class="cmt">// debounce</span>
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-pink">
+                    <h3 style="font-size:var(--small-size);">ledState = !ledState</h3>
+                    <p style="font-size:var(--small-size);">The <code style="background:#fdf2f8;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">!</code> means "NOT" — flips true to false and false to true. Like a toggle switch!</p>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--small-size);">btn == LOW &amp;&amp; lastBtn == HIGH</h3>
+                    <p style="font-size:var(--small-size);">This detects the <strong>moment</strong> the button is pressed — not held. We only want to toggle once per press!</p>
+                </div>
+                <div class="card card-green">
+                    <h3 style="font-size:var(--small-size);">delay(50) — Debounce</h3>
+                    <p style="font-size:var(--small-size);">Buttons "bounce" electrically when pressed. A 50ms delay prevents multiple triggers from a single press.</p>
+                </div>
+                <div class="hl-pink" style="font-size:var(--small-size);">
+                    <strong>Wiring:</strong> Button between Pin 2 and GND. LED + 220Ω resistor on Pin 13 to GND. Same as Day 1 LED circuit!
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 14: HOMEWORK
+     ============================================ -->
+<section class="slide bg-orange">
+    <div class="blob" style="width:240px;height:240px;background:#fed7aa;top:-60px;right:-60px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-hw reveal">Homework</span>
+        <h2 class="reveal" data-delay="1">Your Homework Challenges</h2>
+        <div class="grid-3 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-orange">
+                <div class="icon-circle icon-orange" style="margin-bottom:0.4em;font-weight:800;font-family:var(--font-display);">1</div>
+                <h3 style="font-size:var(--body-size);color:var(--accent2);">Two-Button Traffic Light</h3>
+                <p style="font-size:var(--small-size);">Add a second button on Pin 3. Button 1 turns on a red LED, Button 2 turns on a green LED. Only one can be on at a time.</p>
+            </div>
+            <div class="card card-purple">
+                <div class="icon-circle icon-purple" style="margin-bottom:0.4em;font-weight:800;font-family:var(--font-display);">2</div>
+                <h3 style="font-size:var(--body-size);color:var(--accent5);">Counter with Serial Monitor</h3>
+                <p style="font-size:var(--small-size);">Every time you press the button, increase a counter variable by 1 and print it. How high can you count?</p>
+            </div>
+            <div class="card card-green">
+                <div class="icon-circle icon-green" style="margin-bottom:0.4em;font-weight:800;font-family:var(--font-display);">3</div>
+                <h3 style="font-size:var(--body-size);color:var(--accent3);">Research Task</h3>
+                <p style="font-size:var(--small-size);">Find 2 real devices that use buttons as inputs and describe what their microcontroller does when the button is pressed.</p>
+            </div>
+        </div>
+        <div class="reveal" data-delay="3" style="margin-top:0.5em;">
+            <div class="hl-yellow" style="font-size:var(--small-size);">
+                <strong>Bonus Challenge — Reaction Timer!</strong> LED turns on after a random delay. Press the button as fast as you can. Use <code style="background:#fffbeb;padding:1px 5px;border-radius:4px;font-family:var(--font-code);">millis()</code> to measure and print your reaction time in milliseconds!
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 15: QUIZ
+     ============================================ -->
+<section class="slide bg-indigo">
+    <div class="blob" style="width:200px;height:200px;background:#c4b5fd;top:-40px;left:-40px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-quiz reveal">Quick Quiz</span>
+        <h2 class="reveal" data-delay="1" style="color:var(--accent);">Test Your Knowledge!</h2>
+        <div class="two-col reveal" data-delay="2" style="margin-top:0.3em;">
+
+            <!-- Q1 -->
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q1. What does <code style="background:#ede9fe;padding:1px 5px;border-radius:4px;font-family:var(--font-code);">Serial.begin(9600)</code> do?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) Starts the LED blinking</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) Starts serial communication at 9600 baud</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) Sets pin 9 to output</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Delays for 9600 milliseconds</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q2. With INPUT_PULLUP, pressing the button reads…?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) HIGH</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) LOW</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) 5V</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Nothing changes</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q3. What data type stores true or false?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) int</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) float</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) bool</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) String</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q4. What does <code style="background:#ede9fe;padding:1px 5px;border-radius:4px;font-family:var(--font-code);">ledState = !ledState</code> do?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) Always sets it to true</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) Deletes the variable</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) Flips it — true becomes false, false becomes true</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Adds 1 to the value</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const navDotsContainer = document.getElementById('navDots');
+    const slideCounter = document.getElementById('slideCounter');
+    const total = slides.length;
+    let current = 0;
+
+    slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', `Slide ${i + 1}`);
+        dot.addEventListener('click', () => scrollToSlide(i));
+        navDotsContainer.appendChild(dot);
+    });
+
+    function updateUI(index) {
+        current = index;
+        const pct = total > 1 ? (index / (total - 1)) * 100 : 100;
+        progressBar.style.width = pct + '%';
+        slideCounter.textContent = `${index + 1} / ${total}`;
+        document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === index));
+        revealSlide(index);
+    }
+
+    function scrollToSlide(index) { slides[index].scrollIntoView({ behavior: 'smooth' }); }
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                updateUI(Array.from(slides).indexOf(entry.target));
+            }
+        });
+    }, { threshold: 0.5 });
+
+    slides.forEach(s => observer.observe(s));
+
+    function revealSlide(index) {
+        slides[index].querySelectorAll('.reveal, .reveal-right, .reveal-scale, .reveal-up').forEach(el => el.classList.add('visible'));
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            if (current < total - 1) scrollToSlide(current + 1);
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            if (current > 0) scrollToSlide(current - 1);
+        }
+    });
+
+    window.addEventListener('load', () => updateUI(0));
+
+    function answer(btn, result) {
+        const group = btn.closest('.card');
+        group.querySelectorAll('.quiz-option').forEach(b => {
+            b.style.pointerEvents = 'none';
+            if (b.getAttribute('onclick').includes("'correct'")) b.classList.add('correct');
+        });
+        const feedback = group.querySelector('.quiz-feedback');
+        if (result === 'correct') {
+            btn.classList.add('correct');
+            feedback.textContent = 'Correct! Well done!';
+            feedback.style.background = '#d1fae5';
+            feedback.style.color = '#065f46';
+        } else {
+            btn.classList.add('wrong');
+            feedback.textContent = 'Not quite — the green answer is correct!';
+            feedback.style.background = '#fee2e2';
+            feedback.style.color = '#991b1b';
+        }
+        feedback.classList.add('show');
+    }
+</script>
+</body>
+</html>

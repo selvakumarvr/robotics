@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 Day 4 — DHT11 Temperature & Humidity</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--red:#ef4444;--red-dark:#dc2626;--red-light:#fee2e2;--orange:#f97316;--orange-light:#ffedd5;--amber:#f59e0b;--amber-light:#fef3c7;--blue:#3b82f6;--blue-light:#dbeafe;--green:#10b981;--green-light:#d1fae5;--slate:#1e293b;--slate-mid:#475569;}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;height:100%;}
+body{font-family:'Nunito',sans-serif;background:#fff5f5;color:var(--slate);}
+.slide{scroll-snap-align:start;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem;position:relative;overflow:hidden;}
+h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+code,pre{font-family:'Fira Code',monospace;}
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--red),var(--orange));transition:width .4s;z-index:100;}
+#nav-dots{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:100;}
+.dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;}
+.dot.active{background:var(--red);transform:scale(1.3);}
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.reveal-delay-1{transition-delay:.1s;}.reveal-delay-2{transition-delay:.2s;}.reveal-delay-3{transition-delay:.3s;}
+.slide-title{background:linear-gradient(135deg,#7f1d1d,#b91c1c,#ef4444);}
+.slide-title h1{font-size:clamp(2rem,5vw,3.5rem);color:#fff;text-align:center;line-height:1.2;}
+.subtitle{font-size:clamp(1rem,2.5vw,1.4rem);color:#fecaca;text-align:center;margin-top:1rem;}
+.badge{display:inline-block;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:.4rem 1.2rem;border-radius:999px;font-size:.9rem;font-weight:700;margin-bottom:1.5rem;}
+.wave{position:absolute;bottom:0;left:0;width:100%;opacity:.3;}
+.card{background:#fff;border-radius:1.2rem;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.08);border-left:5px solid var(--red);}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;width:100%;max-width:900px;}
+.card h3{font-size:1.1rem;color:var(--slate);margin-bottom:.4rem;}
+.card p{font-size:.9rem;color:var(--slate-mid);line-height:1.5;}
+.card-icon{font-size:2rem;margin-bottom:.5rem;}
+.code-block{background:#0f172a;border-radius:1rem;padding:1.5rem;width:100%;max-width:800px;overflow-x:auto;}
+.code-block pre{color:#e2e8f0;font-size:.82rem;line-height:1.7;}
+.kw{color:#7dd3fc;}.fn{color:#86efac;}.cm{color:#64748b;}.str{color:#fde68a;}.num{color:#fb923c;}
+.steps{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:800px;}
+.step{display:flex;align-items:flex-start;gap:1rem;background:#fff;padding:1.2rem 1.5rem;border-radius:1rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.step-num{min-width:2.2rem;height:2.2rem;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;}
+.step-text h4{font-size:1rem;color:var(--slate);margin-bottom:.2rem;}
+.step-text p{font-size:.88rem;color:var(--slate-mid);}
+.wire-table{width:100%;max-width:650px;border-collapse:collapse;}
+.wire-table th{background:var(--red);color:#fff;padding:.7rem 1rem;text-align:left;font-family:'Baloo 2',sans-serif;}
+.wire-table td{padding:.7rem 1rem;border-bottom:1px solid #e2e8f0;font-size:.9rem;}
+.wire-table tr:nth-child(even) td{background:#fff5f5;}
+.pin{display:inline-block;padding:.2rem .6rem;border-radius:.4rem;font-family:'Fira Code',monospace;font-size:.82rem;font-weight:600;}
+.pin-vcc{background:#fee2e2;color:#b91c1c;}.pin-gnd{background:#1e293b;color:#fff;}.pin-data{background:#dbeafe;color:#1e40af;}
+.hw-list{display:flex;flex-direction:column;gap:.8rem;width:100%;max-width:700px;}
+.hw-item{display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem 1.4rem;border-radius:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.hw-badge{padding:.25rem .8rem;border-radius:999px;font-size:.75rem;font-weight:700;white-space:nowrap;}
+.hw-easy{background:#dcfce7;color:#166534;}.hw-medium{background:#fef9c3;color:#854d0e;}.hw-hard{background:#fee2e2;color:#991b1b;}.hw-bonus{background:#ede9fe;color:#5b21b6;}
+.quiz-q{background:#fff;border-radius:1.2rem;padding:1.8rem;width:100%;max-width:750px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.quiz-q h3{font-size:1.15rem;margin-bottom:1.2rem;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+.opt{padding:.9rem 1.2rem;border-radius:.8rem;border:2px solid #e2e8f0;cursor:pointer;font-size:.9rem;font-family:'Nunito',sans-serif;background:#fff;transition:all .2s;text-align:left;}
+.opt:hover{border-color:var(--red);background:var(--red-light);}
+.opt.correct{background:#dcfce7;border-color:#16a34a;color:#166534;font-weight:700;}
+.opt.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b;}
+.quiz-nav{display:flex;gap:1rem;margin-top:1.5rem;justify-content:center;}
+.btn{padding:.7rem 1.8rem;border-radius:999px;border:none;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1rem;transition:all .2s;}
+.btn-red{background:var(--red);color:#fff;}.btn-red:hover{background:var(--red-dark);}
+#quiz-score{text-align:center;font-size:1.3rem;font-weight:700;margin-top:1rem;color:var(--red-dark);}
+.slide-header{text-align:center;margin-bottom:2rem;}
+.slide-header h2{font-size:clamp(1.6rem,3.5vw,2.4rem);color:var(--slate);}
+.slide-header p{color:var(--slate-mid);margin-top:.4rem;}
+.tag{display:inline-block;background:var(--red-light);color:var(--red-dark);padding:.2rem .8rem;border-radius:999px;font-size:.78rem;font-weight:700;margin-bottom:.5rem;}
+.sensor-diagram{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;justify-content:center;}
+.dht-pin{width:60px;text-align:center;}
+.dht-pin .pin-num{width:40px;height:60px;background:#1e293b;border-radius:.5rem;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1.2rem;margin:0 auto .5rem;}
+.dht-pin .pin-label{font-size:.75rem;font-weight:700;color:var(--slate-mid);}
+.big-stat{display:flex;gap:2rem;flex-wrap:wrap;justify-content:center;}
+.stat-box{background:#fff;border-radius:1.5rem;padding:2rem 2.5rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.1);}
+.stat-value{font-size:3rem;font-family:'Baloo 2',sans-serif;font-weight:800;}
+.stat-label{font-size:.9rem;color:var(--slate-mid);margin-top:.3rem;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="nav-dots"></div>
+
+<!-- Slide 1: Title -->
+<div class="slide slide-title">
+  <div class="badge reveal">Week 2 · Day 4</div>
+  <h1 class="reveal reveal-delay-1">Temperature &<br>Humidity Sensor</h1>
+  <p class="subtitle reveal reveal-delay-2">Reading the environment with the DHT11</p>
+  <div style="display:flex;gap:1.5rem;margin-top:2rem;flex-wrap:wrap;justify-content:center;" class="reveal reveal-delay-3">
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">DHT11 Sensor</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">float variables</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">LCD Dashboard</span>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 100"><path fill="#fff5f5" d="M0,60 C360,100 1080,0 1440,60 L1440,100 L0,100 Z"/></svg>
+</div>
+
+<!-- Slide 2: What is DHT11 -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">The Sensor</div>
+    <h2>Meet the DHT11</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card" style="border-color:var(--red);">
+      <div class="card-icon">🌡️</div>
+      <h3>Temperature</h3>
+      <p>Measures from <strong>0°C to 50°C</strong> with ±2°C accuracy. Good for indoor environments!</p>
+    </div>
+    <div class="card" style="border-color:var(--blue);">
+      <div class="card-icon">💧</div>
+      <h3>Humidity</h3>
+      <p>Measures relative humidity from <strong>20% to 90%</strong> with ±5% accuracy</p>
+    </div>
+    <div class="card" style="border-color:var(--orange);">
+      <div class="card-icon">🔌</div>
+      <h3>Only 3 Pins</h3>
+      <p>VCC (3.3V or 5V), GND, and a single data pin. Uses its own serial protocol!</p>
+    </div>
+    <div class="card" style="border-color:var(--green);">
+      <div class="card-icon">📦</div>
+      <h3>DHT Library</h3>
+      <p>The DHT library handles all the complex communication. Just call <code>dht.readTemperature()</code>!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: Wiring -->
+<div class="slide" style="background:linear-gradient(135deg,#fff5f5,#fee2e2);">
+  <div class="slide-header reveal">
+    <div class="tag">Wiring</div>
+    <h2>DHT11 Connections</h2>
+    <p>Only 3 wires needed!</p>
+  </div>
+  <table class="wire-table reveal reveal-delay-1">
+    <tr><th>DHT11 Pin</th><th>Arduino</th><th>Notes</th></tr>
+    <tr><td><span class="pin pin-vcc">VCC (Pin 1)</span></td><td>5V</td><td>Power supply</td></tr>
+    <tr><td><span class="pin pin-data">DATA (Pin 2)</span></td><td>Digital Pin 2</td><td>Add 10kΩ pull-up to 5V</td></tr>
+    <tr><td>NC (Pin 3)</td><td>—</td><td>Not connected</td></tr>
+    <tr><td><span class="pin pin-gnd">GND (Pin 4)</span></td><td>GND</td><td>Ground</td></tr>
+  </table>
+  <div class="card reveal reveal-delay-2" style="max-width:650px;margin-top:1rem;border-color:var(--amber);">
+    <p>💡 Most DHT11 <strong>modules</strong> (on a breakout board) have only 3 pins and the pull-up resistor built in — just VCC, DATA, GND. Much easier!</p>
+  </div>
+</div>
+
+<!-- Slide 4: float variables -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">New Concept</div>
+    <h2>float — Numbers with Decimal Points</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card" style="border-color:var(--red);">
+      <h3>int vs float</h3>
+      <p><code>int temp = 23;</code> — whole numbers only<br><code>float temp = 23.5;</code> — decimals allowed!</p>
+    </div>
+    <div class="card" style="border-color:var(--orange);">
+      <h3>Memory</h3>
+      <p><code>int</code> = 2 bytes. <code>float</code> = 4 bytes. Floats use more memory but handle sensor readings perfectly</p>
+    </div>
+    <div class="card" style="border-color:var(--blue);">
+      <h3>NaN check!</h3>
+      <p>DHT can fail to read. Always check: <code>if (isnan(temp))</code> before using the value</p>
+    </div>
+    <div class="card" style="border-color:var(--green);">
+      <h3>Printing floats</h3>
+      <p><code>Serial.print(temp, 1)</code> — prints with 1 decimal place. Default is 2 decimal places</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: Basic Code -->
+<div class="slide" style="background:linear-gradient(135deg,#fff5f5,#fee2e2);">
+  <div class="slide-header reveal">
+    <div class="tag">Code</div>
+    <h2>Reading Temperature & Humidity</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1">
+    <pre><span class="kw">#include</span> <span class="str">&lt;DHT.h&gt;</span>
+
+<span class="kw">#define</span> DHTPIN <span class="num">2</span>
+<span class="kw">#define</span> DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  Serial.<span class="fn">begin</span>(<span class="num">9600</span>);
+  dht.<span class="fn">begin</span>();
+  Serial.<span class="fn">println</span>(<span class="str">"DHT11 Ready!"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="fn">delay</span>(<span class="num">2000</span>);  <span class="cm">// DHT11 needs 2 sec between readings</span>
+
+  <span class="kw">float</span> humidity = dht.<span class="fn">readHumidity</span>();
+  <span class="kw">float</span> tempC = dht.<span class="fn">readTemperature</span>();
+  <span class="kw">float</span> tempF = dht.<span class="fn">readTemperature</span>(<span class="kw">true</span>); <span class="cm">// true = Fahrenheit</span>
+
+  <span class="kw">if</span> (<span class="fn">isnan</span>(humidity) || <span class="fn">isnan</span>(tempC)) {
+    Serial.<span class="fn">println</span>(<span class="str">"Read failed!"</span>);
+    <span class="kw">return</span>;
+  }
+
+  Serial.<span class="fn">print</span>(<span class="str">"Temp: "</span>); Serial.<span class="fn">print</span>(tempC); Serial.<span class="fn">println</span>(<span class="str">"°C"</span>);
+  Serial.<span class="fn">print</span>(<span class="str">"Humidity: "</span>); Serial.<span class="fn">print</span>(humidity); Serial.<span class="fn">println</span>(<span class="str">"%"</span>);
+}</pre>
+  </div>
+</div>
+
+<!-- Slide 6: Project -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Project</div>
+    <h2>Temperature Dashboard on LCD</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1" style="font-size:.75rem;">
+    <pre><span class="kw">#include</span> <span class="str">&lt;DHT.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;LiquidCrystal.h&gt;</span>
+
+DHT dht(<span class="num">2</span>, DHT11);
+LiquidCrystal lcd(<span class="num">12</span>,<span class="num">11</span>,<span class="num">5</span>,<span class="num">4</span>,<span class="num">3</span>,<span class="num">2</span>);  <span class="cm">// adjust pins as needed</span>
+<span class="cm">// Note: DHT uses pin 7 if LCD uses pin 2</span>
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  lcd.<span class="fn">begin</span>(<span class="num">16</span>, <span class="num">2</span>);
+  dht.<span class="fn">begin</span>();
+  lcd.<span class="fn">print</span>(<span class="str">"Weather Station"</span>);
+  <span class="fn">delay</span>(<span class="num">2000</span>); lcd.<span class="fn">clear</span>();
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">float</span> h = dht.<span class="fn">readHumidity</span>();
+  <span class="kw">float</span> t = dht.<span class="fn">readTemperature</span>();
+  <span class="kw">if</span> (!<span class="fn">isnan</span>(t) && !<span class="fn">isnan</span>(h)) {
+    lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">0</span>);
+    lcd.<span class="fn">print</span>(<span class="str">"Temp: "</span>); lcd.<span class="fn">print</span>(t, <span class="num">1</span>); lcd.<span class="fn">print</span>(<span class="str">" C  "</span>);
+    lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">1</span>);
+    lcd.<span class="fn">print</span>(<span class="str">"Hum:  "</span>); lcd.<span class="fn">print</span>(h, <span class="num">1</span>); lcd.<span class="fn">print</span>(<span class="str">" %  "</span>);
+    <span class="cm">// Comfort indicator</span>
+    <span class="kw">if</span> (t > <span class="num">28</span>) { lcd.<span class="fn">setCursor</span>(<span class="num">14</span>,<span class="num">0</span>); lcd.<span class="fn">print</span>(<span class="str">"!!"</span>); }
+  }
+  <span class="fn">delay</span>(<span class="num">2000</span>);
+}</pre>
+  </div>
+</div>
+
+<!-- Slide 7: Homework -->
+<div class="slide" style="background:linear-gradient(135deg,#fff5f5,#fee2e2);">
+  <div class="slide-header reveal">
+    <div class="tag">Homework</div>
+    <h2>Take It Further!</h2>
+  </div>
+  <div class="hw-list reveal reveal-delay-1">
+    <div class="hw-item"><span class="hw-badge hw-easy">Easy</span><p>Add a Serial Plotter graph — use Serial.println(tempC) to see a live temperature graph</p></div>
+    <div class="hw-item"><span class="hw-badge hw-medium">Medium</span><p>Add a comfort message on LCD: "COZY 😊" (18–24°C), "TOO HOT! 🥵" (&gt;28°C), "TOO COLD 🥶" (&lt;18°C)</p></div>
+    <div class="hw-item"><span class="hw-badge hw-hard">Hard</span><p>Calculate the Heat Index (feels-like temperature) using the formula: HI = -8.78469 + 1.61139411*T + 2.3385*H...</p></div>
+    <div class="hw-item"><span class="hw-badge hw-bonus">Bonus</span><p>Control a fan (servo or DC motor) speed based on temperature — hotter = faster fan!</p></div>
+  </div>
+</div>
+
+<!-- Slide 8: Quiz -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Quiz Time!</div>
+    <h2>Test Your Knowledge</h2>
+  </div>
+  <div id="quiz-container" class="reveal reveal-delay-1">
+    <div class="quiz-q" id="q-display"><h3 id="q-text"></h3><div class="options" id="q-options"></div></div>
+    <div class="quiz-nav"><button class="btn btn-red" onclick="nextQ()">Next Question →</button></div>
+    <div id="quiz-score"></div>
+  </div>
+</div>
+
+<!-- Slide 9: Summary -->
+<div class="slide" style="background:linear-gradient(135deg,#7f1d1d,#b91c1c,#ef4444);">
+  <div class="slide-header reveal" style="color:#fff;">
+    <div class="tag" style="background:rgba(255,255,255,.2);color:#fff;">Day 4 Complete!</div>
+    <h2 style="color:#fff;">What You Learned Today</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1" style="max-width:800px;">
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🌡️</div><h3 style="color:#fecaca;">DHT11 Sensor</h3><p style="color:#fee2e2;">Reads temperature (0–50°C) and humidity (20–90%) with a single data pin</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🔢</div><h3 style="color:#fecaca;">float Data Type</h3><p style="color:#fee2e2;">For decimal numbers like 23.5°C — always check for NaN before using!</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">📚</div><h3 style="color:#fecaca;">DHT Library</h3><p style="color:#fee2e2;">dht.begin(), readTemperature(), readHumidity() — sensor communication made easy</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">📊</div><h3 style="color:#fecaca;">LCD Dashboard</h3><p style="color:#fee2e2;">Combined DHT11 + LCD to build a real weather station display</p>
+    </div>
+  </div>
+  <p class="reveal reveal-delay-2" style="color:#fecaca;margin-top:1.5rem;font-size:1.1rem;">Tomorrow: OLED Display — tiny screen, huge cool factor! 📺</p>
+</div>
+
+<script>
+const questions=[
+  {q:"What data type should you use to store 23.5°C?",opts:["int","bool","float","String"],ans:2},
+  {q:"Why does DHT11 need a 2-second delay between readings?",opts:["Arduino is slow","DHT11 sensor needs time to take accurate measurements","To save battery","Library requirement"],ans:1},
+  {q:"What does isnan() check for?",opts:["If a number is negative","If a variable is null","If a float value is NaN (failed reading)","If a number is zero"],ans:2},
+  {q:"Which function reads Fahrenheit from DHT?",opts:["readFahrenheit()","readTemperature(true)","getTemp('F')","readHumidity()"],ans:1},
+];
+let qIdx=0,score=0,answered=false;
+function showQ(){
+  if(qIdx>=questions.length){document.getElementById('q-display').style.display='none';document.getElementById('quiz-score').innerHTML=`🎉 You scored ${score}/${questions.length}!`;return;}
+  const q=questions[qIdx];document.getElementById('q-text').textContent=`Q${qIdx+1}: ${q.q}`;
+  const opts=document.getElementById('q-options');opts.innerHTML='';answered=false;
+  q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>{if(answered)return;answered=true;b.classList.add(i===q.ans?'correct':'wrong');if(i===q.ans)score++;};opts.appendChild(b);});
+}
+function nextQ(){qIdx++;showQ();}
+showQ();
+const slides=document.querySelectorAll('.slide');
+const dotsEl=document.getElementById('nav-dots');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>slides[i].scrollIntoView({behavior:'smooth'});dotsEl.appendChild(d);});
+const dots=document.querySelectorAll('.dot');
+const prog=document.getElementById('progress');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const i=[...slides].indexOf(e.target);dots.forEach((d,j)=>d.classList.toggle('active',i===j));prog.style.width=`${((i+1)/slides.length)*100}%`;e.target.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}});},{threshold:0.5});
+slides.forEach(s=>obs.observe(s));
+document.addEventListener('keydown',e=>{const active=[...slides].findIndex(s=>s.getBoundingClientRect().top>-10&&s.getBoundingClientRect().top<window.innerHeight/2);if(e.key==='ArrowDown'||e.key===' ')slides[Math.min(active+1,slides.length-1)].scrollIntoView({behavior:'smooth'});if(e.key==='ArrowUp')slides[Math.max(active-1,0)].scrollIntoView({behavior:'smooth'});});
+</script>
+</body>
+</html>

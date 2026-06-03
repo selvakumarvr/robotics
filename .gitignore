@@ -1,0 +1,4 @@
+.DS_Store
+.claude-design/
+*.py
+__pycache__/

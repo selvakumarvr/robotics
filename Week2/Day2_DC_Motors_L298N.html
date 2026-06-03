@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 Day 2 — DC Motors & L298N</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --orange:#f97316;--orange-dark:#ea580c;--orange-light:#ffedd5;
+  --red:#ef4444;--red-light:#fee2e2;
+  --amber:#f59e0b;--amber-light:#fef3c7;
+  --green:#10b981;--green-light:#d1fae5;
+  --blue:#3b82f6;--blue-light:#dbeafe;
+  --slate:#1e293b;--slate-mid:#475569;
+}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;height:100%;}
+body{font-family:'Nunito',sans-serif;background:#fff7ed;color:var(--slate);}
+.slide{scroll-snap-align:start;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem;position:relative;overflow:hidden;}
+h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+code,pre{font-family:'Fira Code',monospace;}
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--orange),var(--red));transition:width .4s;z-index:100;}
+#nav-dots{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:100;}
+.dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;}
+.dot.active{background:var(--orange);transform:scale(1.3);}
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.reveal-delay-1{transition-delay:.1s;}.reveal-delay-2{transition-delay:.2s;}.reveal-delay-3{transition-delay:.3s;}.reveal-delay-4{transition-delay:.4s;}
+.slide-title{background:linear-gradient(135deg,#7c2d12,#c2410c,#f97316);}
+.slide-title h1{font-size:clamp(2rem,5vw,3.5rem);color:#fff;text-align:center;line-height:1.2;}
+.subtitle{font-size:clamp(1rem,2.5vw,1.4rem);color:#fed7aa;text-align:center;margin-top:1rem;}
+.badge{display:inline-block;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:.4rem 1.2rem;border-radius:999px;font-size:.9rem;font-weight:700;margin-bottom:1.5rem;}
+.wave{position:absolute;bottom:0;left:0;width:100%;opacity:.3;}
+.card{background:#fff;border-radius:1.2rem;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.08);border-left:5px solid var(--orange);}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;width:100%;max-width:900px;}
+.card-icon{font-size:2rem;margin-bottom:.5rem;}
+.card h3{font-size:1.1rem;color:var(--slate);margin-bottom:.4rem;}
+.card p{font-size:.9rem;color:var(--slate-mid);line-height:1.5;}
+.slide-divider{color:#fff;text-align:center;}
+.divider-title{font-size:clamp(1.8rem,4vw,2.8rem);font-family:'Baloo 2',sans-serif;font-weight:700;margin-top:.5rem;}
+.divider-sub{font-size:1.1rem;opacity:.85;margin-top:.5rem;}
+.code-block{background:#0f172a;border-radius:1rem;padding:1.5rem;width:100%;max-width:800px;overflow-x:auto;}
+.code-block pre{color:#e2e8f0;font-size:.82rem;line-height:1.7;}
+.kw{color:#7dd3fc;}.fn{color:#86efac;}.cm{color:#64748b;}.str{color:#fde68a;}.num{color:#fb923c;}
+.steps{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:800px;}
+.step{display:flex;align-items:flex-start;gap:1rem;background:#fff;padding:1.2rem 1.5rem;border-radius:1rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.step-num{min-width:2.2rem;height:2.2rem;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;}
+.step-text h4{font-size:1rem;color:var(--slate);margin-bottom:.2rem;}
+.step-text p{font-size:.88rem;color:var(--slate-mid);}
+.wire-table{width:100%;max-width:750px;border-collapse:collapse;}
+.wire-table th{background:var(--orange);color:#fff;padding:.7rem 1rem;text-align:left;font-family:'Baloo 2',sans-serif;}
+.wire-table td{padding:.7rem 1rem;border-bottom:1px solid #e2e8f0;font-size:.9rem;}
+.wire-table tr:nth-child(even) td{background:#fff7ed;}
+.pin{display:inline-block;padding:.2rem .6rem;border-radius:.4rem;font-family:'Fira Code',monospace;font-size:.82rem;font-weight:600;}
+.pin-vcc{background:#fee2e2;color:#b91c1c;}
+.pin-gnd{background:#1e293b;color:#fff;}
+.pin-data{background:#dbeafe;color:#1e40af;}
+.pin-out{background:#dcfce7;color:#166534;}
+.pin-pwm{background:#fef3c7;color:#92400e;}
+.hw-list{display:flex;flex-direction:column;gap:.8rem;width:100%;max-width:700px;}
+.hw-item{display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem 1.4rem;border-radius:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.hw-badge{padding:.25rem .8rem;border-radius:999px;font-size:.75rem;font-weight:700;white-space:nowrap;}
+.hw-easy{background:#dcfce7;color:#166534;}.hw-medium{background:#fef9c3;color:#854d0e;}.hw-hard{background:#fee2e2;color:#991b1b;}.hw-bonus{background:#ede9fe;color:#5b21b6;}
+.quiz-q{background:#fff;border-radius:1.2rem;padding:1.8rem;width:100%;max-width:750px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.quiz-q h3{font-size:1.15rem;margin-bottom:1.2rem;color:var(--slate);}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+.opt{padding:.9rem 1.2rem;border-radius:.8rem;border:2px solid #e2e8f0;cursor:pointer;font-size:.9rem;font-family:'Nunito',sans-serif;background:#fff;transition:all .2s;text-align:left;}
+.opt:hover{border-color:var(--orange);background:var(--orange-light);}
+.opt.correct{background:#dcfce7;border-color:#16a34a;color:#166534;font-weight:700;}
+.opt.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b;}
+.quiz-nav{display:flex;gap:1rem;margin-top:1.5rem;justify-content:center;}
+.btn{padding:.7rem 1.8rem;border-radius:999px;border:none;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1rem;transition:all .2s;}
+.btn-orange{background:var(--orange);color:#fff;}.btn-orange:hover{background:var(--orange-dark);}
+#quiz-score{text-align:center;font-size:1.3rem;font-weight:700;margin-top:1rem;color:var(--orange-dark);}
+.slide-header{text-align:center;margin-bottom:2rem;}
+.slide-header h2{font-size:clamp(1.6rem,3.5vw,2.4rem);color:var(--slate);}
+.slide-header p{color:var(--slate-mid);margin-top:.4rem;}
+.tag{display:inline-block;background:var(--orange-light);color:var(--orange-dark);padding:.2rem .8rem;border-radius:999px;font-size:.78rem;font-weight:700;margin-bottom:.5rem;}
+.h-bridge{display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:700px;width:100%;}
+.hb-state{background:#fff;border-radius:1rem;padding:1.2rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.hb-state h4{font-family:'Baloo 2',sans-serif;font-size:1rem;margin-bottom:.5rem;}
+.hb-state .arrows{font-size:2rem;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="nav-dots"></div>
+
+<!-- Slide 1: Title -->
+<div class="slide slide-title">
+  <div class="badge reveal">Week 2 · Day 2</div>
+  <h1 class="reveal reveal-delay-1">DC Motors &<br>Motor Driver</h1>
+  <p class="subtitle reveal reveal-delay-2">Making things spin with the L298N H-Bridge!</p>
+  <div style="display:flex;gap:1.5rem;margin-top:2rem;flex-wrap:wrap;justify-content:center;" class="reveal reveal-delay-3">
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">L298N Driver</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">H-Bridge</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">Speed Control</span>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 100"><path fill="#fff7ed" d="M0,60 C360,100 1080,0 1440,60 L1440,100 L0,100 Z"/></svg>
+</div>
+
+<!-- Slide 2: Why motor driver? -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">The Problem</div>
+    <h2>Why Can't Arduino Drive a Motor Directly?</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card" style="border-color:var(--red);">
+      <div class="card-icon">⚡</div>
+      <h3>Arduino Pin Limit</h3>
+      <p>Each Arduino pin can only supply <strong>40mA max</strong>. A DC motor needs 200mA–1A to run!</p>
+    </div>
+    <div class="card" style="border-color:var(--amber);">
+      <div class="card-icon">🔄</div>
+      <h3>Direction Problem</h3>
+      <p>Arduino can only output HIGH or LOW (one direction). Motors need to go <strong>forwards AND backwards</strong>.</p>
+    </div>
+    <div class="card" style="border-color:var(--green);">
+      <div class="card-icon">🛡️</div>
+      <h3>The Solution: L298N</h3>
+      <p>The L298N motor driver takes Arduino's logic signals and controls a separate power supply for the motors.</p>
+    </div>
+    <div class="card" style="border-color:var(--orange);">
+      <div class="card-icon">🤖</div>
+      <h3>Used Everywhere!</h3>
+      <p>Every robot car uses a motor driver. Master this and you can build any wheeled robot!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: H-Bridge explained -->
+<div class="slide" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+  <div class="slide-header reveal">
+    <div class="tag">H-Bridge</div>
+    <h2>How the H-Bridge Works</h2>
+    <p>Named after the "H" shape of its circuit diagram</p>
+  </div>
+  <div class="h-bridge reveal reveal-delay-1">
+    <div class="hb-state" style="border:2px solid var(--green);">
+      <h4 style="color:var(--green);">Forward</h4>
+      <div class="arrows">➡️</div>
+      <p style="font-size:.85rem;margin-top:.5rem;"><code>IN1=HIGH, IN2=LOW</code></p>
+      <p style="font-size:.8rem;color:#64748b;">Current flows left → right through motor</p>
+    </div>
+    <div class="hb-state" style="border:2px solid var(--blue);">
+      <h4 style="color:var(--blue);">Backward</h4>
+      <div class="arrows">⬅️</div>
+      <p style="font-size:.85rem;margin-top:.5rem;"><code>IN1=LOW, IN2=HIGH</code></p>
+      <p style="font-size:.8rem;color:#64748b;">Current flows right → left through motor</p>
+    </div>
+    <div class="hb-state" style="border:2px solid #64748b;">
+      <h4 style="color:#64748b;">Stop (Brake)</h4>
+      <div class="arrows">⏹️</div>
+      <p style="font-size:.85rem;margin-top:.5rem;"><code>IN1=HIGH, IN2=HIGH</code></p>
+      <p style="font-size:.8rem;color:#64748b;">Motor brakes (both sides connected)</p>
+    </div>
+    <div class="hb-state" style="border:2px solid #64748b;">
+      <h4 style="color:#64748b;">Coast (Free)</h4>
+      <div class="arrows">💨</div>
+      <p style="font-size:.85rem;margin-top:.5rem;"><code>IN1=LOW, IN2=LOW</code></p>
+      <p style="font-size:.8rem;color:#64748b;">Motor coasts to a stop freely</p>
+    </div>
+  </div>
+  <div class="card reveal reveal-delay-2" style="max-width:700px;margin-top:1rem;border-color:var(--orange);">
+    <p><strong>ENA pin</strong> = Enable + Speed control. Use <code>analogWrite(ENA, 0-255)</code> to set motor speed!</p>
+  </div>
+</div>
+
+<!-- Slide 4: L298N Wiring -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Wiring</div>
+    <h2>L298N Motor Driver Connections</h2>
+  </div>
+  <table class="wire-table reveal reveal-delay-1">
+    <tr><th>L298N Pin</th><th>Arduino / Power</th><th>Purpose</th></tr>
+    <tr><td><span class="pin pin-vcc">12V</span></td><td>External battery (7–12V)</td><td>Motor power supply</td></tr>
+    <tr><td><span class="pin pin-gnd">GND</span></td><td>Common GND (Arduino + battery)</td><td>Shared ground</td></tr>
+    <tr><td><span class="pin pin-data">5V out</span></td><td>Can power Arduino 5V pin</td><td>Onboard regulator output</td></tr>
+    <tr><td><span class="pin pin-data">IN1</span></td><td>Digital Pin 4</td><td>Motor A direction bit 1</td></tr>
+    <tr><td><span class="pin pin-data">IN2</span></td><td>Digital Pin 5</td><td>Motor A direction bit 2</td></tr>
+    <tr><td><span class="pin pin-pwm">ENA</span></td><td>PWM Pin 3</td><td>Motor A speed (0–255)</td></tr>
+    <tr><td><span class="pin pin-out">OUT1/OUT2</span></td><td>DC Motor terminals</td><td>Motor A output wires</td></tr>
+  </table>
+  <div class="card reveal reveal-delay-2" style="max-width:700px;margin-top:1rem;border-color:var(--amber);">
+    <p>💡 For Tinkercad simulation, the L298N module is available in the component library. The built-in 5V jumper on the L298N board can power Arduino directly!</p>
+  </div>
+</div>
+
+<!-- Slide 5: Basic Code -->
+<div class="slide" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+  <div class="slide-header reveal">
+    <div class="tag">Code</div>
+    <h2>Controlling a DC Motor</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1">
+    <pre><span class="kw">const int</span> in1 = <span class="num">4</span>;
+<span class="kw">const int</span> in2 = <span class="num">5</span>;
+<span class="kw">const int</span> ena = <span class="num">3</span>;  <span class="cm">// PWM pin</span>
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(in1, OUTPUT);
+  <span class="fn">pinMode</span>(in2, OUTPUT);
+  <span class="fn">pinMode</span>(ena, OUTPUT);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cm">// Forward at full speed</span>
+  <span class="fn">digitalWrite</span>(in1, HIGH);
+  <span class="fn">digitalWrite</span>(in2, LOW);
+  <span class="fn">analogWrite</span>(ena, <span class="num">255</span>);   <span class="cm">// Full speed</span>
+  <span class="fn">delay</span>(<span class="num">2000</span>);
+
+  <span class="cm">// Slow down</span>
+  <span class="fn">analogWrite</span>(ena, <span class="num">100</span>);   <span class="cm">// Half speed</span>
+  <span class="fn">delay</span>(<span class="num">2000</span>);
+
+  <span class="cm">// Backward</span>
+  <span class="fn">digitalWrite</span>(in1, LOW);
+  <span class="fn">digitalWrite</span>(in2, HIGH);
+  <span class="fn">analogWrite</span>(ena, <span class="num">200</span>);
+  <span class="fn">delay</span>(<span class="num">2000</span>);
+
+  <span class="cm">// Stop</span>
+  <span class="fn">analogWrite</span>(ena, <span class="num">0</span>);
+  <span class="fn">delay</span>(<span class="num">1000</span>);
+}</pre>
+  </div>
+</div>
+
+<!-- Slide 6: Project -->
+<div class="slide slide-divider" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
+  <div class="reveal">
+    <div style="font-size:4rem;">🎛️</div>
+    <div class="divider-title">Project: Potentiometer<br>Speed Controller</div>
+    <div class="divider-sub">Turn a knob to control motor speed and direction</div>
+  </div>
+</div>
+
+<!-- Slide 7: Project Code -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Project Code</div>
+    <h2>Pot-Controlled Motor Speed</h2>
+    <p>Map potentiometer (0–1023) to motor speed and direction</p>
+  </div>
+  <div class="code-block reveal reveal-delay-1">
+    <pre><span class="kw">const int</span> potPin = A0;
+<span class="kw">const int</span> in1=<span class="num">4</span>, in2=<span class="num">5</span>, ena=<span class="num">3</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(in1, OUTPUT); <span class="fn">pinMode</span>(in2, OUTPUT); <span class="fn">pinMode</span>(ena, OUTPUT);
+  Serial.<span class="fn">begin</span>(<span class="num">9600</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">int</span> potVal = <span class="fn">analogRead</span>(potPin);  <span class="cm">// 0–1023</span>
+
+  <span class="kw">if</span> (potVal &lt; <span class="num">412</span>) {
+    <span class="cm">// Left half → reverse, faster as you turn left</span>
+    <span class="fn">digitalWrite</span>(in1, LOW); <span class="fn">digitalWrite</span>(in2, HIGH);
+    <span class="kw">int</span> spd = <span class="fn">map</span>(potVal, <span class="num">412</span>, <span class="num">0</span>, <span class="num">0</span>, <span class="num">255</span>);
+    <span class="fn">analogWrite</span>(ena, spd);
+  } <span class="kw">else if</span> (potVal &gt; <span class="num">612</span>) {
+    <span class="cm">// Right half → forward, faster as you turn right</span>
+    <span class="fn">digitalWrite</span>(in1, HIGH); <span class="fn">digitalWrite</span>(in2, LOW);
+    <span class="kw">int</span> spd = <span class="fn">map</span>(potVal, <span class="num">612</span>, <span class="num">1023</span>, <span class="num">0</span>, <span class="num">255</span>);
+    <span class="fn">analogWrite</span>(ena, spd);
+  } <span class="kw">else</span> {
+    <span class="cm">// Middle zone → stop</span>
+    <span class="fn">analogWrite</span>(ena, <span class="num">0</span>);
+  }
+  Serial.<span class="fn">println</span>(potVal);
+  <span class="fn">delay</span>(<span class="num">50</span>);
+}</pre>
+  </div>
+</div>
+
+<!-- Slide 8: Two Motor Setup -->
+<div class="slide" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+  <div class="slide-header reveal">
+    <div class="tag">Going Further</div>
+    <h2>Two Motors — Robot Chassis!</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card">
+      <div class="card-icon">🔌</div>
+      <h3>L298N has 2 channels</h3>
+      <p>IN1/IN2 + ENA = Motor A. IN3/IN4 + ENB = Motor B. Control two motors independently!</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">➡️</div>
+      <h3>Move Forward</h3>
+      <p>Both motors forward → robot goes straight</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">↩️</div>
+      <h3>Turn Left</h3>
+      <p>Right motor forward, left motor stop (or reverse)</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">↪️</div>
+      <h3>Turn Right</h3>
+      <p>Left motor forward, right motor stop (or reverse)</p>
+    </div>
+  </div>
+  <div class="card reveal reveal-delay-2" style="max-width:700px;margin-top:1rem;background:#0f172a;border-color:var(--orange);">
+    <p style="color:#fed7aa;">This is exactly what your <strong style="color:#fb923c;">Week 2 Capstone</strong> obstacle-avoiding robot will use! We'll add the ultrasonic sensor from Day 1 to navigate automatically.</p>
+  </div>
+</div>
+
+<!-- Slide 9: Homework -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Homework</div>
+    <h2>Take It Further!</h2>
+  </div>
+  <div class="hw-list reveal reveal-delay-1">
+    <div class="hw-item"><span class="hw-badge hw-easy">Easy</span><p>Make the motor accelerate from 0 to full speed gradually using a for loop and analogWrite</p></div>
+    <div class="hw-item"><span class="hw-badge hw-medium">Medium</span><p>Add a push button: one press = forward, second press = backward, third press = stop</p></div>
+    <div class="hw-item"><span class="hw-badge hw-hard">Hard</span><p>Wire up TWO motors to channels A and B of L298N. Write a function <code>moveRobot(dir, speed)</code></p></div>
+    <div class="hw-item"><span class="hw-badge hw-bonus">Bonus</span><p>Add an LCD that displays the current motor direction (FORWARD / REVERSE / STOP) and speed %</p></div>
+  </div>
+</div>
+
+<!-- Slide 10: Quiz -->
+<div class="slide" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+  <div class="slide-header reveal">
+    <div class="tag">Quiz Time!</div>
+    <h2>Test Your Knowledge</h2>
+  </div>
+  <div id="quiz-container" class="reveal reveal-delay-1">
+    <div class="quiz-q" id="q-display">
+      <h3 id="q-text"></h3>
+      <div class="options" id="q-options"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="btn btn-orange" onclick="nextQ()">Next Question →</button>
+    </div>
+    <div id="quiz-score"></div>
+  </div>
+</div>
+
+<!-- Slide 11: Summary -->
+<div class="slide" style="background:linear-gradient(135deg,#7c2d12,#c2410c,#f97316);">
+  <div class="slide-header reveal" style="color:#fff;">
+    <div class="tag" style="background:rgba(255,255,255,.2);color:#fff;">Day 2 Complete!</div>
+    <h2 style="color:#fff;">What You Learned Today</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1" style="max-width:800px;">
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🔧</div><h3 style="color:#fed7aa;">Why Motor Drivers</h3><p style="color:#ffedd5;">Arduino pins can't supply enough current for motors — L298N bridges the gap</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">H</div><h3 style="color:#fed7aa;">H-Bridge Logic</h3><p style="color:#ffedd5;">IN1/IN2 control direction; ENA + analogWrite controls speed</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🎛️</div><h3 style="color:#fed7aa;">Speed Control</h3><p style="color:#ffedd5;">analogWrite(ENA, 0–255) sets motor speed using PWM</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🤖</div><h3 style="color:#fed7aa;">Two Channels</h3><p style="color:#ffedd5;">L298N controls 2 motors — the foundation of a robot car!</p>
+    </div>
+  </div>
+  <p class="reveal reveal-delay-2" style="color:#fed7aa;margin-top:1.5rem;font-size:1.1rem;">Tomorrow: IR Remote Control — control stuff with a TV remote! 📡</p>
+</div>
+
+<script>
+const questions=[
+  {q:"Why can't you connect a DC motor directly to an Arduino pin?",opts:["Motors need AC power","Arduino pins only supply ~40mA, motors need more","Motors are too heavy","Arduino doesn't have enough pins"],ans:1},
+  {q:"What does the ENA pin on the L298N control?",opts:["Direction of motor","Power supply voltage","Motor speed (PWM)","Number of motors"],ans:2},
+  {q:"To make a motor go FORWARD, what logic do you set?",opts:["IN1=LOW, IN2=LOW","IN1=HIGH, IN2=HIGH","IN1=HIGH, IN2=LOW","IN1=LOW, IN2=HIGH"],ans:2},
+  {q:"How many DC motors can the L298N control simultaneously?",opts:["1","2","3","4"],ans:1},
+];
+let qIdx=0,score=0,answered=false;
+function showQ(){
+  if(qIdx>=questions.length){document.getElementById('q-display').style.display='none';document.getElementById('quiz-score').innerHTML=`🎉 You scored ${score}/${questions.length}!`;return;}
+  const q=questions[qIdx];
+  document.getElementById('q-text').textContent=`Q${qIdx+1}: ${q.q}`;
+  const opts=document.getElementById('q-options');opts.innerHTML='';answered=false;
+  q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>{if(answered)return;answered=true;b.classList.add(i===q.ans?'correct':'wrong');if(i===q.ans)score++;};opts.appendChild(b);});
+}
+function nextQ(){qIdx++;showQ();}
+showQ();
+const slides=document.querySelectorAll('.slide');
+const dotsEl=document.getElementById('nav-dots');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>slides[i].scrollIntoView({behavior:'smooth'});dotsEl.appendChild(d);});
+const dots=document.querySelectorAll('.dot');
+const prog=document.getElementById('progress');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const i=[...slides].indexOf(e.target);dots.forEach((d,j)=>d.classList.toggle('active',i===j));prog.style.width=`${((i+1)/slides.length)*100}%`;e.target.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}});},{threshold:0.5});
+slides.forEach(s=>obs.observe(s));
+document.addEventListener('keydown',e=>{const active=[...slides].findIndex(s=>s.getBoundingClientRect().top>-10&&s.getBoundingClientRect().top<window.innerHeight/2);if(e.key==='ArrowDown'||e.key===' ')slides[Math.min(active+1,slides.length-1)].scrollIntoView({behavior:'smooth'});if(e.key==='ArrowUp')slides[Math.max(active-1,0)].scrollIntoView({behavior:'smooth'});});
+</script>
+</body>
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 Day 8 — Capstone Project: Smart Environment Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent:#059669; --accent-light:#34d399; --accent-glow:rgba(5,150,105,0.18);
+            --accent2:#f97316; --accent3:#7c3aed; --accent4:#0ea5e9; --accent5:#ec4899;
+            --warning:#f59e0b; --danger:#ef4444;
+            --text-primary:#052e16; --text-muted:#94a3b8;
+            --font-display:'Baloo 2',cursive; --font-body:'Nunito',sans-serif; --font-code:'Fira Code',monospace;
+            --title-size:clamp(1.8rem,5vw,3.6rem); --h2-size:clamp(1.3rem,3.5vw,2.2rem);
+            --h3-size:clamp(1rem,2.5vw,1.4rem); --body-size:clamp(0.78rem,1.5vw,1.05rem);
+            --small-size:clamp(0.68rem,1.1vw,0.88rem); --code-size:clamp(0.62rem,1.05vw,0.83rem);
+            --slide-padding:clamp(1.5rem,4vw,4rem); --content-gap:clamp(0.8rem,2vw,1.6rem);
+            --elem-gap:clamp(0.3rem,1vw,0.7rem); --radius:16px; --ease-out:cubic-bezier(0.16,1,0.3,1);
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;scroll-snap-type:y mandatory;height:100%;overflow-x:hidden;}
+        body{font-family:var(--font-body);background:#f0fdf4;color:var(--text-primary);overflow-x:hidden;height:100%;line-height:1.5;}
+        .slide{width:100vw;height:100vh;height:100dvh;padding:var(--slide-padding);scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+        .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center;max-height:100%;overflow:hidden;gap:var(--content-gap);}
+        .progress-bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-light),var(--accent2),var(--accent3),var(--accent4),var(--accent5));z-index:1000;transition:width 0.3s ease;}
+        .nav-dots{position:fixed;right:clamp(0.5rem,1.5vw,1.5rem);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:100;}
+        .nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(5,150,105,0.2);cursor:pointer;transition:all 0.3s ease;border:none;padding:0;}
+        .nav-dot.active{background:var(--accent);transform:scale(1.5);}
+        .nav-dot:hover{background:var(--accent-light);}
+        .slide-counter{position:fixed;bottom:clamp(0.5rem,2vw,1.2rem);right:clamp(0.5rem,2vw,1.2rem);font-family:var(--font-code);font-size:var(--small-size);color:var(--text-muted);z-index:100;background:rgba(255,255,255,0.85);padding:3px 10px;border-radius:20px;}
+        h1{font-family:var(--font-display);font-size:var(--title-size);font-weight:800;line-height:1.15;}
+        h2{font-family:var(--font-display);font-size:var(--h2-size);font-weight:700;line-height:1.2;color:var(--accent);}
+        h3{font-family:var(--font-display);font-size:var(--h3-size);font-weight:700;line-height:1.3;}
+        p,li{font-size:var(--body-size);line-height:1.65;color:#334155;}
+        strong{font-weight:700;}
+        .accent{color:var(--accent);} .accent2{color:var(--accent2);} .accent3{color:var(--accent3);} .accent4{color:var(--accent4);} .accent5{color:var(--accent5);}
+        .bg-dots{background-image:radial-gradient(rgba(5,150,105,0.07) 1.5px,transparent 1.5px);background-size:28px 28px;}
+        .bg-white{background:#ffffff;}
+        .bg-green{background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 50%,#bbf7d0 100%);}
+        .bg-multi{background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 30%,#ede9fe 70%,#fff7ed 100%);}
+        .card{background:#fff;border-radius:var(--radius);padding:clamp(0.8rem,2vw,1.4rem);border:2px solid rgba(5,150,105,0.1);box-shadow:0 2px 12px rgba(5,150,105,0.06);transition:all 0.3s ease;}
+        .card:hover{border-color:rgba(5,150,105,0.25);box-shadow:0 6px 24px rgba(5,150,105,0.12);transform:translateY(-2px);}
+        .card-green{border-left:4px solid var(--accent);background:linear-gradient(135deg,#fff 80%,#f0fdf4);}
+        .card-orange{border-left:4px solid var(--accent2);background:linear-gradient(135deg,#fff 80%,#fff7ed);}
+        .card-purple{border-left:4px solid var(--accent3);background:linear-gradient(135deg,#fff 80%,#f5f3ff);}
+        .card-sky{border-left:4px solid var(--accent4);background:linear-gradient(135deg,#fff 80%,#e0f2fe);}
+        .card-pink{border-left:4px solid var(--accent5);background:linear-gradient(135deg,#fff 80%,#fdf2f8);}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:var(--content-gap);align-items:start;}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--elem-gap);}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--elem-gap);}
+        @media(max-width:768px){.two-col,.grid-3{grid-template-columns:1fr 1fr;}}
+        .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:var(--small-size);font-weight:700;}
+        .badge-green{background:#dcfce7;color:var(--accent);}
+        .badge-orange{background:#fff7ed;color:var(--accent2);}
+        .badge-purple{background:#f5f3ff;color:var(--accent3);}
+        .badge-sky{background:#e0f2fe;color:var(--accent4);}
+        .badge-pink{background:#fdf2f8;color:var(--accent5);}
+        .section-label{font-family:var(--font-code);font-size:var(--small-size);letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+        .divider{height:3px;width:60px;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent-light));}
+        .subtitle{font-size:clamp(0.9rem,2vw,1.3rem);color:#475569;font-weight:500;}
+        .code-block{background:#052e16;border-radius:12px;padding:clamp(0.8rem,2vw,1.4rem);font-family:var(--font-code);font-size:var(--code-size);color:#bbf7d0;overflow-x:auto;border:2px solid rgba(52,211,153,0.25);}
+        .code-block .kw{color:#f0abfc;} .code-block .fn{color:#67e8f9;} .code-block .num{color:#fcd34d;}
+        .code-block .cmt{color:#6ee7b7;font-style:italic;} .code-block .str{color:#f9a8d4;} .code-block .pin{color:#fb923c;} .code-block .typ{color:#a5f3fc;} .code-block .inc{color:#fde68a;}
+        .code-block pre{white-space:pre;line-height:1.8;}
+        .step{display:flex;align-items:flex-start;gap:clamp(0.5rem,1.5vw,1rem);padding:clamp(0.5rem,1.2vw,0.9rem);background:#fff;border-radius:12px;border:2px solid rgba(5,150,105,0.12);}
+        .step-num{min-width:clamp(28px,3.5vw,40px);height:clamp(28px,3.5vw,40px);border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:var(--body-size);flex-shrink:0;font-family:var(--font-display);}
+        .quiz-option{padding:clamp(0.5rem,1.2vw,0.85rem) clamp(0.8rem,2vw,1.2rem);border-radius:10px;background:#fff;border:2px solid rgba(5,150,105,0.15);cursor:pointer;font-size:var(--body-size);font-weight:600;color:#334155;transition:all 0.2s ease;text-align:left;font-family:var(--font-body);}
+        .quiz-option:hover{border-color:var(--accent);background:#f0fdf4;transform:translateX(4px);}
+        .quiz-option.correct{background:#d1fae5;border-color:var(--accent);color:#065f46;}
+        .quiz-option.wrong{background:#fee2e2;border-color:var(--danger);color:#991b1b;}
+        .quiz-feedback{font-size:var(--body-size);font-weight:700;padding:0.5em 1em;border-radius:10px;display:none;margin-top:0.5em;}
+        .quiz-feedback.show{display:block;}
+        .reveal,.reveal-right,.reveal-scale,.reveal-up{opacity:0;transition:opacity 0.6s var(--ease-out),transform 0.6s var(--ease-out);}
+        .reveal{transform:translateY(24px);} .reveal-right{transform:translateX(24px);} .reveal-scale{transform:scale(0.92);} .reveal-up{transform:translateY(-20px);}
+        .reveal.visible,.reveal-right.visible,.reveal-scale.visible,.reveal-up.visible{opacity:1;transform:none;}
+        [data-delay="1"]{transition-delay:0.1s;} [data-delay="2"]{transition-delay:0.2s;} [data-delay="3"]{transition-delay:0.3s;} [data-delay="4"]{transition-delay:0.4s;} [data-delay="5"]{transition-delay:0.5s;} [data-delay="6"]{transition-delay:0.6s;}
+        .big-emoji{font-size:clamp(3rem,8vw,6rem);line-height:1;display:block;text-align:center;}
+        .hl-green{background:#dcfce7;border-left:4px solid var(--accent);color:#065f46;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-orange{background:#fff7ed;border-left:4px solid var(--accent2);color:#9a3412;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-purple{background:#f5f3ff;border-left:4px solid var(--accent3);color:#4c1d95;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-sky{background:#e0f2fe;border-left:4px solid var(--accent4);color:#0369a1;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-yellow{background:#fffbeb;border-left:4px solid var(--warning);color:#92400e;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .section-tag{display:inline-flex;align-items:center;gap:0.4em;padding:0.3em 0.9em;border-radius:30px;font-size:var(--small-size);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.4em;}
+        .tag-day{background:#dcfce7;color:var(--accent);border:2px solid #86efac;}
+        .tag-project{background:linear-gradient(90deg,#dcfce7,#ede9fe);color:var(--accent);border:2px solid #86efac;}
+        .tag-hw{background:#fff7ed;color:#f97316;border:2px solid #fed7aa;}
+        .tag-quiz{background:#e0f2fe;color:var(--accent4);border:2px solid #7dd3fc;}
+        .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.25;pointer-events:none;}
+        /* Week summary skills */
+        .skill-pill{display:inline-flex;align-items:center;gap:0.4em;padding:0.3em 0.7em;border-radius:20px;font-size:var(--small-size);font-weight:700;margin:0.2em;}
+        /* LCD screen */
+        .lcd-screen{background:#0a2e0a;border-radius:8px;padding:0.6em 0.8em;font-family:var(--font-code);border:2px solid #4ade80;box-shadow:0 0 12px rgba(74,222,128,0.2);}
+        .lcd-line{color:#4ade80;font-size:clamp(0.7rem,1.3vw,0.9rem);letter-spacing:0.06em;min-height:1.3em;}
+        /* Flow diagram */
+        .flow-box{background:#fff;border-radius:10px;padding:0.5em 0.8em;border:2px solid rgba(5,150,105,0.2);text-align:center;font-size:var(--small-size);font-weight:700;}
+        .flow-arrow{text-align:center;color:var(--accent);font-size:1.2em;line-height:1.5;}
+    </style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">1 / 15</div>
+
+<!-- SLIDE 1: TITLE -->
+<section class="slide" style="background:linear-gradient(135deg,#059669 0%,#34d399 40%,#6ee7b7 70%,#bbf7d0 100%);">
+    <div class="blob" style="width:300px;height:300px;background:#a7f3d0;top:-80px;right:-80px;"></div>
+    <div class="blob" style="width:200px;height:200px;background:#ddd6fe;bottom:-60px;left:-60px;"></div>
+    <div class="slide-content" style="align-items:flex-start;">
+        <span class="section-tag tag-day reveal-up" style="background:rgba(255,255,255,0.3);color:#fff;border-color:rgba(255,255,255,0.5);">Week 1 · Day 8 — Capstone</span>
+        <h1 class="reveal" style="margin-top:0.2em;color:#fff;">Smart Environment<br><span style="color:#fde68a;">Monitor!</span></h1>
+        <p class="subtitle reveal" data-delay="2" style="color:#ecfdf5;">Putting it ALL together — LDR + LED + Buzzer + Servo + LCD in one project</p>
+        <div class="divider reveal" data-delay="3" style="margin-top:0.8em;background:linear-gradient(90deg,#fff,#bbf7d0);"></div>
+        <div class="reveal" data-delay="4" style="display:flex;gap:0.8em;flex-wrap:wrap;margin-top:0.5em;">
+            <span class="badge badge-green" style="background:rgba(255,255,255,0.3);color:#fff;border:1px solid rgba(255,255,255,0.4);">Week 1 Recap</span>
+            <span class="badge" style="background:rgba(255,255,255,0.3);color:#fff;border:1px solid rgba(255,255,255,0.4);">System Design</span>
+            <span class="badge" style="background:rgba(255,255,255,0.3);color:#fff;border:1px solid rgba(255,255,255,0.4);">Full Project Build</span>
+            <span class="badge" style="background:rgba(255,255,255,0.3);color:#fff;border:1px solid rgba(255,255,255,0.4);">Demo Day!</span>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 2: WEEK 1 RECAP -->
+<section class="slide bg-dots" style="background-color:#f0fdf4;">
+    <div class="slide-content">
+        <span class="section-label reveal">Week 1 Complete!</span>
+        <h2 class="reveal" data-delay="1">Everything You've Learned</h2>
+        <div class="grid-3 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-sky"><div style="font-size:1.4em;text-align:center;">💡</div><h3 style="font-size:var(--small-size);text-align:center;margin-top:0.3em;">Day 1</h3><p style="font-size:var(--small-size);text-align:center;">Electronics, Arduino, Tinkercad, LED Blink</p></div>
+            <div class="card card-orange"><div style="font-size:1.4em;text-align:center;">🔘</div><h3 style="font-size:var(--small-size);text-align:center;margin-top:0.3em;">Day 2</h3><p style="font-size:var(--small-size);text-align:center;">Button, Serial Monitor, Variables, if/else</p></div>
+            <div class="card card-purple"><div style="font-size:1.4em;text-align:center;">🎚️</div><h3 style="font-size:var(--small-size);text-align:center;margin-top:0.3em;">Day 3</h3><p style="font-size:var(--small-size);text-align:center;">Analog, Potentiometer, PWM, for loops</p></div>
+            <div class="card card-pink"><div style="font-size:1.4em;text-align:center;">🔔</div><h3 style="font-size:var(--small-size);text-align:center;margin-top:0.3em;">Day 4</h3><p style="font-size:var(--small-size);text-align:center;">Buzzer, tone(), Arrays, Melody</p></div>
+            <div class="card card-green"><div style="font-size:1.4em;text-align:center;">☀️</div><h3 style="font-size:var(--small-size);text-align:center;margin-top:0.3em;">Day 5</h3><p style="font-size:var(--small-size);text-align:center;">LDR sensor, Threshold, Night Lamp</p></div>
+            <div class="card card-sky"><div style="font-size:1.4em;text-align:center;">⚙️</div><h3 style="font-size:var(--small-size);text-align:center;margin-top:0.3em;">Day 6</h3><p style="font-size:var(--small-size);text-align:center;">Servo motor, Servo.h, Sweep &amp; control</p></div>
+        </div>
+        <div class="card card-purple reveal" data-delay="3" style="text-align:center;">
+            <div style="font-size:1.4em;">🖥️</div>
+            <h3 style="font-size:var(--small-size);margin-top:0.2em;">Day 7</h3>
+            <p style="font-size:var(--small-size);">LCD 16×2, LiquidCrystal library, live sensor display</p>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 3: PROJECT OVERVIEW -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <span class="section-label reveal">Day 8 — Capstone Project</span>
+        <h2 class="reveal" data-delay="1">Smart Environment Monitor — What it Does</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="2" style="display:flex;flex-direction:column;gap:0.45em;">
+                <div class="step"><div class="step-num">1</div><div><h3 style="font-size:var(--body-size);">LDR reads light level</h3><p style="font-size:var(--small-size);">Continuously monitors how bright or dark the room is</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent2);">2</div><div><h3 style="font-size:var(--body-size);">LCD shows status</h3><p style="font-size:var(--small-size);">Row 1: light value. Row 2: status text (DARK / DIM / BRIGHT)</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent3);">3</div><div><h3 style="font-size:var(--body-size);">LED auto-brightness</h3><p style="font-size:var(--small-size);">Dims when bright, brightens when dark — smooth PWM</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent4);">4</div><div><h3 style="font-size:var(--body-size);">Servo points like a gauge</h3><p style="font-size:var(--small-size);">Maps light level to servo angle — acts like a light meter dial</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent5);">5</div><div><h3 style="font-size:var(--body-size);">Buzzer alerts on sudden dark</h3><p style="font-size:var(--small-size);">Short beep when light drops below DARK threshold</p></div></div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.4em;">
+                <div class="flow-box" style="border-color:rgba(14,165,233,0.3);">LDR reads light (A0)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-box" style="border-color:rgba(5,150,105,0.3);">Map to LED brightness (pin 9)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-box" style="border-color:rgba(124,58,237,0.3);">Map to servo angle (pin 10)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-box" style="border-color:rgba(236,72,153,0.3);">if DARK → beep buzzer (pin 8)</div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-box" style="border-color:rgba(217,119,6,0.3);">Print to LCD display</div>
+                <div class="hl-green" style="margin-top:0.3em;font-size:var(--small-size);">All 5 components working together in one system — this is real engineering!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 4: WIRING OVERVIEW -->
+<section class="slide bg-dots" style="background-color:#f0fdf4;">
+    <div class="slide-content">
+        <h2 class="reveal">Complete Wiring Plan</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.4em;">
+                <div class="card card-sky"><h3 style="font-size:var(--small-size);">LDR (Light Sensor)</h3><p style="font-size:var(--small-size);">5V → LDR → A0 + 10kΩ → GND</p></div>
+                <div class="card card-green"><h3 style="font-size:var(--small-size);">LED (Auto Lamp)</h3><p style="font-size:var(--small-size);">Pin ~9 → 220Ω → LED(+) → LED(−) → GND</p></div>
+                <div class="card card-orange"><h3 style="font-size:var(--small-size);">Buzzer (Alert)</h3><p style="font-size:var(--small-size);">Pin 8 → Piezo(+) | Piezo(−) → GND</p></div>
+                <div class="card card-purple"><h3 style="font-size:var(--small-size);">Servo (Light Gauge)</h3><p style="font-size:var(--small-size);">Red→5V | Black→GND | Orange→Pin 10</p></div>
+                <div class="card card-pink"><h3 style="font-size:var(--small-size);">LCD 16×2</h3><p style="font-size:var(--small-size);">RS→12, EN→11, D4→5, D5→4, D6→3, D7→2, Contrast Pot on V0</p></div>
+            </div>
+            <div class="reveal-right" data-delay="2">
+                <div class="code-block" style="font-size:var(--small-size);">
+                    <div style="color:#64748b;margin-bottom:0.4em;">Pin summary:</div>
+                    <pre><span class="cmt">// INPUTS</span>
+<span class="pin">A0</span>  <span class="cmt">← LDR (light sensor)</span>
+
+<span class="cmt">// OUTPUTS</span>
+<span class="pin">~9</span>  <span class="cmt">→ LED (PWM brightness)</span>
+<span class="num">8</span>   <span class="cmt">→ Piezo buzzer</span>
+<span class="num">10</span>  <span class="cmt">→ Servo signal</span>
+
+<span class="cmt">// LCD</span>
+<span class="num">12</span>  <span class="cmt">→ RS</span>
+<span class="num">11</span>  <span class="cmt">→ EN</span>
+<span class="num">5</span>   <span class="cmt">→ D4</span>
+<span class="num">4</span>   <span class="cmt">→ D5</span>
+<span class="num">3</span>   <span class="cmt">→ D6</span>
+<span class="num">2</span>   <span class="cmt">→ D7</span></pre>
+                </div>
+                <div class="hl-yellow" style="margin-top:0.5em;font-size:var(--small-size);">Build step-by-step! Add one component at a time and test each before adding the next. This is how real engineers work!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 5: FULL CODE PART 1 -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Full Project Code — Part 1</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1" style="font-size:clamp(0.56rem,0.92vw,0.76rem);">
+<pre><span class="inc">#include &lt;LiquidCrystal.h&gt;</span>
+<span class="inc">#include &lt;Servo.h&gt;</span>
+
+LiquidCrystal lcd(<span class="num">12</span>,<span class="num">11</span>,<span class="num">5</span>,<span class="num">4</span>,<span class="num">3</span>,<span class="num">2</span>);
+Servo gauge;
+
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">ldrPin</span>  = <span class="pin">A0</span>;
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">ledPin</span>  = <span class="num">9</span>;
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">buzPin</span>  = <span class="num">8</span>;
+
+<span class="kw">const</span> <span class="typ">int</span> DARK   = <span class="num">300</span>;
+<span class="kw">const</span> <span class="typ">int</span> DIM    = <span class="num">600</span>;
+<span class="kw">const</span> <span class="typ">int</span> BRIGHT = <span class="num">800</span>;
+
+<span class="typ">bool</span> lastDark = <span class="kw">false</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(<span class="pin">ledPin</span>, <span class="pin">OUTPUT</span>);
+  <span class="fn">pinMode</span>(<span class="pin">buzPin</span>, <span class="pin">OUTPUT</span>);
+  gauge.<span class="fn">attach</span>(<span class="num">10</span>);
+
+  lcd.<span class="fn">begin</span>(<span class="num">16</span>, <span class="num">2</span>);
+  lcd.<span class="fn">print</span>(<span class="str">"Smart Monitor"</span>);
+  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>,<span class="num">1</span>);
+  lcd.<span class="fn">print</span>(<span class="str">"Starting..."</span>);
+  <span class="fn">delay</span>(<span class="num">2000</span>);
+  lcd.<span class="fn">clear</span>();
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-green"><h3 style="font-size:var(--body-size);">Two libraries!</h3><p style="font-size:var(--small-size);">We include both LiquidCrystal and Servo. Arduino handles both simultaneously.</p></div>
+                <div class="card card-orange"><h3 style="font-size:var(--body-size);">Threshold constants</h3><p style="font-size:var(--small-size);">DARK=300, DIM=600, BRIGHT=800. Change these to calibrate to your classroom's lighting.</p></div>
+                <div class="card card-purple"><h3 style="font-size:var(--body-size);">lastDark variable</h3><p style="font-size:var(--small-size);">Tracks whether last reading was dark — so we only beep ONCE when it gets dark, not on every loop cycle.</p></div>
+                <div class="lcd-screen" style="margin-top:0.3em;">
+                    <div class="lcd-line">Smart Monitor&nbsp;&nbsp;&nbsp;</div>
+                    <div class="lcd-line">Starting...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                </div>
+                <p style="font-size:var(--small-size);color:#64748b;text-align:center;">Startup message for 2 seconds</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 6: FULL CODE PART 2 -->
+<section class="slide bg-dots" style="background-color:#f0fdf4;">
+    <div class="slide-content">
+        <h2 class="reveal">Full Project Code — Part 2 (loop)</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1" style="font-size:clamp(0.55rem,0.9vw,0.75rem);">
+<pre><span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="typ">int</span> light = <span class="fn">analogRead</span>(<span class="pin">ldrPin</span>);
+
+  <span class="cmt">// LED: darker = brighter</span>
+  <span class="typ">int</span> bright = <span class="fn">map</span>(light,<span class="num">0</span>,<span class="num">1023</span>,<span class="num">255</span>,<span class="num">0</span>);
+  bright = <span class="fn">constrain</span>(bright, <span class="num">0</span>, <span class="num">255</span>);
+  <span class="fn">analogWrite</span>(<span class="pin">ledPin</span>, bright);
+
+  <span class="cmt">// Servo: maps light → angle</span>
+  <span class="typ">int</span> angle = <span class="fn">map</span>(light,<span class="num">0</span>,<span class="num">1023</span>,<span class="num">0</span>,<span class="num">180</span>);
+  gauge.<span class="fn">write</span>(angle);
+
+  <span class="cmt">// Buzzer: beep once on dark</span>
+  <span class="typ">bool</span> isDark = (light &lt; DARK);
+  <span class="kw">if</span> (isDark && !lastDark) {
+    <span class="fn">tone</span>(<span class="pin">buzPin</span>, <span class="num">800</span>, <span class="num">300</span>);
+  }
+  lastDark = isDark;
+
+  <span class="cmt">// LCD display</span>
+  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">0</span>);
+  lcd.<span class="fn">print</span>(<span class="str">"Light:"</span>);
+  lcd.<span class="fn">print</span>(light);
+  lcd.<span class="fn">print</span>(<span class="str">"     "</span>);
+
+  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">1</span>);
+  <span class="kw">if</span>      (light &lt; DARK)   lcd.<span class="fn">print</span>(<span class="str">"Status: DARK    "</span>);
+  <span class="kw">else if</span> (light &lt; DIM)    lcd.<span class="fn">print</span>(<span class="str">"Status: DIM     "</span>);
+  <span class="kw">else if</span> (light &lt; BRIGHT) lcd.<span class="fn">print</span>(<span class="str">"Status: MEDIUM  "</span>);
+  <span class="kw">else</span>                     lcd.<span class="fn">print</span>(<span class="str">"Status: BRIGHT  "</span>);
+
+  <span class="fn">delay</span>(<span class="num">100</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.4em;">
+                <div class="card card-green"><h3 style="font-size:var(--small-size);">isDark &amp;&amp; !lastDark</h3><p style="font-size:var(--small-size);">This pattern detects the TRANSITION to dark (not already dark). Only beeps once when it crosses the threshold — not on every loop!</p></div>
+                <div class="card card-sky"><h3 style="font-size:var(--small-size);">4-zone status</h3><p style="font-size:var(--small-size);">DARK → DIM → MEDIUM → BRIGHT. Four conditions using else if chain.</p></div>
+                <div style="display:flex;flex-direction:column;gap:0.3em;">
+                    <div class="lcd-screen"><div class="lcd-line">Light:245&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div class="lcd-line">Status: DARK&nbsp;&nbsp;&nbsp;&nbsp;</div></div>
+                    <div class="lcd-screen"><div class="lcd-line">Light:856&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div class="lcd-line">Status: BRIGHT&nbsp;&nbsp;</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 7: BUILD CHALLENGE -->
+<section class="slide" style="background:linear-gradient(135deg,#059669 0%,#34d399 50%,#6ee7b7 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#a7f3d0;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🛠️</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ecfdf5;margin-top:0.5em;">Build Time!</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Now Build It<br>in Tinkercad!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#d1fae5;margin-top:0.5em;">Add components one at a time. Test each step. Celebrate when it works!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#a7f3d0);"></div>
+        <div class="reveal" data-delay="5" style="display:flex;flex-direction:column;gap:0.5em;max-width:500px;margin-top:0.5em;">
+            <div style="background:rgba(255,255,255,0.3);border-radius:10px;padding:0.5em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">Step 1 — LDR + Serial Monitor test</div>
+            <div style="background:rgba(255,255,255,0.3);border-radius:10px;padding:0.5em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">Step 2 — Add LED brightness control</div>
+            <div style="background:rgba(255,255,255,0.3);border-radius:10px;padding:0.5em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">Step 3 — Add servo gauge</div>
+            <div style="background:rgba(255,255,255,0.3);border-radius:10px;padding:0.5em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">Step 4 — Add buzzer alert</div>
+            <div style="background:rgba(255,255,255,0.3);border-radius:10px;padding:0.5em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">Step 5 — Add LCD display</div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 8: DEBUGGING TIPS -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Debugging Tips — When Something Goes Wrong</h2>
+        <div class="grid-2 reveal" data-delay="1" style="margin-top:0.3em;">
+            <div class="card card-orange"><h3 style="font-size:var(--body-size);">LCD shows nothing</h3><p style="font-size:var(--small-size);">Check V0 contrast pot. Make sure lcd.begin(16,2) is in setup(). Check all 6 data pin connections.</p></div>
+            <div class="card card-purple"><h3 style="font-size:var(--body-size);">Servo doesn't move</h3><p style="font-size:var(--small-size);">Check servo.attach() pin matches the signal wire. LiquidCrystal uses pins 2-5, so use pin 10 for servo.</p></div>
+            <div class="card card-sky"><h3 style="font-size:var(--body-size);">LDR always reads same value</h3><p style="font-size:var(--small-size);">Make sure 10kΩ resistor is in the voltage divider (LDR leg 2 → A0 AND → 10kΩ → GND).</p></div>
+            <div class="card card-green"><h3 style="font-size:var(--body-size);">Buzzer keeps beeping</h3><p style="font-size:var(--small-size);">Check lastDark logic. The && !lastDark ensures beep only on transition, not continuous.</p></div>
+            <div class="card card-pink"><h3 style="font-size:var(--body-size);">LED too dim or not dimming</h3><p style="font-size:var(--small-size);">Make sure it's on a PWM pin (~9, not 9). Check the inverted map: map(light, 0, 1023, 255, 0).</p></div>
+            <div class="card card-orange"><h3 style="font-size:var(--body-size);">Use Serial Monitor!</h3><p style="font-size:var(--small-size);">Add Serial.println(light) to see what your LDR is actually reading. This is your most powerful debugging tool!</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 9: EXTENSIONS -->
+<section class="slide bg-dots" style="background-color:#f0fdf4;">
+    <div class="slide-content">
+        <h2 class="reveal">Extensions — Make It Your Own!</h2>
+        <div class="grid-3 reveal" data-delay="1" style="margin-top:0.3em;">
+            <div class="card card-green"><h3 style="font-size:var(--body-size);">Add a button</h3><p style="font-size:var(--small-size);">Press button to mute/unmute the buzzer alarm. Use a bool muteMode variable.</p></div>
+            <div class="card card-orange"><h3 style="font-size:var(--body-size);">Add a counter</h3><p style="font-size:var(--small-size);">Count how many times it's gone DARK. Show the count on the LCD row 2.</p></div>
+            <div class="card card-purple"><h3 style="font-size:var(--body-size);">Potentiometer threshold</h3><p style="font-size:var(--small-size);">Use a pot on A1 to let the user manually set the DARK threshold — no code reupload needed!</p></div>
+            <div class="card card-sky"><h3 style="font-size:var(--body-size);">Morse code LED</h3><p style="font-size:var(--small-size);">When it gets DARK, flash SOS in morse code with the LED instead of just turning on.</p></div>
+            <div class="card card-pink"><h3 style="font-size:var(--body-size);">Day/Night servo labels</h3><p style="font-size:var(--small-size);">Servo points to labels: "NIGHT" at 0°, "SUNRISE" at 45°, "DAY" at 90°, "BRIGHT" at 180°.</p></div>
+            <div class="card card-green"><h3 style="font-size:var(--body-size);">Melody on dark</h3><p style="font-size:var(--small-size);">Instead of a single beep, play a 3-note melody from Day 4 when it gets dark.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 10: WEEK 1 SKILLS SUMMARY -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Week 1 Skills Summary — You Can Now…</h2>
+        <div class="two-col reveal" data-delay="1" style="margin-top:0.3em;">
+            <div style="display:flex;flex-direction:column;gap:0.35em;">
+                <div class="hl-green" style="font-size:var(--small-size);">✓ Wire LEDs, resistors, buttons on a breadboard</div>
+                <div class="hl-green" style="font-size:var(--small-size);">✓ Read digital inputs with digitalRead()</div>
+                <div class="hl-green" style="font-size:var(--small-size);">✓ Read analog inputs with analogRead()</div>
+                <div class="hl-green" style="font-size:var(--small-size);">✓ Control LED brightness with analogWrite() / PWM</div>
+                <div class="hl-green" style="font-size:var(--small-size);">✓ Use if / else if / else for decision making</div>
+                <div class="hl-green" style="font-size:var(--small-size);">✓ Use for loops to repeat code with a counter</div>
+                <div class="hl-green" style="font-size:var(--small-size);">✓ Declare and use variables (int, bool, const)</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.35em;">
+                <div class="hl-orange" style="font-size:var(--small-size);">✓ Print messages with the Serial Monitor</div>
+                <div class="hl-orange" style="font-size:var(--small-size);">✓ Play sounds with tone() and noTone()</div>
+                <div class="hl-orange" style="font-size:var(--small-size);">✓ Store lists of data in arrays</div>
+                <div class="hl-orange" style="font-size:var(--small-size);">✓ Scale values with map() and constrain()</div>
+                <div class="hl-orange" style="font-size:var(--small-size);">✓ Control a servo motor with Servo.h</div>
+                <div class="hl-orange" style="font-size:var(--small-size);">✓ Display text and numbers on an LCD</div>
+                <div class="hl-orange" style="font-size:var(--small-size);">✓ Build multi-sensor systems in Tinkercad</div>
+            </div>
+        </div>
+        <div class="hl-sky reveal" data-delay="2" style="font-size:var(--small-size);margin-top:0.4em;text-align:center;"><strong>That's 14 skills in 8 days — amazing work! Week 2 awaits...</strong></div>
+    </div>
+</section>
+
+<!-- SLIDE 11: DEMO DAY -->
+<section class="slide" style="background:linear-gradient(135deg,#7c3aed 0%,#ec4899 50%,#f97316 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:rgba(255,255,255,0.2);top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🎉</span>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Demo Time!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:rgba(255,255,255,0.9);margin-top:0.5em;">Share your screen in Tinkercad and show the class your Smart Monitor working!</p>
+        <div class="reveal" data-delay="4" style="display:flex;gap:1em;flex-wrap:wrap;justify-content:center;margin-top:1em;">
+            <div style="background:rgba(255,255,255,0.25);border-radius:12px;padding:0.6em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">Cover the LDR</div>
+            <div style="background:rgba(255,255,255,0.25);border-radius:12px;padding:0.6em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">Watch LCD change</div>
+            <div style="background:rgba(255,255,255,0.25);border-radius:12px;padding:0.6em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">Servo swings</div>
+            <div style="background:rgba(255,255,255,0.25);border-radius:12px;padding:0.6em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">Buzzer beeps</div>
+            <div style="background:rgba(255,255,255,0.25);border-radius:12px;padding:0.6em 1em;color:#fff;font-weight:700;font-size:var(--body-size);">LED dims</div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 12: HOMEWORK -->
+<section class="slide bg-green">
+    <div class="blob" style="width:230px;height:230px;background:#bbf7d0;top:-60px;right:-60px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-hw reveal">Week 1 Final Homework</span>
+        <h2 class="reveal" data-delay="1">Your Final Challenges</h2>
+        <div class="grid-3 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-green"><div style="font-size:1.4em;margin-bottom:0.4em;">1</div><h3 style="font-size:var(--body-size);color:var(--accent);">Personalise Your Monitor</h3><p style="font-size:var(--small-size);">Change the startup message to your name. Add a 3rd LCD row of information (if using I2C LCD). Customise the threshold values.</p></div>
+            <div class="card card-orange"><div style="font-size:1.4em;margin-bottom:0.4em;">2</div><h3 style="font-size:var(--body-size);color:var(--accent2);">Add a Second Mode</h3><p style="font-size:var(--small-size);">Add a button to switch between "Monitor Mode" and "Manual Mode". In manual mode, a potentiometer controls the LED brightness directly.</p></div>
+            <div class="card card-purple"><div style="font-size:1.4em;margin-bottom:0.4em;">3</div><h3 style="font-size:var(--body-size);color:var(--accent3);">Week 1 Reflection</h3><p style="font-size:var(--small-size);">Write 5 sentences: What was your favourite thing you built? What was the hardest concept? What do you want to build in Week 2?</p></div>
+        </div>
+        <div class="reveal" data-delay="3" style="margin-top:0.5em;"><div class="hl-yellow" style="font-size:var(--small-size);"><strong>Share your project!</strong> Save your Tinkercad simulation URL and share it with your teacher. They'll review it before Week 2!</div></div>
+    </div>
+</section>
+
+<!-- SLIDE 13-15: QUIZ -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Week 1 — Key Concepts Review</h2>
+        <div class="two-col reveal" data-delay="1" style="margin-top:0.3em;">
+            <div style="display:flex;flex-direction:column;gap:0.4em;">
+                <h3 style="font-size:var(--body-size);color:var(--accent);">Inputs</h3>
+                <div class="card card-sky"><p style="font-size:var(--small-size);"><strong>digitalRead(pin)</strong> — returns HIGH or LOW<br><strong>analogRead(A0)</strong> — returns 0–1023</p></div>
+                <h3 style="font-size:var(--body-size);color:var(--accent2);">Outputs</h3>
+                <div class="card card-orange"><p style="font-size:var(--small-size);"><strong>digitalWrite(pin, HIGH/LOW)</strong> — on/off<br><strong>analogWrite(pin, 0–255)</strong> — PWM brightness<br><strong>tone(pin, freq)</strong> — play sound<br><strong>myServo.write(0–180)</strong> — angle</p></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.4em;">
+                <h3 style="font-size:var(--body-size);color:var(--accent3);">Maths Helpers</h3>
+                <div class="card card-purple"><p style="font-size:var(--small-size);"><strong>map(v,fl,fh,tl,th)</strong> — scale ranges<br><strong>constrain(v,lo,hi)</strong> — clamp value</p></div>
+                <h3 style="font-size:var(--body-size);color:var(--accent4);">Libraries</h3>
+                <div class="card card-sky"><p style="font-size:var(--small-size);"><strong>#include &lt;Servo.h&gt;</strong> — servo control<br><strong>#include &lt;LiquidCrystal.h&gt;</strong> — LCD</p></div>
+                <h3 style="font-size:var(--body-size);color:var(--accent);">Control Flow</h3>
+                <div class="card card-green"><p style="font-size:var(--small-size);"><strong>if / else if / else</strong> — decisions<br><strong>for(init; cond; step)</strong> — counting loop</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="slide" style="background:linear-gradient(135deg,#059669 0%,#34d399 50%,#6ee7b7 100%);text-align:center;align-items:center;">
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🏆</span>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Week 1 Final Quiz!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#d1fae5;">4 questions covering everything from this week!</p>
+    </div>
+</section>
+
+<section class="slide bg-multi">
+    <div class="slide-content">
+        <span class="section-tag tag-quiz reveal">Week 1 Quiz</span>
+        <h2 class="reveal" data-delay="1">Final Week 1 Test!</h2>
+        <div class="two-col reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q1. Which pin reads an analog sensor value 0–1023?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) Pin 13</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) Pin 9</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) Pin A0</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Pin 2</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q2. What does map(500, 0, 1000, 0, 100) return?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 500</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) 50</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) 100</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 25</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q3. Which function moves a servo to 45°?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) analogWrite(9, 45)</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) tone(9, 45)</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) myServo.write(45)</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) digitalWrite(9, 45)</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q4. True or false: lcd.clear() should be called every loop() to refresh the display.</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) True — it's the only way to update</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) False — use setCursor() to overwrite, clear() causes flicker</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) True — LCD needs a full refresh</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) It doesn't matter</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const slides=document.querySelectorAll('.slide'),progressBar=document.getElementById('progressBar'),navDotsContainer=document.getElementById('navDots'),slideCounter=document.getElementById('slideCounter'),total=slides.length;let current=0;
+    slides.forEach((_,i)=>{const dot=document.createElement('button');dot.className='nav-dot'+(i===0?' active':'');dot.setAttribute('aria-label',`Slide ${i+1}`);dot.addEventListener('click',()=>scrollToSlide(i));navDotsContainer.appendChild(dot);});
+    function updateUI(i){current=i;progressBar.style.width=(total>1?(i/(total-1))*100:100)+'%';slideCounter.textContent=`${i+1} / ${total}`;document.querySelectorAll('.nav-dot').forEach((d,j)=>d.classList.toggle('active',j===i));revealSlide(i);}
+    function scrollToSlide(i){slides[i].scrollIntoView({behavior:'smooth'});}
+    const obs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting&&en.intersectionRatio>=0.5)updateUI(Array.from(slides).indexOf(en.target));});},{threshold:0.5});
+    slides.forEach(s=>obs.observe(s));
+    function revealSlide(i){slides[i].querySelectorAll('.reveal,.reveal-right,.reveal-scale,.reveal-up').forEach(el=>el.classList.add('visible'));}
+    document.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();if(current<total-1)scrollToSlide(current+1);}else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();if(current>0)scrollToSlide(current-1);}});
+    window.addEventListener('load',()=>updateUI(0));
+    function answer(btn,result){const g=btn.closest('.card');g.querySelectorAll('.quiz-option').forEach(b=>{b.style.pointerEvents='none';if(b.getAttribute('onclick').includes("'correct'"))b.classList.add('correct');});const f=g.querySelector('.quiz-feedback');if(result==='correct'){btn.classList.add('correct');f.textContent='Correct! Excellent!';f.style.background='#d1fae5';f.style.color='#065f46';}else{btn.classList.add('wrong');f.textContent='Not quite — check the green answer!';f.style.background='#fee2e2';f.style.color='#991b1b';}f.classList.add('show');}
+</script>
+</body>
+</html>

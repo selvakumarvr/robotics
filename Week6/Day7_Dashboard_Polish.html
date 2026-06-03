@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 6 · Day 7 — Dashboard Polish & UX</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;height:100%;}
+body{font-family:'Nunito',sans-serif;background:#fffbeb;color:#1e293b;}
+.slide{scroll-snap-align:start;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem;position:relative;overflow:hidden;}
+h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+code,pre{font-family:'Fira Code',monospace;}
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,#f59e0b,#f97316);transition:width .4s;z-index:100;}
+#nav-dots{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:100;}
+.dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;}.dot.active{background:#f59e0b;transform:scale(1.3);}
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s ease;}.reveal.visible{opacity:1;transform:none;}
+.reveal-delay-1{transition-delay:.1s;}.reveal-delay-2{transition-delay:.2s;}.reveal-delay-3{transition-delay:.3s;}
+.slide-title{background:linear-gradient(135deg,#78350f,#f59e0b,#f97316);}
+.slide-title h1{font-size:clamp(2rem,5vw,3.5rem);color:#fff;text-align:center;line-height:1.2;}
+.subtitle{color:rgba(255,255,255,.8);text-align:center;margin-top:1rem;font-size:clamp(1rem,2.5vw,1.3rem);}
+.badge{display:inline-block;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:.4rem 1.2rem;border-radius:999px;font-size:.9rem;font-weight:700;margin-bottom:1.5rem;}
+.wave{position:absolute;bottom:0;left:0;width:100%;opacity:.3;}
+.card{background:#fff;border-radius:1.2rem;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.08);border-left:5px solid #f59e0b;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;width:100%;max-width:900px;}
+.card h3{font-size:1.1rem;color:#1e293b;margin-bottom:.4rem;font-family:'Baloo 2',sans-serif;}
+.card p{font-size:.9rem;color:#475569;line-height:1.5;}
+.card-icon{font-size:2rem;margin-bottom:.5rem;}
+.code-block{background:#0f172a;border-radius:1rem;padding:1.5rem;width:100%;max-width:800px;overflow-x:auto;}
+.code-block pre{color:#e2e8f0;font-size:.8rem;line-height:1.7;}
+.kw{color:#7dd3fc;}.fn{color:#86efac;}.cm{color:#64748b;}.str{color:#fde68a;}.num{color:#fb923c;}
+.steps{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:800px;}
+.step{display:flex;align-items:flex-start;gap:1rem;background:#fff;padding:1.2rem 1.5rem;border-radius:1rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.step-num{min-width:2.2rem;height:2.2rem;border-radius:50%;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;}
+.step-text h4{font-size:1rem;color:#1e293b;margin-bottom:.2rem;font-family:'Baloo 2',sans-serif;}
+.step-text p{font-size:.88rem;color:#475569;}
+.hw-list{display:flex;flex-direction:column;gap:.8rem;width:100%;max-width:700px;}
+.hw-item{display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem 1.4rem;border-radius:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.hw-badge{padding:.25rem .8rem;border-radius:999px;font-size:.75rem;font-weight:700;white-space:nowrap;}
+.hw-easy{background:#dcfce7;color:#166534;}.hw-medium{background:#fef9c3;color:#854d0e;}.hw-hard{background:#fee2e2;color:#991b1b;}.hw-bonus{background:#ede9fe;color:#5b21b6;}
+.quiz-q{background:#fff;border-radius:1.2rem;padding:1.8rem;width:100%;max-width:750px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.quiz-q h3{font-size:1.1rem;margin-bottom:1.2rem;font-family:'Baloo 2',sans-serif;}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+.opt{padding:.9rem 1.2rem;border-radius:.8rem;border:2px solid #e2e8f0;cursor:pointer;font-size:.9rem;font-family:'Nunito',sans-serif;background:#fff;transition:all .2s;text-align:left;}
+.opt:hover{border-color:#f59e0b;background:#fffbeb;}
+.opt.correct{background:#dcfce7;border-color:#16a34a;color:#166534;font-weight:700;}
+.opt.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b;}
+.quiz-nav{display:flex;gap:1rem;margin-top:1.5rem;justify-content:center;}
+.btn{padding:.7rem 1.8rem;border-radius:999px;border:none;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1rem;transition:all .2s;background:#f59e0b;color:#fff;}
+#quiz-score{text-align:center;font-size:1.3rem;font-weight:700;margin-top:1rem;color:#78350f;}
+.slide-header{text-align:center;margin-bottom:2rem;}
+.slide-header h2{font-size:clamp(1.6rem,3.5vw,2.4rem);color:#1e293b;font-family:'Baloo 2',sans-serif;}
+.slide-header p{color:#475569;margin-top:.4rem;}
+.tag{display:inline-block;background:#fffbeb;color:#78350f;padding:.2rem .8rem;border-radius:999px;font-size:.78rem;font-weight:700;margin-bottom:.5rem;}
+.summary-slide{background:linear-gradient(135deg,#78350f,#f59e0b);}
+</style>
+</head>
+<body>
+<div id="progress"></div><div id="nav-dots"></div>
+
+<div class="slide slide-title">
+  <div class="badge reveal">Week 6 · Day 7</div>
+  <h1 class="reveal reveal-delay-1">Dashboard Polish & UX</h1>
+  <p class="subtitle reveal reveal-delay-2">Make your interfaces look professional!</p>
+  <div style="display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap;justify-content:center;" class="reveal reveal-delay-3">
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">UX Principles</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">Animations</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">Responsive UI</span>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 100"><path fill="#fffbeb" d="M0,60 C360,100 1080,0 1440,60 L1440,100 L0,100 Z"/></svg>
+</div>
+
+
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal"><div class="tag">Overview</div><h2>Dashboard Polish & UX</h2></div>
+  <div class="card-grid reveal reveal-delay-1"><div class="card" style="border-color:#06b6d4;"><div class="card-icon">🎯</div><h3>Learning Goal</h3><p>Make your interfaces look professional!</p></div>
+<div class="card" style="border-color:#f97316;"><div class="card-icon">🔧</div><h3>Key Tools</h3><p>UX Principles + Animations + Responsive UI</p></div>
+<div class="card" style="border-color:#8b5cf6;"><div class="card-icon">💡</div><h3>Builds On</h3><p>All concepts from previous weeks — we stack knowledge!</p></div>
+<div class="card" style="border-color:#10b981;"><div class="card-icon">🚀</div><h3>This Session</h3><p>Theory → Demo → Hands-on project → Quiz</p></div>
+</div>
+</div>
+<div class="slide" style="background:#fffbeb;">
+  <div class="slide-header reveal"><div class="tag">Deep Dive</div><h2>Core Concepts — Dashboard Polish & UX</h2></div>
+  <div class="card-grid reveal reveal-delay-1"><div class="card" style="border-color:#06b6d4;"><div class="card-icon">📚</div><h3>Concept 1</h3><p>Study the components and their pin-outs before wiring</p></div>
+<div class="card" style="border-color:#f97316;"><div class="card-icon">⚡</div><h3>Concept 2</h3><p>Always start simple: test with basic code before adding features</p></div>
+<div class="card" style="border-color:#8b5cf6;"><div class="card-icon">🔗</div><h3>Integration</h3><p>Connect to previously learned sensors and outputs</p></div>
+<div class="card" style="border-color:#10b981;"><div class="card-icon">📊</div><h3>Output</h3><p>Document with Serial Monitor — see what your code does</p></div>
+</div>
+</div>
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal"><div class="tag">Homework</div><h2>Take It Further!</h2></div>
+  <div class="hw-list reveal reveal-delay-1"><div class="hw-item"><span class="hw-badge hw-easy">Easy</span><p>Complete the basic project as shown in class</p></div><div class="hw-item"><span class="hw-badge hw-medium">Medium</span><p>Add an extra sensor or output to extend functionality</p></div><div class="hw-item"><span class="hw-badge hw-hard">Hard</span><p>Combine this topic with a previous week component</p></div><div class="hw-item"><span class="hw-badge hw-bonus">Bonus</span><p>Research a real-world product that uses this technology and present to class</p></div></div>
+</div>
+<div class="slide" style="background:linear-gradient(135deg,#fffbeb,#fffbeb);">
+  <div class="slide-header reveal"><div class="tag">Quiz Time!</div><h2>Test Your Knowledge</h2></div>
+  <div id="quiz-container" class="reveal reveal-delay-1">
+    <div class="quiz-q" id="q-display"><h3 id="q-text"></h3><div class="options" id="q-options"></div></div>
+    <div class="quiz-nav"><button class="btn" onclick="nextQ()">Next Question →</button></div>
+    <div id="quiz-score"></div>
+  </div>
+</div>
+
+<div class="slide summary-slide">
+  <div class="slide-header reveal" style="color:#fff;">
+    <div class="tag" style="background:rgba(255,255,255,.2);color:#fff;">Week 6 · Day 7 Complete!</div>
+    <h2 style="color:#fff;">What You Learned</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1" style="max-width:800px;">
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);"><div class="card-icon">🎯</div><h3 style="color:rgba(255,255,255,.9);">Goal Achieved</h3><p style="color:rgba(255,255,255,.75);">Make your interfaces look professional!</p></div>
+<div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);"><div class="card-icon">🔧</div><h3 style="color:rgba(255,255,255,.9);">Tools Used</h3><p style="color:rgba(255,255,255,.75);">UX Principles + Animations + Responsive UI</p></div>
+<div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);"><div class="card-icon">🔗</div><h3 style="color:rgba(255,255,255,.9);">Connected</h3><p style="color:rgba(255,255,255,.75);">This topic links to everything learned so far</p></div>
+<div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);"><div class="card-icon">🏆</div><h3 style="color:rgba(255,255,255,.9);">Next Level</h3><p style="color:rgba(255,255,255,.75);">Keep building — every day adds to your engineering skills</p></div>
+
+  </div>
+  <p class="reveal reveal-delay-2" style="color:rgba(255,255,255,.85);margin-top:1.5rem;font-size:1.1rem;">Keep going — more exciting projects ahead! 🚀</p>
+</div>
+
+<script>
+const questions=[{"q": "What is the main topic of Week 6 \u00b7 Day 7?", "opts": ["Dashboard Polish & UX", "DC Motors", "LED Blink", "Serial Monitor"], "ans": 0}, {"q": "What is the best first step when building a new circuit?", "opts": ["Write all code first", "Test each component alone", "Connect everything at once", "Power on immediately"], "ans": 1}, {"q": "Where should you look if your sensor gives unexpected readings?", "opts": ["Change the sensor", "Check wiring and Serial Monitor output", "Restart Arduino", "None"], "ans": 1}, {"q": "What makes a good Arduino project?", "opts": ["Uses all pins", "Combines sensors + logic + output meaningfully", "Only uses LEDs", "Requires WiFi"], "ans": 1}];
+let qIdx=0,score=0,answered=false;
+function showQ(){if(qIdx>=questions.length){document.getElementById('q-display').style.display='none';document.getElementById('quiz-score').innerHTML=`🎉 You scored ${score}/${questions.length}!`;return;}const q=questions[qIdx];document.getElementById('q-text').textContent=`Q${qIdx+1}: ${q.q}`;const opts=document.getElementById('q-options');opts.innerHTML='';answered=false;q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>{if(answered)return;answered=true;b.classList.add(i===q.ans?'correct':'wrong');if(i===q.ans)score++;};opts.appendChild(b);});}
+function nextQ(){qIdx++;showQ();}showQ();
+const slides=document.querySelectorAll('.slide');const dotsEl=document.getElementById('nav-dots');slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>slides[i].scrollIntoView({behavior:'smooth'});dotsEl.appendChild(d);});const dots=document.querySelectorAll('.dot');const prog=document.getElementById('progress');const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const i=[...slides].indexOf(e.target);dots.forEach((d,j)=>d.classList.toggle('active',i===j));prog.style.width=`${((i+1)/slides.length)*100}%`;e.target.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}})},{threshold:0.5});slides.forEach(s=>obs.observe(s));document.addEventListener('keydown',e=>{const active=[...slides].findIndex(s=>s.getBoundingClientRect().top>-10&&s.getBoundingClientRect().top<window.innerHeight/2);if(e.key==='ArrowDown'||e.key===' ')slides[Math.min(active+1,slides.length-1)].scrollIntoView({behavior:'smooth'});if(e.key==='ArrowUp')slides[Math.max(active-1,0)].scrollIntoView({behavior:'smooth'});});
+</script>
+</body>
+</html>

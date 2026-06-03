@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intermediate · Week 10 · Day 7 — Assembly Best Practices</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;height:100%;}
+body{font-family:'Nunito',sans-serif;background:#fff7ed;color:#1e293b;}
+.slide{scroll-snap-align:start;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem;position:relative;overflow:hidden;}
+h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+code,pre{font-family:'Fira Code',monospace;}
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,#f97316,#ef4444);transition:width .4s;z-index:100;}
+#nav-dots{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:100;}
+.dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;}.dot.active{background:#f97316;transform:scale(1.3);}
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s ease;}.reveal.visible{opacity:1;transform:none;}
+.r1{transition-delay:.1s;}.r2{transition-delay:.2s;}.r3{transition-delay:.3s;}
+.title-slide{background:linear-gradient(135deg,#7c2d12,#f97316,#ef4444);}
+.title-slide h1{font-size:clamp(2rem,5vw,3.5rem);color:#fff;text-align:center;line-height:1.2;}
+.sub{color:rgba(255,255,255,.85);text-align:center;margin-top:1rem;font-size:clamp(.95rem,2.5vw,1.3rem);}
+.badge{display:inline-block;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:.4rem 1.2rem;border-radius:999px;font-size:.9rem;font-weight:700;margin-bottom:1.5rem;}
+.wave{position:absolute;bottom:0;left:0;width:100%;opacity:.25;}
+.card{background:#fff;border-radius:1.2rem;padding:1.4rem;box-shadow:0 4px 20px rgba(0,0,0,.07);border-left:5px solid #f97316;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1.1rem;width:100%;max-width:920px;}
+.card h3{font-size:1.05rem;color:#1e293b;margin-bottom:.35rem;font-family:'Baloo 2',sans-serif;}
+.card p{font-size:.88rem;color:#475569;line-height:1.5;}
+.icon{font-size:1.8rem;margin-bottom:.4rem;}
+.cb{background:#0f172a;border-radius:1rem;padding:1.4rem;width:100%;max-width:820px;overflow-x:auto;}
+.cb pre{color:#e2e8f0;font-size:.79rem;line-height:1.7;}
+.kw{color:#7dd3fc;}.fn{color:#86efac;}.cm{color:#64748b;}.str{color:#fde68a;}.num{color:#fb923c;}
+.steps{display:flex;flex-direction:column;gap:.9rem;width:100%;max-width:820px;}
+.step{display:flex;align-items:flex-start;gap:.9rem;background:#fff;padding:1.1rem 1.4rem;border-radius:1rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.sn{min-width:2.1rem;height:2.1rem;border-radius:50%;background:#f97316;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;}
+.st h4{font-size:.98rem;color:#1e293b;margin-bottom:.2rem;font-family:'Baloo 2',sans-serif;}
+.st p{font-size:.85rem;color:#475569;}
+.hw-list{display:flex;flex-direction:column;gap:.75rem;width:100%;max-width:720px;}
+.hw-item{display:flex;align-items:center;gap:.9rem;background:#fff;padding:.9rem 1.3rem;border-radius:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.hw-badge{padding:.2rem .75rem;border-radius:999px;font-size:.73rem;font-weight:700;white-space:nowrap;}
+.easy{background:#dcfce7;color:#166534;}.medium{background:#fef9c3;color:#854d0e;}.hard{background:#fee2e2;color:#991b1b;}.bonus{background:#ede9fe;color:#5b21b6;}
+.qbox{background:#fff;border-radius:1.2rem;padding:1.7rem;width:100%;max-width:760px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.qbox h3{font-size:1.08rem;margin-bottom:1.1rem;font-family:'Baloo 2',sans-serif;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.opt{padding:.85rem 1.1rem;border-radius:.8rem;border:2px solid #e2e8f0;cursor:pointer;font-size:.88rem;font-family:'Nunito',sans-serif;background:#fff;transition:all .2s;text-align:left;}
+.opt:hover{border-color:#f97316;background:#fff7ed;}
+.opt.correct{background:#dcfce7;border-color:#16a34a;color:#166534;font-weight:700;}
+.opt.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b;}
+.qnav{display:flex;gap:1rem;margin-top:1.4rem;justify-content:center;}
+.btn{padding:.65rem 1.7rem;border-radius:999px;border:none;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:.95rem;background:#f97316;color:#fff;}
+#qs{text-align:center;font-size:1.2rem;font-weight:700;margin-top:.9rem;color:#7c2d12;}
+.sh{text-align:center;margin-bottom:1.8rem;}
+.sh h2{font-size:clamp(1.5rem,3.5vw,2.3rem);color:#1e293b;font-family:'Baloo 2',sans-serif;}
+.sh p{color:#475569;margin-top:.35rem;font-size:.95rem;}
+.tag{display:inline-block;background:#fff7ed;color:#7c2d12;padding:.18rem .75rem;border-radius:999px;font-size:.76rem;font-weight:700;margin-bottom:.5rem;border:1.5px solid #f97316;}
+.sum-slide{background:linear-gradient(135deg,#7c2d12,#f97316);}
+.table{width:100%;max-width:820px;border-collapse:collapse;}
+.table th{background:#f97316;color:#fff;padding:.65rem 1rem;text-align:left;font-family:'Baloo 2',sans-serif;font-size:.9rem;}
+.table td{padding:.65rem 1rem;border-bottom:1px solid #e2e8f0;font-size:.87rem;}
+.table tr:nth-child(even) td{background:#fff7ed;}
+.pill{display:inline-block;background:rgba(255,255,255,.15);color:#fff;padding:.4rem 1rem;border-radius:999px;font-size:.85rem;margin:.25rem;}
+</style>
+</head>
+<body>
+<div id="progress"></div><div id="nav-dots"></div>
+
+<div class="slide title-slide">
+  <div class="badge reveal">Intermediate · Week 10 · Day 7</div>
+  <h1 class="reveal r1">Assembly Best Practices</h1>
+  <p class="sub reveal r2">Assembling a complete professional project!</p>
+  <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.8rem;justify-content:center;" class="reveal r3">
+    <span class="pill">Assembly Order</span>
+    <span class="pill">Testing Each Stage</span>
+    <span class="pill">Documentation</span>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 100"><path fill="#fff7ed" d="M0,60 C360,100 1080,0 1440,60 L1440,100 L0,100 Z"/></svg>
+</div>
+
+
+<div class="slide" style="background:#fff;">
+  <div class="sh reveal"><div class="tag">Key Concepts</div><h2>Assembly Best Practices</h2></div>
+  <div class="card-grid reveal r1"><div class="card" style="border-color:#06b6d4;"><div class="icon">📋</div><h3>Assembly Order</h3><p>1) Solder SMD first 2) Then THT short components 3) Then tall components 4) Connectors last</p></div><div class="card" style="border-color:#f97316;"><div class="icon">🔬</div><h3>Stage Testing</h3><p>Test at each assembly stage — find faults early before burying them under more components!</p></div><div class="card" style="border-color:#8b5cf6;"><div class="icon">📸</div><h3>Documentation</h3><p>Photo each stage of build. Write build notes. Creates a build log useful for debugging</p></div><div class="card" style="border-color:#10b981;"><div class="icon">🧹</div><h3>Flux Cleanup</h3><p>Clean flux residue with isopropyl alcohol (IPA) — looks professional, prevents corrosion</p></div></div>
+</div>
+<div class="slide" style="background:#fff7ed;">
+  <div class="sh reveal"><div class="tag">Techniques</div><h2>Assembly Best Practices</h2></div>
+  <div class="cb reveal r1"><pre><span class="cm">// Assembly order for a typical PCB:</span>
+<span class="cm">// 1. SMD resistors and capacitors (lowest profile)</span>
+<span class="cm">// 2. SMD ICs and diodes</span>
+<span class="cm">// 3. THT resistors (bend leads first)</span>
+<span class="cm">// 4. THT capacitors (note polarity!)</span>
+<span class="cm">// 5. THT diodes (check cathode band direction)</span>
+<span class="cm">// 6. ICs in DIP sockets</span>
+<span class="cm">// 7. Tall components: inductors, transformers</span>
+<span class="cm">// 8. Connectors and headers</span>
+<span class="cm">// 9. Final check before power-on</span>
+
+<span class="cm">// Test between stages!</span></pre></div>
+</div>
+<div class="slide" style="background:#fff;">
+  <div class="sh reveal"><div class="tag">Homework</div><h2>Take It Further!</h2></div>
+  <div class="hw-list reveal r1"><div class="hw-item"><span class="hw-badge easy">Easy</span><p>Write a build log with photos for a simple LED circuit assembly</p></div><div class="hw-item"><span class="hw-badge medium">Medium</span><p>Assemble a complete PCB following the correct component order</p></div><div class="hw-item"><span class="hw-badge hard">Hard</span><p>Clean assembled PCB with IPA and inspect all joints under magnification</p></div><div class="hw-item"><span class="hw-badge bonus">Bonus</span><p>Create a PDF assembly guide for your PCB that someone else could follow</p></div></div>
+</div>
+<div class="slide" style="background:#fff;">
+  <div class="sh reveal"><div class="tag">Quiz</div><h2>Test Your Knowledge</h2></div>
+  <div class="reveal r1"><div class="qbox" id="qd"><h3 id="qt"></h3><div class="opts" id="qo"></div></div>
+  <div class="qnav"><button class="btn" onclick="nxt()">Next →</button></div>
+  <div id="qs"></div></div>
+</div>
+
+<div class="slide sum-slide">
+  <div class="sh reveal" style="color:#fff;">
+    <div class="tag" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4);">Intermediate · Week 10 · Day 7 ✓</div>
+    <h2 style="color:#fff;">Key Takeaways</h2>
+  </div>
+  <div class="card-grid reveal r1" style="max-width:820px;"><div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);"><div class="icon">📋</div><h3 style="color:rgba(255,255,255,.92);">Assembly Order</h3><p style="color:rgba(255,255,255,.75);">1) Solder SMD first 2) Then THT short components 3) Then tall components 4) Connectors last</p></div><div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);"><div class="icon">🔬</div><h3 style="color:rgba(255,255,255,.92);">Stage Testing</h3><p style="color:rgba(255,255,255,.75);">Test at each assembly stage — find faults early before burying them under more components!</p></div><div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);"><div class="icon">📸</div><h3 style="color:rgba(255,255,255,.92);">Documentation</h3><p style="color:rgba(255,255,255,.75);">Photo each stage of build. Write build notes. Creates a build log useful for debugging</p></div><div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);"><div class="icon">🧹</div><h3 style="color:rgba(255,255,255,.92);">Flux Cleanup</h3><p style="color:rgba(255,255,255,.75);">Clean flux residue with isopropyl alcohol (IPA) — looks professional, prevents corrosion</p></div></div>
+  <p class="reveal r2" style="color:rgba(255,255,255,.85);margin-top:1.4rem;font-size:1.05rem;">Tomorrow: Week 10 Capstone — complete soldered project! 🏆</p>
+</div>
+
+<script>
+const QS=[{"q": "What should be soldered first on a PCB?", "opts": ["Tallest components", "Connectors", "SMD components (lowest profile)", "ICs last"], "ans": 2}, {"q": "What chemical is used to clean flux residue?", "opts": ["Water", "Acetone", "Isopropyl alcohol (IPA)", "Petrol"], "ans": 2}, {"q": "Why test at each assembly stage?", "opts": ["Required process", "Find faults before they are buried under more components", "Faster overall", "No reason"], "ans": 1}, {"q": "When soldering an electrolytic capacitor, what must you check?", "opts": ["Colour", "Polarity (+ and - must be correct)", "Resistance value", "Lead length"], "ans": 1}];
+let qi=0,sc=0,ans=false;
+function show(){if(qi>=QS.length){document.getElementById('qd').style.display='none';document.getElementById('qs').innerHTML=`🎉 Score: ${sc}/${QS.length}`;return;}const q=QS[qi];document.getElementById('qt').textContent=`Q${qi+1}: ${q.q}`;const o=document.getElementById('qo');o.innerHTML='';ans=false;q.opts.forEach((t,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=t;b.onclick=()=>{if(ans)return;ans=true;b.classList.add(i===q.ans?'correct':'wrong');if(i===q.ans)sc++;};o.appendChild(b);});}
+function nxt(){qi++;show();}show();
+const SL=document.querySelectorAll('.slide');const DN=document.getElementById('nav-dots');SL.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>SL[i].scrollIntoView({behavior:'smooth'});DN.appendChild(d);});const dots=document.querySelectorAll('.dot');const pr=document.getElementById('progress');new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const i=[...SL].indexOf(e.target);dots.forEach((d,j)=>d.classList.toggle('active',i===j));pr.style.width=`${((i+1)/SL.length)*100}%`;e.target.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}})},{threshold:0.5}).observe&&SL.forEach(s=>new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const i=[...SL].indexOf(e.target);dots.forEach((d,j)=>d.classList.toggle('active',i===j));pr.style.width=`${((i+1)/SL.length)*100}%`;e.target.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}})},{threshold:0.5}).observe(s));
+document.addEventListener('keydown',e=>{const a=[...SL].findIndex(s=>s.getBoundingClientRect().top>-10&&s.getBoundingClientRect().top<window.innerHeight/2);if(e.key==='ArrowDown'||e.key===' ')SL[Math.min(a+1,SL.length-1)].scrollIntoView({behavior:'smooth'});if(e.key==='ArrowUp')SL[Math.max(a-1,0)].scrollIntoView({behavior:'smooth'});});
+</script>
+</body>
+</html>

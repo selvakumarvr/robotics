@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 Day 7 — LCD Display</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent:#7c3aed; --accent-light:#a78bfa; --accent-glow:rgba(124,58,237,0.18);
+            --accent2:#f97316; --accent3:#0ea5e9; --accent4:#10b981; --accent5:#ec4899;
+            --warning:#f59e0b; --danger:#ef4444;
+            --text-primary:#1e0a3c; --text-muted:#94a3b8;
+            --font-display:'Baloo 2',cursive; --font-body:'Nunito',sans-serif; --font-code:'Fira Code',monospace;
+            --title-size:clamp(1.8rem,5vw,3.6rem); --h2-size:clamp(1.3rem,3.5vw,2.2rem);
+            --h3-size:clamp(1rem,2.5vw,1.4rem); --body-size:clamp(0.78rem,1.5vw,1.05rem);
+            --small-size:clamp(0.68rem,1.1vw,0.88rem); --code-size:clamp(0.62rem,1.05vw,0.83rem);
+            --slide-padding:clamp(1.5rem,4vw,4rem); --content-gap:clamp(0.8rem,2vw,1.6rem);
+            --elem-gap:clamp(0.3rem,1vw,0.7rem); --radius:16px; --ease-out:cubic-bezier(0.16,1,0.3,1);
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;scroll-snap-type:y mandatory;height:100%;overflow-x:hidden;}
+        body{font-family:var(--font-body);background:#f5f3ff;color:var(--text-primary);overflow-x:hidden;height:100%;line-height:1.5;}
+        .slide{width:100vw;height:100vh;height:100dvh;padding:var(--slide-padding);scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+        .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center;max-height:100%;overflow:hidden;gap:var(--content-gap);}
+        .progress-bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent-light),var(--accent5));z-index:1000;transition:width 0.3s ease;}
+        .nav-dots{position:fixed;right:clamp(0.5rem,1.5vw,1.5rem);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:100;}
+        .nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(124,58,237,0.2);cursor:pointer;transition:all 0.3s ease;border:none;padding:0;}
+        .nav-dot.active{background:var(--accent);transform:scale(1.5);}
+        .nav-dot:hover{background:var(--accent-light);}
+        .slide-counter{position:fixed;bottom:clamp(0.5rem,2vw,1.2rem);right:clamp(0.5rem,2vw,1.2rem);font-family:var(--font-code);font-size:var(--small-size);color:var(--text-muted);z-index:100;background:rgba(255,255,255,0.85);padding:3px 10px;border-radius:20px;}
+        h1{font-family:var(--font-display);font-size:var(--title-size);font-weight:800;line-height:1.15;}
+        h2{font-family:var(--font-display);font-size:var(--h2-size);font-weight:700;line-height:1.2;color:var(--accent);}
+        h3{font-family:var(--font-display);font-size:var(--h3-size);font-weight:700;line-height:1.3;}
+        p,li{font-size:var(--body-size);line-height:1.65;color:#334155;}
+        strong{font-weight:700;}
+        .accent{color:var(--accent);} .accent2{color:var(--accent2);} .accent3{color:var(--accent3);} .accent4{color:var(--accent4);}
+        .bg-dots{background-image:radial-gradient(rgba(124,58,237,0.07) 1.5px,transparent 1.5px);background-size:28px 28px;}
+        .bg-white{background:#ffffff;}
+        .bg-purple{background:linear-gradient(135deg,#f5f3ff 0%,#ede9fe 50%,#ddd6fe 100%);}
+        .bg-orange{background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 50%,#fed7aa 100%);}
+        .bg-green{background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 50%,#a7f3d0 100%);}
+        .card{background:#fff;border-radius:var(--radius);padding:clamp(0.8rem,2vw,1.4rem);border:2px solid rgba(124,58,237,0.1);box-shadow:0 2px 12px rgba(124,58,237,0.06);transition:all 0.3s ease;}
+        .card:hover{border-color:rgba(124,58,237,0.25);box-shadow:0 6px 24px rgba(124,58,237,0.12);transform:translateY(-2px);}
+        .card-purple{border-left:4px solid var(--accent);background:linear-gradient(135deg,#fff 80%,#f5f3ff);}
+        .card-orange{border-left:4px solid var(--accent2);background:linear-gradient(135deg,#fff 80%,#fff7ed);}
+        .card-sky{border-left:4px solid var(--accent3);background:linear-gradient(135deg,#fff 80%,#e0f2fe);}
+        .card-green{border-left:4px solid var(--accent4);background:linear-gradient(135deg,#fff 80%,#ecfdf5);}
+        .card-pink{border-left:4px solid var(--accent5);background:linear-gradient(135deg,#fff 80%,#fdf2f8);}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:var(--content-gap);align-items:start;}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--elem-gap);}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--elem-gap);}
+        @media(max-width:768px){.two-col,.grid-3{grid-template-columns:1fr 1fr;}}
+        .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:var(--small-size);font-weight:700;}
+        .badge-purple{background:#ede9fe;color:var(--accent);}
+        .badge-orange{background:#fff7ed;color:var(--accent2);}
+        .badge-sky{background:#e0f2fe;color:var(--accent3);}
+        .badge-green{background:#ecfdf5;color:var(--accent4);}
+        .badge-pink{background:#fdf2f8;color:var(--accent5);}
+        .section-label{font-family:var(--font-code);font-size:var(--small-size);letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+        .divider{height:3px;width:60px;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent-light));}
+        .subtitle{font-size:clamp(0.9rem,2vw,1.3rem);color:#475569;font-weight:500;}
+        .code-block{background:#1e0a3c;border-radius:12px;padding:clamp(0.8rem,2vw,1.4rem);font-family:var(--font-code);font-size:var(--code-size);color:#ddd6fe;overflow-x:auto;border:2px solid rgba(167,139,250,0.25);}
+        .code-block .kw{color:#f0abfc;} .code-block .fn{color:#67e8f9;} .code-block .num{color:#fcd34d;}
+        .code-block .cmt{color:#6ee7b7;font-style:italic;} .code-block .str{color:#f9a8d4;} .code-block .pin{color:#fb923c;} .code-block .typ{color:#a5f3fc;} .code-block .inc{color:#fde68a;}
+        .code-block pre{white-space:pre;line-height:1.8;}
+        .step{display:flex;align-items:flex-start;gap:clamp(0.5rem,1.5vw,1rem);padding:clamp(0.5rem,1.2vw,0.9rem);background:#fff;border-radius:12px;border:2px solid rgba(124,58,237,0.12);}
+        .step-num{min-width:clamp(28px,3.5vw,40px);height:clamp(28px,3.5vw,40px);border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:var(--body-size);flex-shrink:0;font-family:var(--font-display);}
+        .quiz-option{padding:clamp(0.5rem,1.2vw,0.85rem) clamp(0.8rem,2vw,1.2rem);border-radius:10px;background:#fff;border:2px solid rgba(124,58,237,0.15);cursor:pointer;font-size:var(--body-size);font-weight:600;color:#334155;transition:all 0.2s ease;text-align:left;font-family:var(--font-body);}
+        .quiz-option:hover{border-color:var(--accent);background:#f5f3ff;transform:translateX(4px);}
+        .quiz-option.correct{background:#d1fae5;border-color:var(--accent4);color:#065f46;}
+        .quiz-option.wrong{background:#fee2e2;border-color:var(--danger);color:#991b1b;}
+        .quiz-feedback{font-size:var(--body-size);font-weight:700;padding:0.5em 1em;border-radius:10px;display:none;margin-top:0.5em;}
+        .quiz-feedback.show{display:block;}
+        .reveal,.reveal-right,.reveal-scale,.reveal-up{opacity:0;transition:opacity 0.6s var(--ease-out),transform 0.6s var(--ease-out);}
+        .reveal{transform:translateY(24px);} .reveal-right{transform:translateX(24px);} .reveal-scale{transform:scale(0.92);} .reveal-up{transform:translateY(-20px);}
+        .reveal.visible,.reveal-right.visible,.reveal-scale.visible,.reveal-up.visible{opacity:1;transform:none;}
+        [data-delay="1"]{transition-delay:0.1s;} [data-delay="2"]{transition-delay:0.2s;} [data-delay="3"]{transition-delay:0.3s;} [data-delay="4"]{transition-delay:0.4s;}
+        .big-emoji{font-size:clamp(3rem,8vw,6rem);line-height:1;display:block;text-align:center;}
+        .hl-purple{background:#ede9fe;border-left:4px solid var(--accent);color:#4c1d95;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-orange{background:#fff7ed;border-left:4px solid var(--accent2);color:#9a3412;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-green{background:#ecfdf5;border-left:4px solid var(--accent4);color:#065f46;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-yellow{background:#fffbeb;border-left:4px solid var(--warning);color:#92400e;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .section-tag{display:inline-flex;align-items:center;gap:0.4em;padding:0.3em 0.9em;border-radius:30px;font-size:var(--small-size);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.4em;}
+        .tag-day{background:#ede9fe;color:var(--accent);border:2px solid #c4b5fd;}
+        .tag-hw{background:#fff7ed;color:#f97316;border:2px solid #fed7aa;}
+        .tag-quiz{background:#e0f2fe;color:var(--accent3);border:2px solid #7dd3fc;}
+        .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.25;pointer-events:none;}
+        /* LCD mock screen */
+        .lcd-screen{background:#0a2e0a;border-radius:8px;padding:0.8em 1em;font-family:var(--font-code);border:3px solid #4ade80;box-shadow:0 0 15px rgba(74,222,128,0.3);display:flex;flex-direction:column;gap:0.4em;}
+        .lcd-line{color:#4ade80;font-size:clamp(0.75rem,1.5vw,1rem);letter-spacing:0.08em;min-height:1.4em;}
+        .lcd-cursor{display:inline-block;width:9px;height:1.1em;background:#4ade80;animation:blink 1s infinite;vertical-align:text-bottom;}
+        @keyframes blink{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+        .lcd-label{font-size:var(--small-size);color:#64748b;text-align:center;margin-top:0.3em;font-family:var(--font-code);}
+        .pin-table{border-collapse:collapse;width:100%;font-size:var(--small-size);}
+        .pin-table th{background:#ede9fe;color:var(--accent);padding:0.3em 0.6em;text-align:left;font-family:var(--font-display);}
+        .pin-table td{padding:0.25em 0.6em;border-bottom:1px solid #ddd6fe;font-family:var(--font-code);}
+    </style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">1 / 15</div>
+
+<!-- SLIDE 1: TITLE -->
+<section class="slide bg-purple">
+    <div class="blob" style="width:300px;height:300px;background:#c4b5fd;top:-80px;right:-80px;"></div>
+    <div class="blob" style="width:200px;height:200px;background:#fbcfe8;bottom:-60px;left:-60px;"></div>
+    <div class="slide-content" style="align-items:flex-start;">
+        <span class="section-tag tag-day reveal-up">Week 1 · Day 7</span>
+        <h1 class="reveal" style="margin-top:0.2em;">Talk to Your <span class="accent">Display!</span></h1>
+        <p class="subtitle reveal" data-delay="2">LCD 16x2, the LiquidCrystal library, printing text, sensor values and custom messages</p>
+        <div class="divider reveal" data-delay="3" style="margin-top:0.8em;"></div>
+        <div class="reveal" data-delay="4" style="display:flex;gap:0.8em;flex-wrap:wrap;margin-top:0.5em;">
+            <span class="badge badge-purple">LCD 16x2</span>
+            <span class="badge badge-orange">LiquidCrystal Library</span>
+            <span class="badge badge-sky">lcd.print()</span>
+            <span class="badge badge-green">setCursor()</span>
+            <span class="badge badge-pink">Live Sensor Display</span>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 2: RECAP -->
+<section class="slide bg-dots" style="background-color:#f5f3ff;">
+    <div class="slide-content">
+        <span class="section-label reveal">Quick Recap</span>
+        <h2 class="reveal" data-delay="1">What We Learned in Day 6</h2>
+        <div class="grid-2 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-sky"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">⚙️</div><div><h3 style="font-size:var(--body-size);">Servo Motor</h3><p style="font-size:var(--small-size);">3-wire motor: Red=5V, Black=GND, Orange=signal pin</p></div></div></div>
+            <div class="card card-purple"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">📚</div><div><h3 style="font-size:var(--body-size);">Servo Library</h3><p style="font-size:var(--small-size);">#include &lt;Servo.h&gt; — attach() and write(angle 0–180)</p></div></div></div>
+            <div class="card card-green"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">🔄</div><div><h3 style="font-size:var(--body-size);">Sweep Project</h3><p style="font-size:var(--small-size);">Smooth 0°→180°→0° with for loops and delay(15)</p></div></div></div>
+            <div class="card card-orange"><div style="display:flex;align-items:center;gap:0.6em;"><div style="font-size:1.5em;">🎚️</div><div><h3 style="font-size:var(--body-size);">Pot Control</h3><p style="font-size:var(--small-size);">map(analogRead, 0, 1023, 0, 180) to aim servo with a knob</p></div></div></div>
+        </div>
+        <div class="hl-purple reveal" data-delay="3" style="font-size:var(--small-size);">Today we add a <strong>screen</strong> — a 16×2 character LCD display so your project can show messages and live sensor values!</div>
+    </div>
+</section>
+
+<!-- SLIDE 3: AGENDA -->
+<section class="slide bg-dots" style="background-color:#f5f3ff;">
+    <div class="slide-content">
+        <span class="section-label reveal">Today's Agenda</span>
+        <h2 class="reveal" data-delay="1">What We'll Do Today</h2>
+        <div class="reveal" data-delay="2" style="display:flex;flex-direction:column;gap:0.45em;margin-top:0.3em;">
+            <div class="step"><div class="step-num">1</div><div><h3 style="font-size:var(--body-size);">The 16×2 LCD</h3><p style="font-size:var(--small-size);">16 columns, 2 rows — wiring the many pins correctly</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent2);">2</div><div><h3 style="font-size:var(--body-size);">LiquidCrystal Library</h3><p style="font-size:var(--small-size);">lcd.begin(), lcd.print(), lcd.clear() — the core functions</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent3);">3</div><div><h3 style="font-size:var(--body-size);">setCursor() — Position Your Text</h3><p style="font-size:var(--small-size);">Print to row 1 or row 2, starting at any column</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent4);">4</div><div><h3 style="font-size:var(--body-size);">Project: Live Sensor Display</h3><p style="font-size:var(--small-size);">Show LDR value and a custom label updating in real time</p></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 4: SECTION DIVIDER -->
+<section class="slide" style="background:linear-gradient(135deg,#7c3aed 0%,#a78bfa 50%,#c4b5fd 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#ddd6fe;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🖥️</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ede9fe;margin-top:0.5em;">Part 1</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">The 16×2<br>LCD Display</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ede9fe;margin-top:0.5em;">16 characters across, 2 rows — perfect for showing messages and data</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#c4b5fd);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 5: LCD INTRO + WIRING -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">LCD 16×2 — Wiring</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">Pin connections</h3>
+                    <table class="pin-table" style="margin-top:0.4em;">
+                        <tr><th>LCD Pin</th><th>Connects to</th></tr>
+                        <tr><td>VSS (1)</td><td>GND</td></tr>
+                        <tr><td>VDD (2)</td><td>5V</td></tr>
+                        <tr><td>V0 (3)</td><td>Potentiometer wiper (contrast)</td></tr>
+                        <tr><td>RS (4)</td><td>Pin 12</td></tr>
+                        <tr><td>RW (5)</td><td>GND</td></tr>
+                        <tr><td>EN (6)</td><td>Pin 11</td></tr>
+                        <tr><td>D4 (11)</td><td>Pin 5</td></tr>
+                        <tr><td>D5 (12)</td><td>Pin 4</td></tr>
+                        <tr><td>D6 (13)</td><td>Pin 3</td></tr>
+                        <tr><td>D7 (14)</td><td>Pin 2</td></tr>
+                        <tr><td>A (15)</td><td>5V (backlight +)</td></tr>
+                        <tr><td>K (16)</td><td>GND (backlight −)</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="lcd-screen">
+                    <div class="lcd-line">Hello, World!&nbsp;&nbsp;&nbsp;</div>
+                    <div class="lcd-line">Arduino Day 7!&nbsp;&nbsp;</div>
+                </div>
+                <div class="lcd-label">A real 16×2 LCD display</div>
+                <div class="hl-purple" style="font-size:var(--small-size);">The contrast pot on V0 adjusts how dark the characters appear. Turn it until you can see the characters clearly!</div>
+                <div class="hl-yellow" style="font-size:var(--small-size);">In Tinkercad: search "LCD 16x2" — it's ready with all connections. Way easier than real wiring!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 6: LIQUIDCRYSTAL LIBRARY -->
+<section class="slide bg-dots" style="background-color:#f5f3ff;">
+    <div class="slide-content">
+        <h2 class="reveal">LiquidCrystal Library — Core Functions</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="inc">#include &lt;LiquidCrystal.h&gt;</span>
+
+<span class="cmt">// RS, EN, D4, D5, D6, D7</span>
+LiquidCrystal lcd(<span class="num">12</span>,<span class="num">11</span>,<span class="num">5</span>,<span class="num">4</span>,<span class="num">3</span>,<span class="num">2</span>);
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  lcd.<span class="fn">begin</span>(<span class="num">16</span>, <span class="num">2</span>);   <span class="cmt">// 16 cols, 2 rows</span>
+  lcd.<span class="fn">print</span>(<span class="str">"Hello World!"</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cmt">// Move to row 1, column 0</span>
+  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">1</span>);
+  lcd.<span class="fn">print</span>(<span class="str">"Arduino Rocks!"</span>);
+  <span class="fn">delay</span>(<span class="num">2000</span>);
+
+  lcd.<span class="fn">clear</span>();
+  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">0</span>);
+  lcd.<span class="fn">print</span>(<span class="str">"Day 7 - LCD!"</span>);
+  <span class="fn">delay</span>(<span class="num">2000</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-purple"><h3 style="font-size:var(--body-size);">LiquidCrystal lcd(12,11,5,4,3,2)</h3><p style="font-size:var(--small-size);">Creates the LCD object with pin numbers: RS, Enable, D4, D5, D6, D7.</p></div>
+                <div class="card card-orange"><h3 style="font-size:var(--body-size);">lcd.begin(16, 2)</h3><p style="font-size:var(--small-size);">Initialise: 16 columns, 2 rows. Call this in setup() before printing.</p></div>
+                <div class="card card-sky"><h3 style="font-size:var(--body-size);">lcd.print("text")</h3><p style="font-size:var(--small-size);">Prints text or a number starting at current cursor position.</p></div>
+                <div class="card card-green"><h3 style="font-size:var(--body-size);">lcd.clear()</h3><p style="font-size:var(--small-size);">Clears the entire screen and resets cursor to top-left (0,0).</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 7: setCursor -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">setCursor() — Position Your Text</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">lcd.setCursor(column, row)</h3>
+                    <p style="font-size:var(--small-size);margin:0.3em 0;">Column: 0–15 (left to right). Row: 0 = top, 1 = bottom.</p>
+                    <div class="code-block" style="margin-top:0.4em;font-size:var(--small-size);">
+<pre>lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">0</span>); <span class="cmt">// top-left</span>
+lcd.<span class="fn">print</span>(<span class="str">"Light:"</span>);
+
+lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">1</span>); <span class="cmt">// bottom-left</span>
+lcd.<span class="fn">print</span>(<span class="str">"Temp:"</span>);</pre>
+                    </div>
+                </div>
+                <div class="card card-sky">
+                    <h3 style="font-size:var(--body-size);">Print numbers too</h3>
+                    <div class="code-block" style="margin-top:0.3em;font-size:var(--small-size);">
+<pre><span class="typ">int</span> val = <span class="fn">analogRead</span>(<span class="pin">A0</span>);
+lcd.<span class="fn">setCursor</span>(<span class="num">7</span>, <span class="num">0</span>);
+lcd.<span class="fn">print</span>(val);   <span class="cmt">// prints number</span></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <p style="font-size:var(--small-size);font-weight:700;color:var(--accent);">LCD grid — 16 columns, 2 rows:</p>
+                <div style="background:#0a2e0a;border-radius:10px;padding:0.8em;border:3px solid #4ade80;box-shadow:0 0 12px rgba(74,222,128,0.2);">
+                    <div style="display:grid;grid-template-columns:repeat(16,1fr);gap:2px;margin-bottom:4px;">
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">L</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">i</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">g</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">h</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">t</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">:</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">&nbsp;</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">7</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">4</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">5</div>
+                        <div style="background:#166534;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;"></div>
+                        <div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(16,1fr);gap:2px;">
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">T</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">e</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">m</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">p</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">:</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">&nbsp;</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">2</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">5</div>
+                        <div style="background:#4ade80;color:#0a2e0a;border-radius:2px;text-align:center;font-family:var(--font-code);font-size:0.55em;padding:3px 1px;font-weight:700;">C</div>
+                        <div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div><div style="background:#166534;border-radius:2px;"></div>
+                    </div>
+                </div>
+                <div class="hl-purple" style="font-size:var(--small-size);">setCursor(0,0) = top-left. setCursor(0,1) = bottom-left. setCursor(8,0) = middle of top row.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 8: SECTION DIVIDER PROJECT -->
+<section class="slide" style="background:linear-gradient(135deg,#10b981 0%,#34d399 50%,#6ee7b7 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:240px;height:240px;background:#a7f3d0;bottom:5%;left:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">📊</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ecfdf5;margin-top:0.5em;">Project</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Live Sensor<br>Dashboard!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#d1fae5;margin-top:0.5em;">Show LDR light value and potentiometer reading live on the LCD</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#a7f3d0);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 9: FULL PROJECT CODE -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent4);">Live Sensor Dashboard Code</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1" style="font-size:clamp(0.57rem,0.93vw,0.77rem);">
+<pre><span class="inc">#include &lt;LiquidCrystal.h&gt;</span>
+
+LiquidCrystal lcd(<span class="num">12</span>,<span class="num">11</span>,<span class="num">5</span>,<span class="num">4</span>,<span class="num">3</span>,<span class="num">2</span>);
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">ldrPin</span> = <span class="pin">A0</span>;
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">potPin</span> = <span class="pin">A1</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  lcd.<span class="fn">begin</span>(<span class="num">16</span>, <span class="num">2</span>);
+  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">0</span>);
+  lcd.<span class="fn">print</span>(<span class="str">"Sensor Dashboard"</span>);
+  <span class="fn">delay</span>(<span class="num">1500</span>);
+  lcd.<span class="fn">clear</span>();
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="typ">int</span> light = <span class="fn">analogRead</span>(<span class="pin">ldrPin</span>);
+  <span class="typ">int</span> pot   = <span class="fn">analogRead</span>(<span class="pin">potPin</span>);
+
+  <span class="cmt">// Row 0: Light reading</span>
+  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">0</span>);
+  lcd.<span class="fn">print</span>(<span class="str">"Light:"</span>);
+  lcd.<span class="fn">print</span>(light);
+  lcd.<span class="fn">print</span>(<span class="str">"    "</span>); <span class="cmt">// clear leftovers</span>
+
+  <span class="cmt">// Row 1: Pot reading</span>
+  lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">1</span>);
+  lcd.<span class="fn">print</span>(<span class="str">"Pot:  "</span>);
+  lcd.<span class="fn">print</span>(pot);
+  lcd.<span class="fn">print</span>(<span class="str">"    "</span>);
+
+  <span class="fn">delay</span>(<span class="num">200</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="lcd-screen" style="margin-bottom:0.3em;">
+                    <div class="lcd-line">Light:745&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                    <div class="lcd-line">Pot:  512&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                </div>
+                <div class="lcd-label">What students will see on their LCD</div>
+                <div class="card card-purple" style="margin-top:0.3em;"><h3 style="font-size:var(--body-size);">Why print("    ")?</h3><p style="font-size:var(--small-size);">LCD doesn't auto-clear old characters. Printing spaces after the number wipes leftover digits when numbers get shorter (e.g. 1023 → 45).</p></div>
+                <div class="card card-orange"><h3 style="font-size:var(--body-size);">No lcd.clear() in loop!</h3><p style="font-size:var(--small-size);">lcd.clear() causes flicker. Instead, just overwrite characters by setting the cursor position and printing new values.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 10: CUSTOM MESSAGES -->
+<section class="slide bg-dots" style="background-color:#f5f3ff;">
+    <div class="slide-content">
+        <h2 class="reveal">Conditional Messages on LCD</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="typ">int</span> light = <span class="fn">analogRead</span>(<span class="pin">A0</span>);
+
+lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">0</span>);
+lcd.<span class="fn">print</span>(<span class="str">"Light:"</span>);
+lcd.<span class="fn">print</span>(light);
+lcd.<span class="fn">print</span>(<span class="str">"   "</span>);
+
+lcd.<span class="fn">setCursor</span>(<span class="num">0</span>, <span class="num">1</span>);
+
+<span class="kw">if</span> (light &lt; <span class="num">300</span>) {
+  lcd.<span class="fn">print</span>(<span class="str">"Status: DARK    "</span>);
+} <span class="kw">else if</span> (light &lt; <span class="num">600</span>) {
+  lcd.<span class="fn">print</span>(<span class="str">"Status: DIM     "</span>);
+} <span class="kw">else</span> {
+  lcd.<span class="fn">print</span>(<span class="str">"Status: BRIGHT  "</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div style="display:flex;flex-direction:column;gap:0.5em;">
+                    <div>
+                        <p style="font-size:var(--small-size);font-weight:700;color:var(--accent);margin-bottom:0.3em;">Dark room:</p>
+                        <div class="lcd-screen"><div class="lcd-line">Light:245&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div class="lcd-line">Status: DARK&nbsp;&nbsp;&nbsp;&nbsp;</div></div>
+                    </div>
+                    <div>
+                        <p style="font-size:var(--small-size);font-weight:700;color:var(--accent);margin-bottom:0.3em;">Bright room:</p>
+                        <div class="lcd-screen"><div class="lcd-line">Light:856&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div class="lcd-line">Status: BRIGHT&nbsp;&nbsp;</div></div>
+                    </div>
+                </div>
+                <div class="hl-purple" style="font-size:var(--small-size);">Always pad strings to 16 chars with spaces to ensure old text gets overwritten cleanly!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 11: HOMEWORK -->
+<section class="slide bg-purple">
+    <div class="blob" style="width:230px;height:230px;background:#c4b5fd;top:-60px;right:-60px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-hw reveal">Homework</span>
+        <h2 class="reveal" data-delay="1">Your Homework Challenges</h2>
+        <div class="grid-3 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-purple"><div style="font-size:1.4em;margin-bottom:0.4em;">1</div><h3 style="font-size:var(--body-size);color:var(--accent);">Name Display</h3><p style="font-size:var(--small-size);">Display your name on row 1 and a welcome message on row 2. Every 3 seconds, switch to a different message. Use millis() or delay().</p></div>
+            <div class="card card-sky"><div style="font-size:1.4em;margin-bottom:0.4em;">2</div><h3 style="font-size:var(--body-size);color:var(--accent3);">Countdown Timer</h3><p style="font-size:var(--small-size);">Display a countdown from 10 to 0 on the LCD. Show "GO!" when it reaches 0 and play a tone on the buzzer.</p></div>
+            <div class="card card-orange"><div style="font-size:1.4em;margin-bottom:0.4em;">3</div><h3 style="font-size:var(--body-size);color:var(--accent2);">Research Task</h3><p style="font-size:var(--small-size);">Where do you see LCD displays in daily life? List 5 real devices and what information each LCD shows.</p></div>
+        </div>
+        <div class="reveal" data-delay="3" style="margin-top:0.5em;"><div class="hl-yellow" style="font-size:var(--small-size);"><strong>Bonus:</strong> Use the pot to scroll through 3 different "screens" on the LCD — turn knob left = screen 1, middle = screen 2, right = screen 3. Use map() to switch between them!</div></div>
+    </div>
+</section>
+
+<!-- SLIDE 12-15 -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">LCD Function Quick Reference</h2>
+        <div class="grid-2 reveal" data-delay="1" style="margin-top:0.3em;">
+            <div class="card card-purple"><h3 style="font-size:var(--body-size);">lcd.begin(16,2)</h3><p style="font-size:var(--small-size);">Initialise 16-col, 2-row display. Must be in setup().</p></div>
+            <div class="card card-orange"><h3 style="font-size:var(--body-size);">lcd.print(x)</h3><p style="font-size:var(--small-size);">Print text string or number at current cursor position.</p></div>
+            <div class="card card-sky"><h3 style="font-size:var(--body-size);">lcd.setCursor(col, row)</h3><p style="font-size:var(--small-size);">Move to column (0–15) and row (0 or 1) before printing.</p></div>
+            <div class="card card-green"><h3 style="font-size:var(--body-size);">lcd.clear()</h3><p style="font-size:var(--small-size);">Wipe the whole screen. Avoid in loop() — causes flicker.</p></div>
+            <div class="card card-pink"><h3 style="font-size:var(--body-size);">lcd.noDisplay() / display()</h3><p style="font-size:var(--small-size);">Turn display on/off without losing content. Like a screensaver!</p></div>
+            <div class="card card-purple"><h3 style="font-size:var(--body-size);">lcd.blink() / noBlink()</h3><p style="font-size:var(--small-size);">Make the cursor blink on the screen. Good for text-entry UIs!</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="slide" style="background:linear-gradient(135deg,#7c3aed 0%,#a78bfa 50%,#c4b5fd 100%);text-align:center;align-items:center;">
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🧠</span>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Quiz Time!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ede9fe;">Test what you know about LCD displays!</p>
+    </div>
+</section>
+
+<section class="slide bg-purple">
+    <div class="slide-content">
+        <span class="section-tag tag-quiz reveal">Quick Quiz</span>
+        <h2 class="reveal" data-delay="1">Test Your Knowledge!</h2>
+        <div class="two-col reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q1. How many characters can a 16×2 LCD show at once?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 16</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) 20</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) 32</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 64</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q2. lcd.setCursor(0, 1) moves to…?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) Top-left</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) Start of the bottom row</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) Middle of the screen</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Column 1, top row</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q3. Why avoid lcd.clear() in loop()?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) It's too slow to process</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) It causes the screen to flicker</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) It deletes the library</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) It resets the Arduino</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q4. Which pin connects to V0 on the LCD?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 5V power</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) GND</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) Potentiometer (contrast control)</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Pin 12 (RS)</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const slides=document.querySelectorAll('.slide'),progressBar=document.getElementById('progressBar'),navDotsContainer=document.getElementById('navDots'),slideCounter=document.getElementById('slideCounter'),total=slides.length;let current=0;
+    slides.forEach((_,i)=>{const dot=document.createElement('button');dot.className='nav-dot'+(i===0?' active':'');dot.setAttribute('aria-label',`Slide ${i+1}`);dot.addEventListener('click',()=>scrollToSlide(i));navDotsContainer.appendChild(dot);});
+    function updateUI(i){current=i;progressBar.style.width=(total>1?(i/(total-1))*100:100)+'%';slideCounter.textContent=`${i+1} / ${total}`;document.querySelectorAll('.nav-dot').forEach((d,j)=>d.classList.toggle('active',j===i));revealSlide(i);}
+    function scrollToSlide(i){slides[i].scrollIntoView({behavior:'smooth'});}
+    const obs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting&&en.intersectionRatio>=0.5)updateUI(Array.from(slides).indexOf(en.target));});},{threshold:0.5});
+    slides.forEach(s=>obs.observe(s));
+    function revealSlide(i){slides[i].querySelectorAll('.reveal,.reveal-right,.reveal-scale,.reveal-up').forEach(el=>el.classList.add('visible'));}
+    document.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();if(current<total-1)scrollToSlide(current+1);}else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();if(current>0)scrollToSlide(current-1);}});
+    window.addEventListener('load',()=>updateUI(0));
+    function answer(btn,result){const g=btn.closest('.card');g.querySelectorAll('.quiz-option').forEach(b=>{b.style.pointerEvents='none';if(b.getAttribute('onclick').includes("'correct'"))b.classList.add('correct');});const f=g.querySelector('.quiz-feedback');if(result==='correct'){btn.classList.add('correct');f.textContent='Correct!';f.style.background='#d1fae5';f.style.color='#065f46';}else{btn.classList.add('wrong');f.textContent='Not quite — check the green answer!';f.style.background='#fee2e2';f.style.color='#991b1b';}f.classList.add('show');}
+</script>
+</body>
+</html>

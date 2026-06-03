@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Arduino, Tinkercad & Electronics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ===========================================
+           CSS CUSTOM PROPERTIES (ARDUINO THEME)
+           Teal-inspired dark theme for electronics
+           =========================================== */
+        :root {
+            --bg-primary: #0a0f1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2332;
+            --bg-card-hover: #1e2a3a;
+            --text-primary: #e8f0fe;
+            --text-secondary: #8899aa;
+            --text-muted: #5a6a7a;
+            --accent: #00979D;
+            --accent-light: #00BFC6;
+            --accent-glow: rgba(0, 151, 157, 0.35);
+            --accent2: #E47128;
+            --accent2-glow: rgba(228, 113, 40, 0.3);
+            --accent3: #7C3AED;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-code: 'Fira Code', monospace;
+            --title-size: clamp(1.8rem, 5vw, 3.8rem);
+            --h2-size: clamp(1.3rem, 3.5vw, 2.4rem);
+            --h3-size: clamp(1rem, 2.5vw, 1.5rem);
+            --body-size: clamp(0.75rem, 1.4vw, 1.05rem);
+            --small-size: clamp(0.65rem, 1vw, 0.85rem);
+            --code-size: clamp(0.65rem, 1.1vw, 0.9rem);
+            --slide-padding: clamp(1.5rem, 4vw, 4rem);
+            --content-gap: clamp(0.8rem, 2vw, 1.8rem);
+            --element-gap: clamp(0.3rem, 1vw, 0.8rem);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-normal: 0.6s;
+        }
+
+        /* ===========================================
+           BASE STYLES
+           =========================================== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            height: 100%;
+            line-height: 1.5;
+        }
+
+        /* ===========================================
+           SLIDE CONTAINER
+           =========================================== */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            padding: var(--slide-padding);
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+            gap: var(--content-gap);
+        }
+
+        /* ===========================================
+           PROGRESS BAR
+           =========================================== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            z-index: 1000;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* ===========================================
+           NAV DOTS
+           =========================================== */
+        .nav-dots {
+            position: fixed;
+            right: clamp(0.5rem, 1.5vw, 1.5rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            padding: 0;
+        }
+
+        .nav-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+            transform: scale(1.4);
+        }
+
+        .nav-dot:hover { background: var(--accent-light); }
+
+        /* ===========================================
+           SLIDE COUNTER
+           =========================================== */
+        .slide-counter {
+            position: fixed;
+            bottom: clamp(0.5rem, 2vw, 1.5rem);
+            right: clamp(0.5rem, 2vw, 1.5rem);
+            font-family: var(--font-code);
+            font-size: var(--small-size);
+            color: var(--text-muted);
+            z-index: 100;
+        }
+
+        /* ===========================================
+           TYPOGRAPHY
+           =========================================== */
+        h1 {
+            font-family: var(--font-display);
+            font-size: var(--title-size);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: 0.02em;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: var(--h2-size);
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: 0.01em;
+            color: var(--accent-light);
+        }
+
+        h3 {
+            font-size: var(--h3-size);
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        p, li {
+            font-size: var(--body-size);
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .accent { color: var(--accent-light); }
+        .accent2 { color: var(--accent2); }
+        .accent3 { color: var(--accent3); }
+        .success { color: var(--success); }
+        .warning { color: var(--warning); }
+
+        /* ===========================================
+           BACKGROUNDS
+           =========================================== */
+        .bg-grid {
+            background-image:
+                linear-gradient(rgba(0,151,157,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,151,157,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .bg-gradient-teal {
+            background: linear-gradient(135deg, #0a0f1a 0%, #0d1f2d 50%, #0a2a2e 100%);
+        }
+
+        .bg-gradient-orange {
+            background: linear-gradient(135deg, #0a0f1a 0%, #1a1510 50%, #2a1a0a 100%);
+        }
+
+        .bg-gradient-purple {
+            background: linear-gradient(135deg, #0a0f1a 0%, #150d20 50%, #1a0a2a 100%);
+        }
+
+        .bg-dark { background: #060a12; }
+
+        /* Decorative circuit lines */
+        .circuit-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+            height: 1px;
+            opacity: 0.3;
+        }
+
+        .circuit-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.2;
+        }
+
+        /* ===========================================
+           CARDS & CONTAINERS
+           =========================================== */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: clamp(0.8rem, 2vw, 1.5rem);
+            border: 1px solid rgba(0,151,157,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0,151,157,0.3);
+            box-shadow: 0 4px 20px rgba(0,151,157,0.1);
+        }
+
+        .card-accent {
+            border-left: 3px solid var(--accent);
+        }
+
+        .card-orange { border-left: 3px solid var(--accent2); }
+        .card-purple { border-left: 3px solid var(--accent3); }
+        .card-green { border-left: 3px solid var(--success); }
+
+        /* ===========================================
+           GRIDS
+           =========================================== */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(0.6rem, 1.5vw, 1.2rem);
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(0.6rem, 1.5vw, 1.2rem);
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(0.5rem, 1.2vw, 1rem);
+        }
+
+        @media (min-width: 768px) {
+            .grid-4 { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (max-width: 700px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+
+        /* ===========================================
+           CODE BLOCKS
+           =========================================== */
+        .code-block {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: clamp(0.6rem, 1.5vw, 1.2rem);
+            font-family: var(--font-code);
+            font-size: var(--code-size);
+            line-height: 1.6;
+            border: 1px solid rgba(0,151,157,0.15);
+            overflow-x: auto;
+            color: #c9d1d9;
+        }
+
+        .code-block .keyword { color: #ff7b72; }
+        .code-block .function { color: #d2a8ff; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .comment { color: #8b949e; font-style: italic; }
+        .code-block .number { color: #79c0ff; }
+        .code-block .type { color: #7ee787; }
+
+        .code-label {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 6px 6px 0 0;
+            font-family: var(--font-code);
+            font-size: var(--small-size);
+            font-weight: 600;
+            margin-bottom: -1px;
+        }
+
+        /* ===========================================
+           TAGS & BADGES
+           =========================================== */
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: var(--small-size);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .tag-beginner { background: rgba(16,185,129,0.15); color: var(--success); }
+        .tag-intermediate { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .tag-advanced { background: rgba(239,68,68,0.15); color: var(--danger); }
+        .tag-teal { background: rgba(0,151,157,0.15); color: var(--accent-light); }
+
+        /* ===========================================
+           ICON CIRCLES
+           =========================================== */
+        .icon-circle {
+            width: clamp(36px, 5vw, 52px);
+            height: clamp(36px, 5vw, 52px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(16px, 2.5vw, 24px);
+            flex-shrink: 0;
+        }
+
+        .icon-teal { background: rgba(0,151,157,0.15); }
+        .icon-orange { background: rgba(228,113,40,0.15); }
+        .icon-purple { background: rgba(124,58,237,0.15); }
+        .icon-green { background: rgba(16,185,129,0.15); }
+
+        /* ===========================================
+           COMPONENT VISUAL
+           =========================================== */
+        .component-row {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.5rem, 1.5vw, 1rem);
+        }
+
+        .pin-diagram {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: var(--font-code);
+            font-size: var(--small-size);
+        }
+
+        .pin {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            font-size: var(--small-size);
+            color: var(--accent-light);
+        }
+
+        /* ===========================================
+           TWO-COLUMN LAYOUT
+           =========================================== */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(1rem, 3vw, 2.5rem);
+            align-items: center;
+        }
+
+        @media (max-width: 700px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+
+        /* ===========================================
+           STEP INDICATORS
+           =========================================== */
+        .step-num {
+            width: clamp(28px, 3.5vw, 38px);
+            height: clamp(28px, 3.5vw, 38px);
+            border-radius: 50%;
+            background: var(--accent);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: var(--small-size);
+            flex-shrink: 0;
+        }
+
+        .step-row {
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(0.5rem, 1.2vw, 1rem);
+        }
+
+        /* ===========================================
+           BULLET LIST
+           =========================================== */
+        .bullet-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: var(--element-gap);
+        }
+
+        .bullet-list li {
+            padding-left: 1.2em;
+            position: relative;
+        }
+
+        .bullet-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* ===========================================
+           FORMULA / BIG TEXT
+           =========================================== */
+        .formula {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 6vw, 5rem);
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: 0.05em;
+        }
+
+        .big-number {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        /* ===========================================
+           TABLE
+           =========================================== */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--body-size);
+        }
+
+        .info-table th {
+            background: rgba(0,151,157,0.1);
+            padding: clamp(0.4rem, 1vw, 0.8rem);
+            text-align: left;
+            color: var(--accent-light);
+            font-weight: 600;
+            border-bottom: 2px solid rgba(0,151,157,0.2);
+        }
+
+        .info-table td {
+            padding: clamp(0.3rem, 0.8vw, 0.6rem) clamp(0.4rem, 1vw, 0.8rem);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+        }
+
+        /* ===========================================
+           ANIMATIONS
+           =========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(25px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+        .slide.visible .reveal:nth-child(2) { transition-delay: 0.12s; }
+        .slide.visible .reveal:nth-child(3) { transition-delay: 0.19s; }
+        .slide.visible .reveal:nth-child(4) { transition-delay: 0.26s; }
+        .slide.visible .reveal:nth-child(5) { transition-delay: 0.33s; }
+        .slide.visible .reveal:nth-child(6) { transition-delay: 0.40s; }
+        .slide.visible .reveal:nth-child(7) { transition-delay: 0.47s; }
+
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-40px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal-left { opacity: 1; transform: translateX(0); }
+
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal-right { opacity: 1; transform: translateX(0); }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.85);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal-scale { opacity: 1; transform: scale(1); }
+
+        /* Glow pulse for title */
+        @keyframes glowPulse {
+            0%, 100% { text-shadow: 0 0 20px var(--accent-glow); }
+            50% { text-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(0,151,157,0.15); }
+        }
+
+        .glow-text { animation: glowPulse 3s ease-in-out infinite; }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .float { animation: float 4s ease-in-out infinite; }
+
+        /* Blink animation for LED */
+        @keyframes ledBlink {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px var(--success), 0 0 20px var(--success); }
+            50% { opacity: 0.3; box-shadow: none; }
+        }
+
+        .led-blink {
+            width: 12px; height: 12px; border-radius: 50%;
+            background: var(--success);
+            animation: ledBlink 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        /* ===========================================
+           RESPONSIVE BREAKPOINTS
+           =========================================== */
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(0.8rem, 3vw, 2rem);
+                --content-gap: clamp(0.5rem, 1.5vw, 1rem);
+                --title-size: clamp(1.4rem, 4.5vw, 2.5rem);
+                --h2-size: clamp(1.1rem, 3vw, 1.8rem);
+            }
+        }
+
+        @media (max-height: 600px) {
+            :root {
+                --slide-padding: clamp(0.6rem, 2.5vw, 1.5rem);
+                --content-gap: clamp(0.4rem, 1vw, 0.7rem);
+                --title-size: clamp(1.2rem, 4vw, 2rem);
+                --body-size: clamp(0.65rem, 1.2vw, 0.9rem);
+            }
+            .nav-dots { display: none; }
+        }
+
+        @media (max-height: 500px) {
+            :root {
+                --slide-padding: clamp(0.5rem, 2vw, 1rem);
+                --title-size: clamp(1rem, 3.5vw, 1.5rem);
+                --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+            }
+        }
+
+        @media (max-width: 600px) {
+            :root { --title-size: clamp(1.3rem, 7vw, 2.5rem); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+
+        /* ===========================================
+           SPECIAL LAYOUTS
+           =========================================== */
+        .title-slide {
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title-slide .slide-content {
+            align-items: center;
+            text-align: center;
+        }
+
+        .section-divider {
+            text-align: center;
+            align-items: center;
+        }
+
+        .section-divider .slide-content {
+            align-items: center;
+        }
+
+        .section-label {
+            font-family: var(--font-display);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.3rem);
+            color: var(--text-secondary);
+            max-width: 600px;
+        }
+
+        .divider {
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: clamp(0.5rem, 2vw, 1.5rem);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: var(--small-size);
+            color: var(--text-muted);
+            z-index: 100;
+            opacity: 0.6;
+            transition: opacity 0.5s;
+        }
+
+        .keyboard-hint.hidden { opacity: 0; pointer-events: none; }
+
+        kbd {
+            background: rgba(255,255,255,0.08);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: var(--font-code);
+            font-size: inherit;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation dots -->
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- Slide counter -->
+<div class="slide-counter" id="slideCounter">1 / 34</div>
+
+<!-- Keyboard hint -->
+<div class="keyboard-hint" id="keyHint">Use <kbd>↑</kbd> <kbd>↓</kbd> or <kbd>Space</kbd> to navigate</div>
+
+
+<!-- ============================================
+     SLIDE 1: TITLE
+     ============================================ -->
+<section class="slide title-slide bg-grid bg-gradient-teal">
+    <div class="slide-content">
+        <p class="section-label reveal">A Complete Beginner's Guide</p>
+        <h1 class="reveal glow-text" style="margin-top:0.3em;">Learn <span class="accent">Arduino</span>,<br><span class="accent2">Tinkercad</span> &<br>Electronics</h1>
+        <p class="subtitle reveal" style="margin-top:0.5em;">From zero to building real-world projects — designed for teens and curious minds</p>
+        <div class="divider reveal" style="margin-top:1em;"></div>
+        <p class="reveal" style="margin-top:0.5em;font-size:var(--small-size);color:var(--text-muted);">34 Slides &bull; Basic → Advanced &bull; Hands-On Projects</p>
+    </div>
+    <!-- Decorative circuit elements -->
+    <div class="circuit-line" style="top:15%;left:0;width:30%;"></div>
+    <div class="circuit-line" style="bottom:20%;right:0;width:25%;"></div>
+    <div class="circuit-dot" style="top:15%;left:30%;"></div>
+    <div class="circuit-dot" style="bottom:20%;right:25%;"></div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 2: WHAT YOU'LL LEARN
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">What You'll Learn</h2>
+        <div class="grid-4 reveal" style="margin-top:0.5em;">
+            <div class="card card-accent">
+                <div class="icon-circle icon-teal">⚡</div>
+                <h3 style="margin-top:0.4em;font-size:var(--body-size);">Electronics Basics</h3>
+                <p style="font-size:var(--small-size);">Voltage, current, resistance, Ohm's Law and key components</p>
+            </div>
+            <div class="card card-orange">
+                <div class="icon-circle icon-orange">🔧</div>
+                <h3 style="margin-top:0.4em;font-size:var(--body-size);">Arduino Board</h3>
+                <p style="font-size:var(--small-size);">What it is, how to set it up, and write your first code</p>
+            </div>
+            <div class="card card-purple">
+                <div class="icon-circle icon-purple">💻</div>
+                <h3 style="margin-top:0.4em;font-size:var(--body-size);">Tinkercad Circuits</h3>
+                <p style="font-size:var(--small-size);">Simulate circuits online before building for real</p>
+            </div>
+            <div class="card card-green">
+                <div class="icon-circle icon-green">🚀</div>
+                <h3 style="margin-top:0.4em;font-size:var(--body-size);">Real Projects</h3>
+                <p style="font-size:var(--small-size);">7 hands-on projects from LED blink to smart systems</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 3: SECTION DIVIDER — ELECTRONICS BASICS
+     ============================================ -->
+<section class="slide section-divider bg-gradient-teal">
+    <div class="slide-content">
+        <p class="section-label reveal">Part 1</p>
+        <h1 class="reveal" style="margin-top:0.3em;">Electronics<br><span class="accent">Basics</span></h1>
+        <p class="subtitle reveal" style="margin-top:0.5em;">Understanding electricity, components, and how circuits work</p>
+        <div class="divider reveal" style="margin-top:1em;"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 4: WHAT IS ELECTRONICS?
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">What is Electronics?</h2>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <p class="reveal" style="margin-bottom:0.8em;">Electronics is all about controlling the flow of <strong class="accent">electricity</strong> to make things happen — lights turn on, motors spin, screens display images.</p>
+                <p class="reveal">You're surrounded by electronics every day: your phone, game controllers, headphones, even your fridge. They all use tiny circuits to work!</p>
+                <div class="card card-accent reveal" style="margin-top:0.8em;">
+                    <p style="font-size:var(--small-size);"><strong class="accent">Think of it like plumbing:</strong> Electricity flows through wires like water flows through pipes. Components like resistors and LEDs are like valves and faucets.</p>
+                </div>
+            </div>
+            <div class="reveal-right" style="text-align:center;">
+                <div style="font-size:clamp(4rem,10vw,7rem);line-height:1;">⚡</div>
+                <p style="font-size:var(--small-size);color:var(--text-muted);margin-top:0.5em;">Everything electronic starts with controlling electricity</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 5: VOLTAGE, CURRENT, RESISTANCE
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">The Big Three: V, I, R</h2>
+        <div class="grid-3 reveal" style="margin-top:0.5em;">
+            <div class="card card-accent" style="text-align:center;">
+                <div style="font-size:clamp(2rem,5vw,3.5rem);font-family:var(--font-display);font-weight:900;color:var(--accent-light);">V</div>
+                <h3 style="margin:0.3em 0;">Voltage</h3>
+                <p style="font-size:var(--small-size);">The "pressure" pushing electricity through a circuit. Measured in <strong>Volts (V)</strong>.</p>
+                <p style="font-size:var(--small-size);color:var(--accent);margin-top:0.3em;">💧 Like water pressure in a pipe</p>
+            </div>
+            <div class="card card-orange" style="text-align:center;">
+                <div style="font-size:clamp(2rem,5vw,3.5rem);font-family:var(--font-display);font-weight:900;color:var(--accent2);">I</div>
+                <h3 style="margin:0.3em 0;">Current</h3>
+                <p style="font-size:var(--small-size);">The "flow" of electricity — how much charge moves per second. Measured in <strong>Amps (A)</strong>.</p>
+                <p style="font-size:var(--small-size);color:var(--accent2);margin-top:0.3em;">🌊 Like how much water flows</p>
+            </div>
+            <div class="card card-purple" style="text-align:center;">
+                <div style="font-size:clamp(2rem,5vw,3.5rem);font-family:var(--font-display);font-weight:900;color:var(--accent3);">R</div>
+                <h3 style="margin:0.3em 0;">Resistance</h3>
+                <p style="font-size:var(--small-size);">How much a component "resists" the flow. Measured in <strong>Ohms (Ω)</strong>.</p>
+                <p style="font-size:var(--small-size);color:var(--accent3);margin-top:0.3em;">🚰 Like a narrow pipe slowing flow</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 6: OHM'S LAW
+     ============================================ -->
+<section class="slide bg-gradient-teal" style="text-align:center;align-items:center;">
+    <div class="slide-content" style="align-items:center;">
+        <h2 class="reveal">Ohm's Law — The Golden Rule</h2>
+        <div class="reveal-scale" style="margin:0.5em 0;">
+            <div class="card" style="padding:clamp(1rem,3vw,2rem);display:inline-block;background:rgba(0,151,157,0.08);border:2px solid var(--accent);">
+                <div class="formula"><span class="accent">V</span> = <span class="accent2">I</span> × <span class="accent3">R</span></div>
+            </div>
+        </div>
+        <div class="grid-3 reveal" style="max-width:700px;">
+            <div style="text-align:center;">
+                <p style="font-size:var(--h3-size);font-weight:700;color:var(--accent-light);">V</p>
+                <p style="font-size:var(--small-size);">Voltage (Volts)</p>
+            </div>
+            <div style="text-align:center;">
+                <p style="font-size:var(--h3-size);font-weight:700;color:var(--accent2);">I</p>
+                <p style="font-size:var(--small-size);">Current (Amps)</p>
+            </div>
+            <div style="text-align:center;">
+                <p style="font-size:var(--h3-size);font-weight:700;color:var(--accent3);">R</p>
+                <p style="font-size:var(--small-size);">Resistance (Ohms)</p>
+            </div>
+        </div>
+        <div class="card reveal" style="margin-top:0.5em;max-width:600px;">
+            <p style="font-size:var(--body-size);"><strong class="accent">Example:</strong> An LED needs 2V and 20mA. Your Arduino gives 5V. What resistor do you need?</p>
+            <p style="font-size:var(--body-size);margin-top:0.3em;">R = (5V − 2V) / 0.02A = <strong class="accent">150Ω</strong></p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 7: COMPONENTS — RESISTORS & LEDS
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Key Components: Resistors & LEDs</h2>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div class="card card-accent reveal">
+                <h3>Resistors</h3>
+                <p style="font-size:var(--small-size);margin:0.4em 0;">Resist the flow of electrical energy, controlling voltage and current. Colored stripes show their value.</p>
+                <div style="display:flex;gap:4px;margin:0.4em 0;">
+                    <span style="background:#a52a2a;color:#fff;padding:2px 6px;border-radius:3px;font-size:0.7em;">Brown</span>
+                    <span style="background:#000;color:#fff;padding:2px 6px;border-radius:3px;font-size:0.7em;">Black</span>
+                    <span style="background:#f60;color:#fff;padding:2px 6px;border-radius:3px;font-size:0.7em;">Orange</span>
+                    <span style="background:#c5a600;color:#fff;padding:2px 6px;border-radius:3px;font-size:0.7em;">Gold</span>
+                </div>
+                <p style="font-size:var(--small-size);">= 10,000Ω (10kΩ) ±5%</p>
+            </div>
+            <div class="card card-orange reveal">
+                <h3>LEDs <span class="led-blink" style="margin-left:8px;"></span></h3>
+                <p style="font-size:var(--small-size);margin:0.4em 0;">Light Emitting Diodes glow when electricity passes through. Current only flows one way!</p>
+                <div style="display:flex;gap:8px;margin:0.4em 0;font-size:1.5em;">
+                    <span style="color:#f44;">🔴</span>
+                    <span style="color:#4f4;">🟢</span>
+                    <span style="color:#44f;">🔵</span>
+                    <span style="color:#ff4;">🟡</span>
+                </div>
+                <p style="font-size:var(--small-size);"><strong>Long leg (+) = Anode</strong> → connect to power<br><strong>Short leg (−) = Cathode</strong> → connect to ground</p>
+            </div>
+        </div>
+        <div class="card reveal" style="margin-top:0.5em;border-left:3px solid var(--warning);">
+            <p style="font-size:var(--small-size);"><strong class="warning">⚠️ Important:</strong> Always use a resistor with an LED! Without one, too much current flows and the LED burns out.</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 8: COMPONENTS — CAPACITORS & TRANSISTORS
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Key Components: Capacitors & Transistors</h2>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div class="card card-purple reveal">
+                <h3>Capacitors</h3>
+                <p style="font-size:var(--small-size);margin:0.4em 0;">Store and release electrical energy — like tiny rechargeable batteries. Used to smooth out voltage fluctuations.</p>
+                <ul class="bullet-list" style="font-size:var(--small-size);">
+                    <li>Ceramic caps — small, no polarity</li>
+                    <li>Electrolytic caps — larger, have + and − sides</li>
+                    <li>Measured in Farads (usually µF or pF)</li>
+                </ul>
+            </div>
+            <div class="card card-green reveal">
+                <h3>Transistors</h3>
+                <p style="font-size:var(--small-size);margin:0.4em 0;">Electronic switches — a small current on one pin controls a larger current through the other pins.</p>
+                <ul class="bullet-list" style="font-size:var(--small-size);">
+                    <li>3 legs: Base, Collector, Emitter</li>
+                    <li>Control motors, relays, and high-power devices</li>
+                    <li>Building block of all modern computers!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 9: SENSORS
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Sensors — Eyes & Ears of Your Project</h2>
+        <p class="reveal" style="font-size:var(--body-size);color:var(--text-secondary);">Sensors convert physical things (light, heat, motion) into electrical signals your Arduino can read.</p>
+        <div class="grid-3 reveal" style="margin-top:0.5em;">
+            <div class="card card-accent">
+                <div style="font-size:1.5em;">🌡️</div>
+                <h3 style="font-size:var(--body-size);margin-top:0.3em;">Temperature (TMP36)</h3>
+                <p style="font-size:var(--small-size);">Outputs voltage based on temperature. Center pin gives the reading.</p>
+            </div>
+            <div class="card card-orange">
+                <div style="font-size:1.5em;">💡</div>
+                <h3 style="font-size:var(--body-size);margin-top:0.3em;">Light (LDR / Photoresistor)</h3>
+                <p style="font-size:var(--small-size);">Resistance changes with light — bright = low resistance, dark = high.</p>
+            </div>
+            <div class="card card-purple">
+                <div style="font-size:1.5em;">📡</div>
+                <h3 style="font-size:var(--body-size);margin-top:0.3em;">Ultrasonic (HC-SR04)</h3>
+                <p style="font-size:var(--small-size);">Sends sound pulses and measures the echo to find distance.</p>
+            </div>
+            <div class="card card-green">
+                <div style="font-size:1.5em;">🔘</div>
+                <h3 style="font-size:var(--body-size);margin-top:0.3em;">Push Button</h3>
+                <p style="font-size:var(--small-size);">Simple ON/OFF switch. Closes a circuit when pressed.</p>
+            </div>
+            <div class="card" style="border-left:3px solid var(--warning);">
+                <div style="font-size:1.5em;">🎚️</div>
+                <h3 style="font-size:var(--body-size);margin-top:0.3em;">Potentiometer</h3>
+                <p style="font-size:var(--small-size);">Variable resistor with a knob. Turn it to change voltage output.</p>
+            </div>
+            <div class="card" style="border-left:3px solid var(--danger);">
+                <div style="font-size:1.5em;">📐</div>
+                <h3 style="font-size:var(--body-size);margin-top:0.3em;">Tilt Sensor</h3>
+                <p style="font-size:var(--small-size);">A metal ball inside that detects orientation changes.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 10: ACTUATORS
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Actuators — Making Things Move & Sound</h2>
+        <p class="reveal">Actuators convert electrical signals back into physical action: movement, light, or sound.</p>
+        <div class="grid-3 reveal" style="margin-top:0.5em;">
+            <div class="card card-accent">
+                <div style="font-size:1.5em;">⚙️</div>
+                <h3 style="font-size:var(--body-size);margin-top:0.3em;">DC Motor</h3>
+                <p style="font-size:var(--small-size);">Spins continuously. Speed controlled by voltage. Needs a transistor/H-bridge to drive.</p>
+            </div>
+            <div class="card card-orange">
+                <div style="font-size:1.5em;">🔄</div>
+                <h3 style="font-size:var(--body-size);margin-top:0.3em;">Servo Motor</h3>
+                <p style="font-size:var(--small-size);">Rotates to a precise angle (0°–180°). Controlled by PWM pulses from Arduino.</p>
+            </div>
+            <div class="card card-purple">
+                <div style="font-size:1.5em;">🔊</div>
+                <h3 style="font-size:var(--body-size);margin-top:0.3em;">Piezo Buzzer</h3>
+                <p style="font-size:var(--small-size);">Vibrates to make sound. Can play tones and simple melodies!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 11: THE BREADBOARD
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">The Breadboard — Your Circuit Playground</h2>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <p class="reveal">A breadboard lets you build circuits <strong>without soldering</strong>. Just plug in wires and components!</p>
+                <div class="card card-accent reveal" style="margin-top:0.6em;">
+                    <h3 style="font-size:var(--body-size);">How It's Connected Inside:</h3>
+                    <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                        <li><strong class="accent">Power rails</strong> (+ and −) run the full length, top & bottom</li>
+                        <li><strong class="accent2">Rows (a–e, f–j)</strong> are connected horizontally in groups of 5</li>
+                        <li>The <strong>center gap</strong> separates the two halves</li>
+                    </ul>
+                </div>
+                <div class="card reveal" style="margin-top:0.5em;border-left:3px solid var(--warning);">
+                    <p style="font-size:var(--small-size);"><strong class="warning">Pro tip:</strong> Always connect the Arduino's 5V to the + rail and GND to the − rail first!</p>
+                </div>
+            </div>
+            <div class="reveal-right" style="text-align:center;">
+                <!-- ASCII breadboard diagram -->
+                <div class="code-block" style="text-align:left;font-size:clamp(0.5rem,0.9vw,0.75rem);line-height:1.4;">
+<span class="comment">   + − − − − − − − − − +</span>
+<span class="string">   ████████████████████  ← + Power Rail</span>
+<span class="keyword">   ████████████████████  ← − Ground Rail</span>
+   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+<span class="type">   a ● ● ● ● ● │ f ● ● ● ● ●</span>
+<span class="type">   b ● ● ● ● ● │ g ● ● ● ● ●</span>
+<span class="type">   c ● ● ● ● ● │ h ● ● ● ● ●</span>
+<span class="comment">        ↑ Connected     ↑ Gap</span>
+   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+<span class="string">   ████████████████████  ← + Power Rail</span>
+<span class="keyword">   ████████████████████  ← − Ground Rail</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 12: CIRCUIT SYMBOLS
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Circuit Schematic Symbols</h2>
+        <p class="reveal">Schematic diagrams use standard symbols. Learning these helps you read any circuit design.</p>
+        <div class="grid-4 reveal" style="margin-top:0.5em;">
+            <div class="card" style="text-align:center;padding:0.6em;">
+                <div style="font-size:1.8em;">〰️</div>
+                <p style="font-size:var(--small-size);font-weight:600;margin-top:0.2em;">Resistor</p>
+            </div>
+            <div class="card" style="text-align:center;padding:0.6em;">
+                <div style="font-size:1.8em;">▷|</div>
+                <p style="font-size:var(--small-size);font-weight:600;margin-top:0.2em;">LED / Diode</p>
+            </div>
+            <div class="card" style="text-align:center;padding:0.6em;">
+                <div style="font-size:1.8em;">⊣⊢</div>
+                <p style="font-size:var(--small-size);font-weight:600;margin-top:0.2em;">Capacitor</p>
+            </div>
+            <div class="card" style="text-align:center;padding:0.6em;">
+                <div style="font-size:1.8em;">⏚</div>
+                <p style="font-size:var(--small-size);font-weight:600;margin-top:0.2em;">Ground</p>
+            </div>
+            <div class="card" style="text-align:center;padding:0.6em;">
+                <div style="font-size:1.8em;">🔋</div>
+                <p style="font-size:var(--small-size);font-weight:600;margin-top:0.2em;">Battery</p>
+            </div>
+            <div class="card" style="text-align:center;padding:0.6em;">
+                <div style="font-size:1.8em;">⏻</div>
+                <p style="font-size:var(--small-size);font-weight:600;margin-top:0.2em;">Switch</p>
+            </div>
+            <div class="card" style="text-align:center;padding:0.6em;">
+                <div style="font-size:1.8em;">Ⓜ</div>
+                <p style="font-size:var(--small-size);font-weight:600;margin-top:0.2em;">Motor</p>
+            </div>
+            <div class="card" style="text-align:center;padding:0.6em;">
+                <div style="font-size:1.8em;">🔌</div>
+                <p style="font-size:var(--small-size);font-weight:600;margin-top:0.2em;">Connector</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 13: SECTION DIVIDER — ARDUINO
+     ============================================ -->
+<section class="slide section-divider bg-gradient-orange">
+    <div class="slide-content">
+        <p class="section-label reveal">Part 2</p>
+        <h1 class="reveal" style="margin-top:0.3em;">Meet <span class="accent2">Arduino</span></h1>
+        <p class="subtitle reveal" style="margin-top:0.5em;">The tiny computer that makes things interactive</p>
+        <div class="divider reveal" style="margin-top:1em;background:var(--accent2);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 14: WHAT IS ARDUINO?
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">What is Arduino?</h2>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <p class="reveal">Arduino is a small, affordable <strong class="accent">microcontroller board</strong> that you can program to read sensors and control actuators.</p>
+                <div class="card card-accent reveal" style="margin-top:0.6em;">
+                    <h3 style="font-size:var(--body-size);">The 3-Part System</h3>
+                    <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                        <li><strong class="accent">Sensors</strong> listen to the physical world (input)</li>
+                        <li><strong class="accent2">Microcontroller</strong> decides what to do (brain)</li>
+                        <li><strong class="accent3">Actuators</strong> take action (output)</li>
+                    </ul>
+                </div>
+                <div class="card reveal" style="margin-top:0.5em;border-left:3px solid var(--success);">
+                    <p style="font-size:var(--small-size);"><strong class="success">Fun fact:</strong> Arduino is open-source! Anyone can see the designs and build their own version.</p>
+                </div>
+            </div>
+            <div class="reveal-right" style="text-align:center;">
+                <div style="font-size:clamp(4rem,10vw,7rem);">🤖</div>
+                <p style="font-size:var(--small-size);color:var(--text-muted);margin-top:0.5em;">Arduino Uno — the most popular board for beginners</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 15: ARDUINO UNO BOARD
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Arduino Uno — Parts Explained</h2>
+        <div class="grid-3 reveal" style="margin-top:0.5em;">
+            <div class="card card-accent">
+                <h3 style="font-size:var(--body-size);">🔌 USB Port</h3>
+                <p style="font-size:var(--small-size);">Upload code and power the board from your computer</p>
+            </div>
+            <div class="card card-orange">
+                <h3 style="font-size:var(--body-size);">⚡ Power Pins</h3>
+                <p style="font-size:var(--small-size);">5V and GND pins provide power to your circuits</p>
+            </div>
+            <div class="card card-purple">
+                <h3 style="font-size:var(--body-size);">📍 Digital Pins (0–13)</h3>
+                <p style="font-size:var(--small-size);">Read/write HIGH or LOW. Pins with ~ support PWM (analog-like output)</p>
+            </div>
+            <div class="card card-green">
+                <h3 style="font-size:var(--body-size);">📊 Analog Pins (A0–A5)</h3>
+                <p style="font-size:var(--small-size);">Read varying voltage (0–5V) as values 0–1023</p>
+            </div>
+            <div class="card" style="border-left:3px solid var(--warning);">
+                <h3 style="font-size:var(--body-size);">🧠 ATmega328P</h3>
+                <p style="font-size:var(--small-size);">The microcontroller chip — the brain that runs your code</p>
+            </div>
+            <div class="card" style="border-left:3px solid var(--danger);">
+                <h3 style="font-size:var(--body-size);">🔄 Reset Button</h3>
+                <p style="font-size:var(--small-size);">Restarts your program from the beginning</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 16: SETTING UP ARDUINO IDE
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Setting Up Arduino IDE</h2>
+        <p class="reveal">The Arduino IDE is the software where you write and upload code to your board.</p>
+        <div style="margin-top:0.5em;">
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num">1</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Download the IDE</h3>
+                    <p style="font-size:var(--small-size);">Go to <strong class="accent">arduino.cc/en/software</strong> and download for your OS</p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num">2</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Connect Your Board</h3>
+                    <p style="font-size:var(--small-size);">Plug the Arduino into your computer via USB. The green power LED should turn on.</p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num">3</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Select Board & Port</h3>
+                    <p style="font-size:var(--small-size);">Go to <strong>Tools → Board → Arduino Uno</strong> and <strong>Tools → Port</strong> → select your Arduino</p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num">4</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Test with Blink</h3>
+                    <p style="font-size:var(--small-size);">Go to <strong>File → Examples → 01.Basics → Blink</strong> and click the Upload button ➜</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 17: ARDUINO CODE STRUCTURE
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Arduino Code Structure</h2>
+        <p class="reveal">Every Arduino program (called a "sketch") has two main functions:</p>
+        <div class="two-col reveal" style="margin-top:0.5em;">
+            <div>
+                <div class="code-label">sketch.ino</div>
+                <div class="code-block">
+<span class="comment">// Runs ONCE when Arduino starts</span>
+<span class="type">void</span> <span class="function">setup</span>() {
+  <span class="comment">// Initialize pins, serial, etc.</span>
+  <span class="function">pinMode</span>(<span class="number">13</span>, <span class="keyword">OUTPUT</span>);
+}
+
+<span class="comment">// Runs FOREVER in a loop</span>
+<span class="type">void</span> <span class="function">loop</span>() {
+  <span class="comment">// Your main code here</span>
+  <span class="function">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">HIGH</span>);
+  <span class="function">delay</span>(<span class="number">1000</span>);
+  <span class="function">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">LOW</span>);
+  <span class="function">delay</span>(<span class="number">1000</span>);
+}
+                </div>
+            </div>
+            <div>
+                <div class="card card-accent" style="margin-bottom:0.5em;">
+                    <h3 style="font-size:var(--body-size);">setup()</h3>
+                    <p style="font-size:var(--small-size);">Runs once at startup. Use it to set pin modes, start serial communication, etc.</p>
+                </div>
+                <div class="card card-orange" style="margin-bottom:0.5em;">
+                    <h3 style="font-size:var(--body-size);">loop()</h3>
+                    <p style="font-size:var(--small-size);">Runs over and over forever. This is where your main logic goes.</p>
+                </div>
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">Key Functions</h3>
+                    <p style="font-size:var(--small-size);font-family:var(--font-code);">pinMode() · digitalWrite() · digitalRead() · analogRead() · delay()</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 18: DIGITAL vs ANALOG
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Digital vs Analog Signals</h2>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div class="card card-accent reveal">
+                <h3>Digital <span class="tag tag-teal">ON / OFF</span></h3>
+                <p style="font-size:var(--small-size);margin:0.4em 0;">Only two states: <strong>HIGH (5V)</strong> or <strong>LOW (0V)</strong></p>
+                <div class="code-block" style="font-size:var(--small-size);">
+<span class="comment">// Read a button</span>
+<span class="type">int</span> state = <span class="function">digitalRead</span>(<span class="number">2</span>);
+<span class="comment">// Write to LED</span>
+<span class="function">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">HIGH</span>);
+                </div>
+                <p style="font-size:var(--small-size);margin-top:0.3em;color:var(--accent);">Think: Light switch — ON or OFF</p>
+            </div>
+            <div class="card card-orange reveal">
+                <h3>Analog <span class="tag tag-intermediate">Range</span></h3>
+                <p style="font-size:var(--small-size);margin:0.4em 0;">Range of values: <strong>0 to 1023</strong> (input) or <strong>0 to 255</strong> (output/PWM)</p>
+                <div class="code-block" style="font-size:var(--small-size);">
+<span class="comment">// Read sensor (0-1023)</span>
+<span class="type">int</span> val = <span class="function">analogRead</span>(<span class="number">A0</span>);
+<span class="comment">// Write brightness (0-255)</span>
+<span class="function">analogWrite</span>(<span class="number">9</span>, <span class="number">128</span>);
+                </div>
+                <p style="font-size:var(--small-size);margin-top:0.3em;color:var(--accent2);">Think: Dimmer switch — any brightness</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 19: SECTION DIVIDER — TINKERCAD
+     ============================================ -->
+<section class="slide section-divider bg-gradient-purple">
+    <div class="slide-content">
+        <p class="section-label reveal">Part 3</p>
+        <h1 class="reveal" style="margin-top:0.3em;">Using <span class="accent3">Tinkercad</span></h1>
+        <p class="subtitle reveal" style="margin-top:0.5em;">Build and simulate circuits online — no hardware needed!</p>
+        <div class="divider reveal" style="margin-top:1em;background:var(--accent3);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 20: WHAT IS TINKERCAD?
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">What is Tinkercad Circuits?</h2>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <p class="reveal">Tinkercad is a <strong class="accent3">free online tool</strong> by Autodesk that lets you design and simulate Arduino circuits in your browser.</p>
+                <div class="card card-purple reveal" style="margin-top:0.6em;">
+                    <h3 style="font-size:var(--body-size);">Why Use Tinkercad?</h3>
+                    <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                        <li><strong class="success">Free</strong> — no cost, just a browser</li>
+                        <li><strong class="accent">Safe</strong> — can't burn out real components!</li>
+                        <li><strong class="accent2">Visual</strong> — see current flow in real time</li>
+                        <li><strong class="accent3">Code</strong> — write & test Arduino code online</li>
+                        <li><strong class="warning">Share</strong> — share designs with classmates</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="reveal-right" style="text-align:center;">
+                <div style="font-size:clamp(4rem,10vw,7rem);">💻</div>
+                <p style="font-size:var(--body-size);color:var(--accent3);font-weight:600;margin-top:0.5em;">tinkercad.com/circuits</p>
+                <p style="font-size:var(--small-size);color:var(--text-muted);margin-top:0.3em;">Works in Chrome, Firefox, Edge — no install needed</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 21: GETTING STARTED WITH TINKERCAD
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Getting Started with Tinkercad</h2>
+        <div style="margin-top:0.5em;">
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num">1</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Create a Free Account</h3>
+                    <p style="font-size:var(--small-size);">Go to <strong class="accent3">tinkercad.com</strong> → Sign up (use your school/personal email)</p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num">2</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Open Circuits</h3>
+                    <p style="font-size:var(--small-size);">Click <strong>"Circuits"</strong> from the left sidebar, then <strong>"Create new Circuit"</strong></p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num">3</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Drag Components</h3>
+                    <p style="font-size:var(--small-size);">From the right panel, search and drag: Arduino Uno, Breadboard, LEDs, Resistors, etc.</p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num">4</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Wire Everything Up</h3>
+                    <p style="font-size:var(--small-size);">Click on a pin/hole and drag to another pin/hole to create a wire. Color-code: <strong style="color:#f44;">red = power</strong>, <strong style="color:#222;">black = ground</strong></p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num">5</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Write Code & Simulate</h3>
+                    <p style="font-size:var(--small-size);">Click <strong>"Code"</strong> to open the editor, write your Arduino sketch, then hit <strong>"Start Simulation"</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 22: TINKERCAD INTERFACE TOUR
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Tinkercad Interface Tour</h2>
+        <div class="grid-2 reveal" style="margin-top:0.5em;">
+            <div class="card card-accent">
+                <h3 style="font-size:var(--body-size);">🎨 Workspace (Center)</h3>
+                <p style="font-size:var(--small-size);">The main area where you build your circuit. Drag, rotate, and connect components here.</p>
+            </div>
+            <div class="card card-orange">
+                <h3 style="font-size:var(--body-size);">📦 Component Panel (Right)</h3>
+                <p style="font-size:var(--small-size);">Search bar + categories. Find Arduino, resistors, LEDs, sensors, and more. Use "All" for full list.</p>
+            </div>
+            <div class="card card-purple">
+                <h3 style="font-size:var(--body-size);">💻 Code Editor (Top)</h3>
+                <p style="font-size:var(--small-size);">Switch between <strong>Blocks</strong> (Scratch-like), <strong>Blocks + Text</strong>, or <strong>Text</strong> (full Arduino code).</p>
+            </div>
+            <div class="card card-green">
+                <h3 style="font-size:var(--body-size);">▶️ Simulation Controls (Top)</h3>
+                <p style="font-size:var(--small-size);"><strong>Start Simulation</strong> runs your circuit. <strong>Serial Monitor</strong> shows debug output. Stop anytime.</p>
+            </div>
+        </div>
+        <div class="card reveal" style="margin-top:0.5em;border-left:3px solid var(--warning);">
+            <p style="font-size:var(--small-size);"><strong class="warning">💡 Tip:</strong> Use <strong>"Blocks + Text"</strong> mode when learning — it shows blocks AND the generated Arduino code side-by-side!</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 23: SECTION DIVIDER — PROJECTS
+     ============================================ -->
+<section class="slide section-divider bg-gradient-teal">
+    <div class="slide-content">
+        <p class="section-label reveal">Part 4</p>
+        <h1 class="reveal" style="margin-top:0.3em;">Hands-On<br><span class="accent">Projects</span></h1>
+        <p class="subtitle reveal" style="margin-top:0.5em;">7 projects from beginner to advanced — build in Tinkercad, then go real!</p>
+        <div style="display:flex;gap:0.5em;margin-top:1em;" class="reveal">
+            <span class="tag tag-beginner">BEGINNER</span>
+            <span class="tag tag-intermediate">INTERMEDIATE</span>
+            <span class="tag tag-advanced">ADVANCED</span>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 24: PROJECT 1 — LED BLINK
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <div style="display:flex;align-items:center;gap:0.5em;" class="reveal">
+            <h2>Project 1: LED Blink</h2>
+            <span class="tag tag-beginner">BEGINNER</span>
+            <span class="led-blink"></span>
+        </div>
+        <p class="reveal">The "Hello World" of Arduino! Make an LED turn on and off.</p>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <div class="code-label reveal">Blink.ino</div>
+                <div class="code-block reveal">
+<span class="type">void</span> <span class="function">setup</span>() {
+  <span class="function">pinMode</span>(<span class="number">13</span>, <span class="keyword">OUTPUT</span>);
+}
+
+<span class="type">void</span> <span class="function">loop</span>() {
+  <span class="function">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">HIGH</span>);
+  <span class="function">delay</span>(<span class="number">1000</span>); <span class="comment">// ON 1 sec</span>
+  <span class="function">digitalWrite</span>(<span class="number">13</span>, <span class="keyword">LOW</span>);
+  <span class="function">delay</span>(<span class="number">1000</span>); <span class="comment">// OFF 1 sec</span>
+}
+                </div>
+            </div>
+            <div class="reveal-right">
+                <div class="card card-accent">
+                    <h3 style="font-size:var(--body-size);">Circuit Wiring</h3>
+                    <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                        <li>LED long leg → 220Ω resistor → Pin 13</li>
+                        <li>LED short leg → GND</li>
+                    </ul>
+                </div>
+                <div class="card reveal" style="margin-top:0.5em;border-left:3px solid var(--success);">
+                    <h3 style="font-size:var(--body-size);">🎯 Try This!</h3>
+                    <p style="font-size:var(--small-size);">Change the delay to 200 for fast blink, or 2000 for slow. Try different pins!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 25: PROJECT 2 — TRAFFIC LIGHT
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <div style="display:flex;align-items:center;gap:0.5em;" class="reveal">
+            <h2>Project 2: Traffic Light</h2>
+            <span class="tag tag-beginner">BEGINNER</span>
+        </div>
+        <p class="reveal">Control 3 LEDs to simulate a real traffic light sequence.</p>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <div class="code-label reveal">TrafficLight.ino</div>
+                <div class="code-block reveal" style="font-size:var(--small-size);">
+<span class="type">int</span> red = <span class="number">4</span>, yellow = <span class="number">3</span>, green = <span class="number">2</span>;
+
+<span class="type">void</span> <span class="function">setup</span>() {
+  <span class="function">pinMode</span>(red, <span class="keyword">OUTPUT</span>);
+  <span class="function">pinMode</span>(yellow, <span class="keyword">OUTPUT</span>);
+  <span class="function">pinMode</span>(green, <span class="keyword">OUTPUT</span>);
+}
+
+<span class="type">void</span> <span class="function">loop</span>() {
+  <span class="function">digitalWrite</span>(green, <span class="keyword">HIGH</span>);
+  <span class="function">delay</span>(<span class="number">5000</span>);
+  <span class="function">digitalWrite</span>(green, <span class="keyword">LOW</span>);
+  <span class="function">digitalWrite</span>(yellow, <span class="keyword">HIGH</span>);
+  <span class="function">delay</span>(<span class="number">2000</span>);
+  <span class="function">digitalWrite</span>(yellow, <span class="keyword">LOW</span>);
+  <span class="function">digitalWrite</span>(red, <span class="keyword">HIGH</span>);
+  <span class="function">delay</span>(<span class="number">5000</span>);
+  <span class="function">digitalWrite</span>(red, <span class="keyword">LOW</span>);
+}
+                </div>
+            </div>
+            <div class="reveal-right">
+                <div class="card card-accent">
+                    <h3 style="font-size:var(--body-size);">🚦 Wiring</h3>
+                    <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                        <li>Red LED → 220Ω → Pin 4</li>
+                        <li>Yellow LED → 220Ω → Pin 3</li>
+                        <li>Green LED → 220Ω → Pin 2</li>
+                        <li>All cathodes → GND</li>
+                    </ul>
+                </div>
+                <div class="card" style="margin-top:0.5em;border-left:3px solid var(--success);">
+                    <h3 style="font-size:var(--body-size);">🎯 Challenge</h3>
+                    <p style="font-size:var(--small-size);">Add a pedestrian button that triggers the red light!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 26: PROJECT 3 — TEMP SENSOR
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <div style="display:flex;align-items:center;gap:0.5em;" class="reveal">
+            <h2>Project 3: Temperature Monitor</h2>
+            <span class="tag tag-intermediate">INTERMEDIATE</span>
+        </div>
+        <p class="reveal">Read temperature from a TMP36 sensor and display it on the Serial Monitor.</p>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <div class="code-label reveal">TempMonitor.ino</div>
+                <div class="code-block reveal" style="font-size:var(--small-size);">
+<span class="type">void</span> <span class="function">setup</span>() {
+  <span class="function">Serial.begin</span>(<span class="number">9600</span>);
+}
+
+<span class="type">void</span> <span class="function">loop</span>() {
+  <span class="type">int</span> reading = <span class="function">analogRead</span>(<span class="number">A0</span>);
+  <span class="type">float</span> voltage = reading * <span class="number">5.0</span> / <span class="number">1024.0</span>;
+  <span class="type">float</span> tempC = (voltage - <span class="number">0.5</span>) * <span class="number">100</span>;
+  <span class="function">Serial.print</span>(<span class="string">"Temp: "</span>);
+  <span class="function">Serial.print</span>(tempC);
+  <span class="function">Serial.println</span>(<span class="string">" C"</span>);
+  <span class="function">delay</span>(<span class="number">1000</span>);
+}
+                </div>
+            </div>
+            <div class="reveal-right">
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">🌡️ TMP36 Wiring</h3>
+                    <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                        <li>Left pin → 5V</li>
+                        <li>Center pin → A0 (analog read)</li>
+                        <li>Right pin → GND</li>
+                    </ul>
+                </div>
+                <div class="card" style="margin-top:0.5em;border-left:3px solid var(--accent3);">
+                    <h3 style="font-size:var(--body-size);">How It Works</h3>
+                    <p style="font-size:var(--small-size);">TMP36 outputs voltage proportional to temperature. We convert the analog reading (0–1023) to voltage, then to °C.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 27: PROJECT 4 — ULTRASONIC
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <div style="display:flex;align-items:center;gap:0.5em;" class="reveal">
+            <h2>Project 4: Distance Sensor</h2>
+            <span class="tag tag-intermediate">INTERMEDIATE</span>
+        </div>
+        <p class="reveal">Use the HC-SR04 ultrasonic sensor to measure distance like a bat!</p>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <div class="code-label reveal">Distance.ino</div>
+                <div class="code-block reveal" style="font-size:var(--small-size);">
+<span class="type">int</span> trigPin = <span class="number">9</span>, echoPin = <span class="number">10</span>;
+
+<span class="type">void</span> <span class="function">setup</span>() {
+  <span class="function">pinMode</span>(trigPin, <span class="keyword">OUTPUT</span>);
+  <span class="function">pinMode</span>(echoPin, <span class="keyword">INPUT</span>);
+  <span class="function">Serial.begin</span>(<span class="number">9600</span>);
+}
+
+<span class="type">void</span> <span class="function">loop</span>() {
+  <span class="function">digitalWrite</span>(trigPin, <span class="keyword">LOW</span>);
+  <span class="function">delayMicroseconds</span>(<span class="number">2</span>);
+  <span class="function">digitalWrite</span>(trigPin, <span class="keyword">HIGH</span>);
+  <span class="function">delayMicroseconds</span>(<span class="number">10</span>);
+  <span class="function">digitalWrite</span>(trigPin, <span class="keyword">LOW</span>);
+  <span class="type">long</span> dur = <span class="function">pulseIn</span>(echoPin,<span class="keyword">HIGH</span>);
+  <span class="type">float</span> cm = dur * <span class="number">0.034</span> / <span class="number">2</span>;
+  <span class="function">Serial.println</span>(cm);
+  <span class="function">delay</span>(<span class="number">500</span>);
+}
+                </div>
+            </div>
+            <div class="reveal-right">
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">📡 How Ultrasonic Works</h3>
+                    <p style="font-size:var(--small-size);">Sends a sound pulse → waits for echo → calculates distance from time. Speed of sound = 343 m/s.</p>
+                </div>
+                <div class="card" style="margin-top:0.5em;border-left:3px solid var(--accent);">
+                    <h3 style="font-size:var(--body-size);">Wiring</h3>
+                    <p style="font-size:var(--small-size);">VCC → 5V &bull; GND → GND &bull; Trig → Pin 9 &bull; Echo → Pin 10</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 28: PROJECT 5 — LDR LIGHT SENSOR
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <div style="display:flex;align-items:center;gap:0.5em;" class="reveal">
+            <h2>Project 5: Smart Night Light</h2>
+            <span class="tag tag-intermediate">INTERMEDIATE</span>
+        </div>
+        <p class="reveal">LED turns on automatically when it's dark using a photoresistor (LDR).</p>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <div class="code-label reveal">NightLight.ino</div>
+                <div class="code-block reveal" style="font-size:var(--small-size);">
+<span class="type">int</span> ldrPin = <span class="number">A0</span>;
+<span class="type">int</span> ledPin = <span class="number">9</span>;
+<span class="type">int</span> threshold = <span class="number">400</span>;
+
+<span class="type">void</span> <span class="function">setup</span>() {
+  <span class="function">pinMode</span>(ledPin, <span class="keyword">OUTPUT</span>);
+  <span class="function">Serial.begin</span>(<span class="number">9600</span>);
+}
+
+<span class="type">void</span> <span class="function">loop</span>() {
+  <span class="type">int</span> light = <span class="function">analogRead</span>(ldrPin);
+  <span class="function">Serial.println</span>(light);
+  <span class="keyword">if</span> (light < threshold) {
+    <span class="function">digitalWrite</span>(ledPin, <span class="keyword">HIGH</span>);
+  } <span class="keyword">else</span> {
+    <span class="function">digitalWrite</span>(ledPin, <span class="keyword">LOW</span>);
+  }
+  <span class="function">delay</span>(<span class="number">200</span>);
+}
+                </div>
+            </div>
+            <div class="reveal-right">
+                <div class="card card-green">
+                    <h3 style="font-size:var(--body-size);">💡 How LDR Works</h3>
+                    <p style="font-size:var(--small-size);">Photoresistors change resistance based on light. Bright light = low resistance, darkness = high resistance.</p>
+                </div>
+                <div class="card" style="margin-top:0.5em;border-left:3px solid var(--accent2);">
+                    <h3 style="font-size:var(--body-size);">Wiring</h3>
+                    <p style="font-size:var(--small-size);">LDR → one side to 5V, other to A0 + 10kΩ resistor to GND (voltage divider)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 29: PROJECT 6 — SERVO
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <div style="display:flex;align-items:center;gap:0.5em;" class="reveal">
+            <h2>Project 6: Servo Sweep</h2>
+            <span class="tag tag-advanced">ADVANCED</span>
+        </div>
+        <p class="reveal">Control a servo motor to sweep back and forth, or use a potentiometer to set the angle.</p>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <div class="code-label reveal">ServoControl.ino</div>
+                <div class="code-block reveal" style="font-size:var(--small-size);">
+<span class="keyword">#include</span> <span class="string">&lt;Servo.h&gt;</span>
+
+<span class="type">Servo</span> myServo;
+<span class="type">int</span> potPin = <span class="number">A0</span>;
+
+<span class="type">void</span> <span class="function">setup</span>() {
+  myServo.<span class="function">attach</span>(<span class="number">9</span>);
+}
+
+<span class="type">void</span> <span class="function">loop</span>() {
+  <span class="type">int</span> val = <span class="function">analogRead</span>(potPin);
+  <span class="type">int</span> angle = <span class="function">map</span>(val,<span class="number">0</span>,<span class="number">1023</span>,<span class="number">0</span>,<span class="number">180</span>);
+  myServo.<span class="function">write</span>(angle);
+  <span class="function">delay</span>(<span class="number">15</span>);
+}
+                </div>
+            </div>
+            <div class="reveal-right">
+                <div class="card card-accent">
+                    <h3 style="font-size:var(--body-size);">🔄 Servo Wiring</h3>
+                    <p style="font-size:var(--small-size);">Red wire → 5V &bull; Brown → GND &bull; Orange → Pin 9</p>
+                </div>
+                <div class="card" style="margin-top:0.5em;border-left:3px solid var(--accent3);">
+                    <h3 style="font-size:var(--body-size);">New Concepts</h3>
+                    <p style="font-size:var(--small-size);"><strong class="accent3">#include</strong> — importing a library<br><strong class="accent3">map()</strong> — converts one range to another (0–1023 → 0–180°)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 30: PROJECT 7 — LCD DISPLAY
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <div style="display:flex;align-items:center;gap:0.5em;" class="reveal">
+            <h2>Project 7: LCD + Sensor Display</h2>
+            <span class="tag tag-advanced">ADVANCED</span>
+        </div>
+        <p class="reveal">Show temperature on an LCD screen — a real-world monitoring system!</p>
+        <div class="two-col" style="margin-top:0.5em;">
+            <div>
+                <div class="code-label reveal">LCDTemp.ino</div>
+                <div class="code-block reveal" style="font-size:var(--small-size);">
+<span class="keyword">#include</span> <span class="string">&lt;LiquidCrystal.h&gt;</span>
+
+<span class="type">LiquidCrystal</span> lcd(<span class="number">12</span>,<span class="number">11</span>,<span class="number">5</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">2</span>);
+
+<span class="type">void</span> <span class="function">setup</span>() {
+  lcd.<span class="function">begin</span>(<span class="number">16</span>, <span class="number">2</span>);
+  lcd.<span class="function">print</span>(<span class="string">"Temp Monitor"</span>);
+}
+
+<span class="type">void</span> <span class="function">loop</span>() {
+  <span class="type">int</span> val = <span class="function">analogRead</span>(<span class="number">A0</span>);
+  <span class="type">float</span> v = val * <span class="number">5.0</span> / <span class="number">1024.0</span>;
+  <span class="type">float</span> c = (v - <span class="number">0.5</span>) * <span class="number">100</span>;
+  lcd.<span class="function">setCursor</span>(<span class="number">0</span>, <span class="number">1</span>);
+  lcd.<span class="function">print</span>(c);
+  lcd.<span class="function">print</span>(<span class="string">" C    "</span>);
+  <span class="function">delay</span>(<span class="number">1000</span>);
+}
+                </div>
+            </div>
+            <div class="reveal-right">
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">🖥️ LCD (16x2)</h3>
+                    <p style="font-size:var(--small-size);">16 characters wide, 2 rows. Uses 6 Arduino pins. Available in Tinkercad!</p>
+                </div>
+                <div class="card" style="margin-top:0.5em;border-left:3px solid var(--success);">
+                    <h3 style="font-size:var(--body-size);">🎯 Challenge</h3>
+                    <p style="font-size:var(--small-size);">Add a warning LED that turns on when temp > 30°C. Show both °C and °F!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 31: DEBUGGING TIPS
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">Debugging Tips — When Things Don't Work</h2>
+        <div class="grid-2 reveal" style="margin-top:0.5em;">
+            <div class="card card-accent">
+                <h3 style="font-size:var(--body-size);">🔌 Check Your Wiring</h3>
+                <p style="font-size:var(--small-size);">Loose wires are the #1 issue. Make sure connections are firm and in the right holes.</p>
+            </div>
+            <div class="card card-orange">
+                <h3 style="font-size:var(--body-size);">🔋 Verify Power</h3>
+                <p style="font-size:var(--small-size);">Is 5V connected to +rail? GND to −rail? Is the USB plugged in?</p>
+            </div>
+            <div class="card card-purple">
+                <h3 style="font-size:var(--body-size);">📺 Use Serial Monitor</h3>
+                <p style="font-size:var(--small-size);">Add Serial.println() to see what values your code is actually reading.</p>
+            </div>
+            <div class="card card-green">
+                <h3 style="font-size:var(--body-size);">🔄 Check Polarity</h3>
+                <p style="font-size:var(--small-size);">LEDs, electrolytic capacitors, and diodes have a + and − side. Flip them if they don't work.</p>
+            </div>
+        </div>
+        <div class="card reveal" style="margin-top:0.5em;border-left:3px solid var(--warning);">
+            <p style="font-size:var(--body-size);"><strong class="warning">Golden rule:</strong> If it doesn't work in Tinkercad, it won't work in real life either. Debug virtually first, then build physically!</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 32: FROM TINKERCAD TO REAL HARDWARE
+     ============================================ -->
+<section class="slide bg-grid">
+    <div class="slide-content">
+        <h2 class="reveal">From Tinkercad to Real Hardware</h2>
+        <p class="reveal">Once your circuit works in simulation, building it for real is easy!</p>
+        <div style="margin-top:0.5em;">
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num" style="background:var(--accent2);">1</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Get Your Parts</h3>
+                    <p style="font-size:var(--small-size);">Arduino Starter Kit has everything for beginners. Also check Amazon, Adafruit, SparkFun.</p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num" style="background:var(--accent2);">2</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Copy Your Tinkercad Design</h3>
+                    <p style="font-size:var(--small-size);">Follow the exact same wiring layout on your real breadboard. Screenshot your Tinkercad design as a reference.</p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num" style="background:var(--accent2);">3</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Copy Code to Arduino IDE</h3>
+                    <p style="font-size:var(--small-size);">Copy the code from Tinkercad's editor → paste into Arduino IDE → click Upload.</p>
+                </div>
+            </div>
+            <div class="step-row reveal" style="margin-bottom:var(--element-gap);">
+                <div class="step-num" style="background:var(--accent2);">4</div>
+                <div>
+                    <h3 style="font-size:var(--body-size);">Test & Iterate</h3>
+                    <p style="font-size:var(--small-size);">If something doesn't work, compare your real circuit to the Tinkercad diagram. Debug step by step!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 33: RESOURCES
+     ============================================ -->
+<section class="slide bg-gradient-teal">
+    <div class="slide-content">
+        <h2 class="reveal">Resources & Next Steps</h2>
+        <div class="grid-2 reveal" style="margin-top:0.5em;">
+            <div class="card card-accent">
+                <h3 style="font-size:var(--body-size);">📘 Official Resources</h3>
+                <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                    <li><strong>arduino.cc/en/Tutorial</strong> — Official tutorials</li>
+                    <li><strong>tinkercad.com/learn</strong> — Guided lessons</li>
+                    <li><strong>Arduino Projects Book</strong> — 15 starter projects</li>
+                </ul>
+            </div>
+            <div class="card card-orange">
+                <h3 style="font-size:var(--body-size);">🎥 YouTube Channels</h3>
+                <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                    <li><strong>Paul McWhorter</strong> — Beginner Arduino series</li>
+                    <li><strong>DroneBot Workshop</strong> — Component tutorials</li>
+                    <li><strong>The Engineering Mindset</strong> — Electronics basics</li>
+                </ul>
+            </div>
+            <div class="card card-purple">
+                <h3 style="font-size:var(--body-size);">🛒 Where to Buy</h3>
+                <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                    <li><strong>Arduino Starter Kit</strong> — best for beginners</li>
+                    <li><strong>Adafruit / SparkFun</strong> — quality parts</li>
+                    <li><strong>Amazon / AliExpress</strong> — budget options</li>
+                </ul>
+            </div>
+            <div class="card card-green">
+                <h3 style="font-size:var(--body-size);">🚀 What's Next?</h3>
+                <ul class="bullet-list" style="font-size:var(--small-size);margin-top:0.3em;">
+                    <li>Add WiFi with <strong>ESP32/ESP8266</strong></li>
+                    <li>Build IoT projects that talk to the cloud</li>
+                    <li>Learn PCB design and soldering</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 34: THANK YOU
+     ============================================ -->
+<section class="slide title-slide bg-dark">
+    <div class="slide-content">
+        <p class="section-label reveal">That's a Wrap!</p>
+        <h1 class="reveal glow-text" style="margin-top:0.3em;">Now Go<br><span class="accent">Build</span> Something!</h1>
+        <p class="subtitle reveal" style="margin-top:0.5em;">Remember: Every expert was once a beginner. Start small, experiment, and don't be afraid to break things.</p>
+        <div class="divider reveal" style="margin-top:1em;"></div>
+        <div class="reveal" style="margin-top:1em;display:flex;gap:1em;flex-wrap:wrap;justify-content:center;">
+            <span class="tag tag-teal">arduino.cc</span>
+            <span class="tag" style="background:rgba(124,58,237,0.15);color:var(--accent3);">tinkercad.com</span>
+        </div>
+        <p class="reveal" style="margin-top:1em;font-size:var(--small-size);color:var(--text-muted);">Questions? Experiment! The best way to learn electronics is by doing.</p>
+    </div>
+    <div class="circuit-line" style="top:20%;left:5%;width:20%;"></div>
+    <div class="circuit-line" style="bottom:25%;right:5%;width:15%;"></div>
+</section>
+
+
+<!-- ===========================================
+     JAVASCRIPT: Slide Controller
+     =========================================== -->
+<script>
+class SlidePresentation {
+    constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.currentSlide = 0;
+        this.totalSlides = this.slides.length;
+        this.isScrolling = false;
+        this.scrollTimeout = null;
+
+        this.createNavDots();
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.updateProgress();
+        this.hideKeyHint();
+    }
+
+    createNavDots() {
+        const nav = document.getElementById('navDots');
+        this.slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+            dot.addEventListener('click', () => this.goToSlide(i));
+            nav.appendChild(dot);
+        });
+        this.dots = nav.querySelectorAll('.nav-dot');
+    }
+
+    setupIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    const index = Array.from(this.slides).indexOf(entry.target);
+                    this.currentSlide = index;
+                    this.updateProgress();
+                    this.updateDots();
+                    this.updateCounter();
+                }
+            });
+        }, { threshold: 0.5 });
+
+        this.slides.forEach(slide => observer.observe(slide));
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                this.goToSlide(Math.min(this.currentSlide + 1, this.totalSlides - 1));
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                this.goToSlide(Math.max(this.currentSlide - 1, 0));
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                this.goToSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                this.goToSlide(this.totalSlides - 1);
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const diff = touchStartY - e.changedTouches[0].clientY;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    this.goToSlide(Math.min(this.currentSlide + 1, this.totalSlides - 1));
+                } else {
+                    this.goToSlide(Math.max(this.currentSlide - 1, 0));
+                }
+            }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        document.addEventListener('wheel', (e) => {
+            if (this.isScrolling) return;
+            this.isScrolling = true;
+
+            if (e.deltaY > 30) {
+                this.goToSlide(Math.min(this.currentSlide + 1, this.totalSlides - 1));
+            } else if (e.deltaY < -30) {
+                this.goToSlide(Math.max(this.currentSlide - 1, 0));
+            }
+
+            clearTimeout(this.scrollTimeout);
+            this.scrollTimeout = setTimeout(() => { this.isScrolling = false; }, 800);
+        }, { passive: true });
+    }
+
+    goToSlide(index) {
+        this.slides[index].scrollIntoView({ behavior: 'smooth' });
+        this.currentSlide = index;
+        this.updateProgress();
+        this.updateDots();
+        this.updateCounter();
+    }
+
+    updateProgress() {
+        const pct = ((this.currentSlide + 1) / this.totalSlides) * 100;
+        document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    updateDots() {
+        this.dots.forEach((d, i) => d.classList.toggle('active', i === this.currentSlide));
+    }
+
+    updateCounter() {
+        document.getElementById('slideCounter').textContent =
+            `${this.currentSlide + 1} / ${this.totalSlides}`;
+    }
+
+    hideKeyHint() {
+        setTimeout(() => {
+            document.getElementById('keyHint').classList.add('hidden');
+        }, 5000);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => new SlidePresentation());
+</script>
+
+</body>
+</html>

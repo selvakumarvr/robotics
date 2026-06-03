@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 Day 3 — Analog Inputs, PWM & Potentiometer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:     #f0fdf4;
+            --accent:         #0ea5e9;   /* sky blue */
+            --accent-light:   #38bdf8;
+            --accent-glow:    rgba(14,165,233,0.18);
+            --accent2:        #8b5cf6;   /* purple */
+            --accent2-glow:   rgba(139,92,246,0.18);
+            --accent3:        #f97316;   /* orange */
+            --accent4:        #10b981;   /* green */
+            --accent5:        #ec4899;   /* pink */
+            --warning:        #f59e0b;
+            --danger:         #ef4444;
+            --text-primary:   #0c1a2e;
+            --text-secondary: #0369a1;
+            --text-muted:     #94a3b8;
+            --font-display:   'Baloo 2', cursive;
+            --font-body:      'Nunito', sans-serif;
+            --font-code:      'Fira Code', monospace;
+            --title-size:     clamp(1.8rem, 5vw, 3.6rem);
+            --h2-size:        clamp(1.3rem, 3.5vw, 2.2rem);
+            --h3-size:        clamp(1rem, 2.5vw, 1.4rem);
+            --body-size:      clamp(0.78rem, 1.5vw, 1.05rem);
+            --small-size:     clamp(0.68rem, 1.1vw, 0.88rem);
+            --code-size:      clamp(0.63rem, 1.05vw, 0.84rem);
+            --slide-padding:  clamp(1.5rem, 4vw, 4rem);
+            --content-gap:    clamp(0.8rem, 2vw, 1.6rem);
+            --elem-gap:       clamp(0.3rem, 1vw, 0.7rem);
+            --radius:         16px;
+            --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; scroll-snap-type:y mandatory; height:100%; overflow-x:hidden; }
+        body { font-family:var(--font-body); background:var(--bg-primary); color:var(--text-primary); overflow-x:hidden; height:100%; line-height:1.5; }
+
+        .slide { width:100vw; height:100vh; height:100dvh; padding:var(--slide-padding); scroll-snap-align:start; display:flex; flex-direction:column; justify-content:center; position:relative; overflow:hidden; }
+        .slide-content { flex:1; display:flex; flex-direction:column; justify-content:center; max-height:100%; overflow:hidden; gap:var(--content-gap); }
+
+        .progress-bar { position:fixed; top:0; left:0; height:4px; background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent5)); z-index:1000; transition:width 0.3s ease; box-shadow:0 0 8px var(--accent-glow); }
+
+        .nav-dots { position:fixed; right:clamp(0.5rem,1.5vw,1.5rem); top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:6px; z-index:100; }
+        .nav-dot { width:8px; height:8px; border-radius:50%; background:rgba(14,165,233,0.2); cursor:pointer; transition:all 0.3s ease; border:none; padding:0; }
+        .nav-dot.active { background:var(--accent); box-shadow:0 0 8px var(--accent-glow); transform:scale(1.5); }
+        .nav-dot:hover { background:var(--accent-light); }
+
+        .slide-counter { position:fixed; bottom:clamp(0.5rem,2vw,1.2rem); right:clamp(0.5rem,2vw,1.2rem); font-family:var(--font-code); font-size:var(--small-size); color:var(--text-muted); z-index:100; background:rgba(255,255,255,0.85); padding:3px 10px; border-radius:20px; }
+
+        h1 { font-family:var(--font-display); font-size:var(--title-size); font-weight:800; line-height:1.15; color:var(--text-primary); }
+        h2 { font-family:var(--font-display); font-size:var(--h2-size); font-weight:700; line-height:1.2; color:var(--accent); }
+        h3 { font-family:var(--font-display); font-size:var(--h3-size); font-weight:700; line-height:1.3; color:var(--text-primary); }
+        p, li { font-size:var(--body-size); line-height:1.65; color:#334155; }
+        strong { font-weight:700; }
+        .accent  { color:var(--accent); }
+        .accent2 { color:var(--accent2); }
+        .accent3 { color:var(--accent3); }
+        .accent4 { color:var(--accent4); }
+        .accent5 { color:var(--accent5); }
+
+        /* Backgrounds */
+        .bg-dots  { background-image:radial-gradient(rgba(14,165,233,0.07) 1.5px, transparent 1.5px); background-size:28px 28px; }
+        .bg-white { background:#ffffff; }
+        .bg-sky   { background:linear-gradient(135deg,#e0f2fe 0%,#bae6fd 50%,#7dd3fc 100%); }
+        .bg-purple{ background:linear-gradient(135deg,#f3e8ff 0%,#e9d5ff 50%,#d8b4fe 100%); }
+        .bg-orange{ background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 50%,#fed7aa 100%); }
+        .bg-green { background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 50%,#a7f3d0 100%); }
+
+        /* Cards */
+        .card { background:#fff; border-radius:var(--radius); padding:clamp(0.8rem,2vw,1.4rem); border:2px solid rgba(14,165,233,0.12); box-shadow:0 2px 12px rgba(14,165,233,0.06); transition:all 0.3s ease; }
+        .card:hover { border-color:rgba(14,165,233,0.3); box-shadow:0 6px 24px rgba(14,165,233,0.12); transform:translateY(-2px); }
+        .card-sky    { border-left:4px solid var(--accent);  background:linear-gradient(135deg,#fff 80%,#e0f2fe); }
+        .card-purple { border-left:4px solid var(--accent2); background:linear-gradient(135deg,#fff 80%,#f3e8ff); }
+        .card-orange { border-left:4px solid var(--accent3); background:linear-gradient(135deg,#fff 80%,#fff7ed); }
+        .card-green  { border-left:4px solid var(--accent4); background:linear-gradient(135deg,#fff 80%,#ecfdf5); }
+        .card-pink   { border-left:4px solid var(--accent5); background:linear-gradient(135deg,#fff 80%,#fdf2f8); }
+
+        /* Layout */
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:var(--content-gap); align-items:start; }
+        .grid-3  { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--elem-gap); }
+        .grid-4  { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--elem-gap); }
+        .grid-2  { display:grid; grid-template-columns:1fr 1fr; gap:var(--elem-gap); }
+        @media (max-width:768px) { .two-col,.grid-3,.grid-4 { grid-template-columns:1fr 1fr; } }
+
+        .icon-circle { width:clamp(36px,5vw,52px); height:clamp(36px,5vw,52px); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:clamp(1rem,2.5vw,1.6rem); flex-shrink:0; }
+        .icon-sky    { background:#e0f2fe; }
+        .icon-purple { background:#f3e8ff; }
+        .icon-orange { background:#fff7ed; }
+        .icon-green  { background:#ecfdf5; }
+        .icon-pink   { background:#fdf2f8; }
+
+        .badge { display:inline-block; padding:3px 12px; border-radius:20px; font-size:var(--small-size); font-weight:700; letter-spacing:0.04em; }
+        .badge-sky    { background:#e0f2fe; color:var(--accent); }
+        .badge-purple { background:#f3e8ff; color:var(--accent2); }
+        .badge-orange { background:#fff7ed; color:var(--accent3); }
+        .badge-green  { background:#ecfdf5; color:var(--accent4); }
+        .badge-pink   { background:#fdf2f8; color:var(--accent5); }
+
+        .section-label { font-family:var(--font-code); font-size:var(--small-size); letter-spacing:0.15em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+        .divider { height:3px; width:60px; border-radius:4px; background:linear-gradient(90deg,var(--accent),var(--accent2)); }
+        .subtitle { font-size:clamp(0.9rem,2vw,1.3rem); color:#475569; font-weight:500; }
+
+        /* Code */
+        .code-block { background:#0c1a2e; border-radius:12px; padding:clamp(0.8rem,2vw,1.4rem); font-family:var(--font-code); font-size:var(--code-size); color:#bae6fd; overflow-x:auto; border:2px solid rgba(56,189,248,0.25); box-shadow:0 4px 16px rgba(14,165,233,0.12); }
+        .code-block .kw  { color:#f0abfc; }
+        .code-block .fn  { color:#67e8f9; }
+        .code-block .num { color:#fcd34d; }
+        .code-block .cmt { color:#6ee7b7; font-style:italic; }
+        .code-block .str { color:#f9a8d4; }
+        .code-block .pin { color:#fb923c; }
+        .code-block .typ { color:#a5f3fc; }
+        .code-block pre  { white-space:pre; line-height:1.8; }
+
+        .step { display:flex; align-items:flex-start; gap:clamp(0.5rem,1.5vw,1rem); padding:clamp(0.5rem,1.2vw,0.9rem); background:#fff; border-radius:12px; border:2px solid rgba(14,165,233,0.12); }
+        .step-num { min-width:clamp(28px,3.5vw,40px); height:clamp(28px,3.5vw,40px); border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:var(--body-size); flex-shrink:0; font-family:var(--font-display); }
+
+        .quiz-option { padding:clamp(0.5rem,1.2vw,0.85rem) clamp(0.8rem,2vw,1.2rem); border-radius:10px; background:#fff; border:2px solid rgba(14,165,233,0.15); cursor:pointer; font-size:var(--body-size); font-weight:600; color:#334155; transition:all 0.2s ease; text-align:left; font-family:var(--font-body); }
+        .quiz-option:hover { border-color:var(--accent); background:#e0f2fe; transform:translateX(4px); }
+        .quiz-option.correct { background:#d1fae5; border-color:var(--accent4); color:#065f46; }
+        .quiz-option.wrong   { background:#fee2e2; border-color:var(--danger); color:#991b1b; }
+        .quiz-feedback { font-size:var(--body-size); font-weight:700; padding:0.5em 1em; border-radius:10px; display:none; margin-top:0.5em; }
+        .quiz-feedback.show { display:block; }
+
+        .reveal, .reveal-right, .reveal-scale, .reveal-up { opacity:0; transition:opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out); }
+        .reveal        { transform:translateY(24px); }
+        .reveal-right  { transform:translateX(24px); }
+        .reveal-scale  { transform:scale(0.92); }
+        .reveal-up     { transform:translateY(-20px); }
+        .reveal.visible,.reveal-right.visible,.reveal-scale.visible,.reveal-up.visible { opacity:1; transform:none; }
+
+        [data-delay="1"] { transition-delay:0.1s; }
+        [data-delay="2"] { transition-delay:0.2s; }
+        [data-delay="3"] { transition-delay:0.3s; }
+        [data-delay="4"] { transition-delay:0.4s; }
+        [data-delay="5"] { transition-delay:0.5s; }
+        [data-delay="6"] { transition-delay:0.6s; }
+
+        .big-emoji { font-size:clamp(3rem,8vw,6rem); line-height:1; display:block; text-align:center; filter:drop-shadow(0 4px 12px rgba(14,165,233,0.2)); }
+
+        .hl-sky    { background:#e0f2fe; border-left:4px solid var(--accent);  color:#0369a1; border-radius:12px; padding:clamp(0.6rem,1.4vw,1rem); font-size:var(--body-size); font-weight:600; }
+        .hl-purple { background:#f3e8ff; border-left:4px solid var(--accent2); color:#6d28d9; border-radius:12px; padding:clamp(0.6rem,1.4vw,1rem); font-size:var(--body-size); font-weight:600; }
+        .hl-orange { background:#fff7ed; border-left:4px solid var(--accent3); color:#9a3412; border-radius:12px; padding:clamp(0.6rem,1.4vw,1rem); font-size:var(--body-size); font-weight:600; }
+        .hl-green  { background:#ecfdf5; border-left:4px solid var(--accent4); color:#065f46; border-radius:12px; padding:clamp(0.6rem,1.4vw,1rem); font-size:var(--body-size); font-weight:600; }
+        .hl-yellow { background:#fffbeb; border-left:4px solid var(--warning);  color:#92400e; border-radius:12px; padding:clamp(0.6rem,1.4vw,1rem); font-size:var(--body-size); font-weight:600; }
+
+        .section-tag { display:inline-flex; align-items:center; gap:0.4em; padding:0.3em 0.9em; border-radius:30px; font-size:var(--small-size); font-weight:800; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.4em; }
+        .tag-day  { background:#e0f2fe; color:var(--accent);  border:2px solid #7dd3fc; }
+        .tag-hw   { background:#fff7ed; color:var(--accent3); border:2px solid #fed7aa; }
+        .tag-quiz { background:#f3e8ff; color:var(--accent2); border:2px solid #c4b5fd; }
+
+        .blob { position:absolute; border-radius:50%; filter:blur(60px); opacity:0.25; pointer-events:none; }
+
+        /* PWM bar visual */
+        .pwm-bar-wrap { display:flex; flex-direction:column; gap:0.4em; }
+        .pwm-row { display:flex; align-items:center; gap:0.5em; }
+        .pwm-label { font-family:var(--font-code); font-size:var(--small-size); color:#334155; min-width:60px; text-align:right; }
+        .pwm-track { flex:1; height:14px; background:#e2e8f0; border-radius:20px; overflow:hidden; }
+        .pwm-fill  { height:100%; border-radius:20px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width 0.5s ease; }
+        .pwm-val   { font-family:var(--font-code); font-size:var(--small-size); color:#64748b; min-width:36px; }
+
+        /* Analog scale */
+        .analog-scale { background:#f8fafc; border-radius:12px; padding:0.8em 1em; border:2px solid rgba(14,165,233,0.15); }
+        .scale-bar { height:20px; border-radius:20px; background:linear-gradient(90deg,#1e3a5f,#0ea5e9,#7dd3fc); position:relative; margin:0.4em 0; }
+        .scale-labels { display:flex; justify-content:space-between; font-family:var(--font-code); font-size:var(--small-size); color:#64748b; }
+
+        /* Pot diagram */
+        .pot-diagram { background:#0c1a2e; border-radius:12px; padding:1em; font-family:var(--font-code); font-size:var(--small-size); color:#bae6fd; border:2px solid rgba(56,189,248,0.25); line-height:2; }
+
+        /* Brightness demo */
+        .brightness-demo { display:flex; justify-content:space-between; align-items:flex-end; gap:0.4em; padding:0.8em; background:#1e293b; border-radius:12px; }
+        .brightness-led { display:flex; flex-direction:column; align-items:center; gap:0.3em; }
+        .led-bulb { border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; transition:opacity 0.3s; }
+        .led-label { font-family:var(--font-code); font-size:clamp(0.55rem,0.85vw,0.72rem); color:#64748b; }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">1 / 15</div>
+
+
+<!-- ============================================
+     SLIDE 1: TITLE
+     ============================================ -->
+<section class="slide bg-sky">
+    <div class="blob" style="width:320px;height:320px;background:#7dd3fc;top:-80px;right:-80px;"></div>
+    <div class="blob" style="width:220px;height:220px;background:#d8b4fe;bottom:-60px;left:-60px;"></div>
+    <div class="slide-content" style="align-items:flex-start;">
+        <div class="reveal-up"><span class="section-tag tag-day">Week 1 · Day 3</span></div>
+        <h1 class="reveal" style="margin-top:0.2em;color:#0c1a2e;">
+            The <span class="accent">Analog</span><br>World
+        </h1>
+        <p class="subtitle reveal" data-delay="2">Potentiometers, PWM, and for loops — going beyond ON and OFF to infinite shades in between</p>
+        <div class="divider reveal" data-delay="3" style="margin-top:0.8em;"></div>
+        <div class="reveal" data-delay="4" style="display:flex;gap:0.8em;flex-wrap:wrap;margin-top:0.5em;">
+            <span class="badge badge-sky">Digital vs Analog</span>
+            <span class="badge badge-orange">Potentiometer</span>
+            <span class="badge badge-purple">PWM &amp; analogWrite</span>
+            <span class="badge badge-green">for Loops</span>
+            <span class="badge badge-pink">Brightness Project</span>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 2: DAY 2 RECAP
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#f0f9ff;">
+    <div class="slide-content">
+        <span class="section-label reveal">Quick Recap</span>
+        <h2 class="reveal" data-delay="1">What We Learned in Day 2</h2>
+        <div class="grid-2 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-sky">
+                <div style="display:flex;align-items:center;gap:0.6em;">
+                    <div class="icon-circle icon-sky">📟</div>
+                    <div>
+                        <h3 style="font-size:var(--body-size);">Serial Monitor</h3>
+                        <p style="font-size:var(--small-size);">Serial.begin(9600) + Serial.println() to send messages to your computer</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-purple">
+                <div style="display:flex;align-items:center;gap:0.6em;">
+                    <div class="icon-circle icon-purple">📦</div>
+                    <div>
+                        <h3 style="font-size:var(--body-size);">Variables</h3>
+                        <p style="font-size:var(--small-size);">int, bool, const — storing numbers and true/false values in named boxes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-green">
+                <div style="display:flex;align-items:center;gap:0.6em;">
+                    <div class="icon-circle icon-green">🔘</div>
+                    <div>
+                        <h3 style="font-size:var(--body-size);">Push Button</h3>
+                        <p style="font-size:var(--small-size);">digitalRead() + INPUT_PULLUP — reading HIGH/LOW from a button pin</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-orange">
+                <div style="display:flex;align-items:center;gap:0.6em;">
+                    <div class="icon-circle icon-orange">🔀</div>
+                    <div>
+                        <h3 style="font-size:var(--body-size);">if / else Logic</h3>
+                        <p style="font-size:var(--small-size);">Project: button-controlled LED toggle with debounce and Serial output</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hl-sky reveal" data-delay="3" style="font-size:var(--small-size);">
+            So far everything has been <strong>digital</strong> — fully ON or fully OFF. Today we enter the <strong>analog</strong> world where values live between the extremes!
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 3: AGENDA
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#f0f9ff;">
+    <div class="slide-content">
+        <span class="section-label reveal">Today's Agenda</span>
+        <h2 class="reveal" data-delay="1">What We'll Do Today</h2>
+        <div class="reveal" data-delay="2" style="display:flex;flex-direction:column;gap:0.45em;margin-top:0.3em;">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div><h3 style="font-size:var(--body-size);">Digital vs Analog</h3><p style="font-size:var(--small-size);">Understand the difference — ON/OFF vs infinite values in between</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent3);">2</div>
+                <div><h3 style="font-size:var(--body-size);">Potentiometer</h3><p style="font-size:var(--small-size);">A variable resistor — wire it up and read it with analogRead()</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent2);">3</div>
+                <div><h3 style="font-size:var(--body-size);">PWM &amp; analogWrite()</h3><p style="font-size:var(--small-size);">Simulate analog output to dim an LED — values 0 to 255</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent4);">4</div>
+                <div><h3 style="font-size:var(--body-size);">for Loops</h3><p style="font-size:var(--small-size);">Repeat code a specific number of times — fade an LED up and down</p></div>
+            </div>
+            <div class="step">
+                <div class="step-num" style="background:var(--accent5);">5</div>
+                <div><h3 style="font-size:var(--body-size);">Project: Potentiometer LED Dimmer</h3><p style="font-size:var(--small-size);">Turn the knob → LED gets brighter or dimmer. Real-time control!</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 4: SECTION DIVIDER — DIGITAL VS ANALOG
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#0ea5e9 0%,#38bdf8 50%,#7dd3fc 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:280px;height:280px;background:#bae6fd;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">📊</span>
+        <p class="section-label reveal" data-delay="1" style="color:#e0f2fe;margin-top:0.5em;">Part 1</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Digital vs<br>Analog</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#bae6fd;margin-top:0.5em;">The world isn't just ON and OFF — it's full of values in between!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#bae6fd);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 5: DIGITAL VS ANALOG EXPLAINED
+     ============================================ -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Digital vs Analog — What's the Difference?</h2>
+        <div class="two-col reveal" data-delay="1" style="margin-top:0.3em;">
+            <div style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-sky">
+                    <h3 style="font-size:var(--body-size);">Digital — Two States Only</h3>
+                    <p style="font-size:var(--small-size);margin:0.3em 0;">Either ON (HIGH = 5V) or OFF (LOW = 0V). Nothing in between.</p>
+                    <div style="display:flex;gap:0.5em;margin-top:0.4em;">
+                        <div style="flex:1;height:36px;background:#0ea5e9;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:var(--small-size);">HIGH (5V)</div>
+                        <div style="flex:1;height:36px;background:#e2e8f0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#64748b;font-weight:800;font-size:var(--small-size);">LOW (0V)</div>
+                    </div>
+                    <p style="font-size:var(--small-size);color:#64748b;margin-top:0.4em;">Like a light switch — only two positions.</p>
+                </div>
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">Analog — Infinite Values</h3>
+                    <p style="font-size:var(--small-size);margin:0.3em 0;">Any voltage between 0V and 5V. Arduino reads this as 0–1023.</p>
+                    <div class="analog-scale" style="margin-top:0.4em;padding:0.5em 0.7em;">
+                        <div class="scale-bar"></div>
+                        <div class="scale-labels"><span>0</span><span>256</span><span>512</span><span>768</span><span>1023</span></div>
+                    </div>
+                    <p style="font-size:var(--small-size);color:#64748b;margin-top:0.4em;">Like a dimmer switch — infinite positions.</p>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card" style="text-align:center;padding:1em;">
+                    <p style="font-size:clamp(3rem,7vw,5rem);line-height:1;">🎛️</p>
+                    <h3 style="color:var(--accent2);margin-top:0.3em;font-size:var(--body-size);">Real World Examples</h3>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4em;margin-top:0.5em;font-size:var(--small-size);">
+                        <div class="hl-sky" style="font-size:var(--small-size);padding:0.4em 0.6em;"><strong>Digital:</strong> On/Off button, LED state</div>
+                        <div class="hl-purple" style="font-size:var(--small-size);padding:0.4em 0.6em;"><strong>Analog:</strong> Volume knob, temperature</div>
+                        <div class="hl-sky" style="font-size:var(--small-size);padding:0.4em 0.6em;"><strong>Digital:</strong> Door open sensor</div>
+                        <div class="hl-purple" style="font-size:var(--small-size);padding:0.4em 0.6em;"><strong>Analog:</strong> Light sensor, joystick</div>
+                    </div>
+                </div>
+                <div class="hl-yellow" style="font-size:var(--small-size);">
+                    Arduino's analog pins (A0–A5) use a 10-bit ADC to measure voltage and convert it to a number from <strong>0</strong> (= 0V) to <strong>1023</strong> (= 5V).
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 6: SECTION DIVIDER — POTENTIOMETER
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#f97316 0%,#fb923c 50%,#fdba74 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#fed7aa;bottom:5%;left:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🎚️</span>
+        <p class="section-label reveal" data-delay="1" style="color:#fff7ed;margin-top:0.5em;">Part 2</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">The<br>Potentiometer</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ffedd5;margin-top:0.5em;">A variable resistor with a knob — twist it to change resistance from 0Ω to 10kΩ</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#fed7aa);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 7: POTENTIOMETER WIRING + analogRead
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#fff7ed;">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent3);">Potentiometer — Wiring &amp; analogRead()</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">3 Legs — Easy to Wire!</h3>
+                    <div class="pot-diagram" style="margin-top:0.5em;">
+                        <div style="color:#fb923c;">Left leg → 5V (power)</div>
+                        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+                        <div style="color:#fcd34d;">Middle leg → A0 (signal)</div>
+                        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+                        <div style="color:#6ee7b7;">Right leg → GND</div>
+                    </div>
+                </div>
+                <div class="code-block" style="font-size:var(--small-size);">
+<pre><span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="typ">int</span> val = <span class="fn">analogRead</span>(<span class="pin">A0</span>);
+  <span class="fn">Serial</span>.<span class="fn">println</span>(val);
+  <span class="fn">delay</span>(<span class="num">200</span>);
+}</pre>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">Twist the knob — watch the numbers!</h3>
+                    <div class="pwm-bar-wrap" style="margin-top:0.5em;">
+                        <div class="pwm-row">
+                            <span class="pwm-label">All left</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="width:2%;background:#e2e8f0;"></div></div>
+                            <span class="pwm-val">0</span>
+                        </div>
+                        <div class="pwm-row">
+                            <span class="pwm-label">1/4</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="width:25%;"></div></div>
+                            <span class="pwm-val">~256</span>
+                        </div>
+                        <div class="pwm-row">
+                            <span class="pwm-label">Middle</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="width:50%;"></div></div>
+                            <span class="pwm-val">~512</span>
+                        </div>
+                        <div class="pwm-row">
+                            <span class="pwm-label">3/4</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="width:75%;"></div></div>
+                            <span class="pwm-val">~768</span>
+                        </div>
+                        <div class="pwm-row">
+                            <span class="pwm-label">All right</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="width:99%;"></div></div>
+                            <span class="pwm-val">1023</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hl-orange" style="font-size:var(--small-size);">
+                    <strong>In Tinkercad:</strong> Search "Potentiometer" in components. Click and drag the slider to simulate turning the knob while the simulation runs!
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 8: SECTION DIVIDER — PWM
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#8b5cf6 0%,#a78bfa 50%,#c4b5fd 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#ddd6fe;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">💡</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ede9fe;margin-top:0.5em;">Part 3</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">PWM &amp;<br>analogWrite()</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ede9fe;margin-top:0.5em;">Fake analog output using rapid ON/OFF switching — dim that LED!</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#c4b5fd);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 9: WHAT IS PWM?
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#f5f3ff;">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent2);">PWM — Pulse Width Modulation</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <p style="font-size:var(--body-size);">Arduino can only output <strong class="accent2">5V or 0V</strong> digitally. But by switching a pin ON and OFF very fast, it creates the <em>effect</em> of a voltage in between!</p>
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">Duty Cycle</h3>
+                    <p style="font-size:var(--small-size);">The % of time the pin is ON. 50% duty cycle = feels like 2.5V to the LED.</p>
+                    <div class="pwm-bar-wrap" style="margin-top:0.5em;">
+                        <div class="pwm-row">
+                            <span class="pwm-label" style="color:#6d28d9;">0 (0%)</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="width:1%;background:#e9d5ff;"></div></div>
+                            <span class="pwm-val" style="color:#6d28d9;">OFF</span>
+                        </div>
+                        <div class="pwm-row">
+                            <span class="pwm-label" style="color:#6d28d9;">64 (25%)</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="background:linear-gradient(90deg,#8b5cf6,#a78bfa);width:25%;"></div></div>
+                            <span class="pwm-val" style="color:#6d28d9;">Dim</span>
+                        </div>
+                        <div class="pwm-row">
+                            <span class="pwm-label" style="color:#6d28d9;">128 (50%)</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="background:linear-gradient(90deg,#8b5cf6,#a78bfa);width:50%;"></div></div>
+                            <span class="pwm-val" style="color:#6d28d9;">Half</span>
+                        </div>
+                        <div class="pwm-row">
+                            <span class="pwm-label" style="color:#6d28d9;">192 (75%)</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="background:linear-gradient(90deg,#8b5cf6,#a78bfa);width:75%;"></div></div>
+                            <span class="pwm-val" style="color:#6d28d9;">Bright</span>
+                        </div>
+                        <div class="pwm-row">
+                            <span class="pwm-label" style="color:#6d28d9;">255 (100%)</span>
+                            <div class="pwm-track"><div class="pwm-fill" style="background:linear-gradient(90deg,#8b5cf6,var(--accent));width:99%;"></div></div>
+                            <span class="pwm-val" style="color:#6d28d9;">Full!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">analogWrite(pin, value)</h3>
+                    <p style="font-size:var(--small-size);">Sends a PWM signal to a pin. Value: <strong>0</strong> (fully off) to <strong>255</strong> (fully on).</p>
+                    <div class="code-block" style="margin-top:0.5em;font-size:var(--small-size);">
+<pre><span class="fn">analogWrite</span>(<span class="num">9</span>, <span class="num">0</span>);    <span class="cmt">// OFF</span>
+<span class="fn">analogWrite</span>(<span class="num">9</span>, <span class="num">128</span>);  <span class="cmt">// 50%</span>
+<span class="fn">analogWrite</span>(<span class="num">9</span>, <span class="num">255</span>);  <span class="cmt">// FULL</span></pre>
+                    </div>
+                </div>
+                <div class="hl-yellow" style="font-size:var(--small-size);">
+                    <strong>PWM pins only!</strong> Look for the <strong>~</strong> symbol on your Arduino board: pins ~3, ~5, ~6, ~9, ~10, ~11. These are the only pins that support analogWrite().
+                </div>
+                <div class="hl-purple" style="font-size:var(--small-size);">
+                    <strong>Analogy:</strong> Imagine flickering a light switch 500 times per second. If it's ON half the time, it looks half as bright!
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 10: FOR LOOPS
+     ============================================ -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent2);">for Loops — Repeat with a Counter</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div>
+                <p class="reveal" data-delay="1" style="margin-bottom:0.6em;">A <code style="background:#f3e8ff;padding:1px 5px;border-radius:4px;font-family:var(--font-code);color:#6d28d9;">for</code> loop repeats code a set number of times, using a counter variable to track progress.</p>
+                <div class="code-block reveal" data-delay="2">
+<pre><span class="cmt">// Fade LED up — 0 to 255</span>
+<span class="kw">for</span> (<span class="typ">int</span> i = <span class="num">0</span>; i <= <span class="num">255</span>; i++) {
+  <span class="fn">analogWrite</span>(<span class="num">9</span>, i);
+  <span class="fn">delay</span>(<span class="num">10</span>);
+}
+
+<span class="cmt">// Fade LED down — 255 to 0</span>
+<span class="kw">for</span> (<span class="typ">int</span> i = <span class="num">255</span>; i >= <span class="num">0</span>; i--) {
+  <span class="fn">analogWrite</span>(<span class="num">9</span>, i);
+  <span class="fn">delay</span>(<span class="num">10</span>);
+}</pre>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">for loop anatomy</h3>
+                    <div style="font-family:var(--font-code);font-size:var(--small-size);background:#f3e8ff;border-radius:8px;padding:0.5em;margin-top:0.4em;line-height:2.2;">
+                        <span style="color:#f0abfc;">for</span> (<span style="color:#a5f3fc;">int i = 0</span>; <span style="color:#fcd34d;">i &lt;= 255</span>; <span style="color:#fb923c;">i++</span>)
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.3em;margin-top:0.5em;text-align:center;font-size:var(--small-size);">
+                        <div style="background:#ede9fe;border-radius:6px;padding:0.3em;color:#6d28d9;"><strong>Start</strong><br>i = 0</div>
+                        <div style="background:#fff7ed;border-radius:6px;padding:0.3em;color:#9a3412;"><strong>Condition</strong><br>i ≤ 255</div>
+                        <div style="background:#ecfdf5;border-radius:6px;padding:0.3em;color:#065f46;"><strong>Step</strong><br>i++ (+1)</div>
+                    </div>
+                </div>
+                <div class="card card-sky">
+                    <h3 style="font-size:var(--body-size);">i++ and i--</h3>
+                    <p style="font-size:var(--small-size);"><code style="background:#e0f2fe;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">i++</code> means add 1 each time (count UP).<br><code style="background:#e0f2fe;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">i--</code> means subtract 1 each time (count DOWN).</p>
+                </div>
+                <div class="hl-sky" style="font-size:var(--small-size);">
+                    This loop runs <strong>256 times</strong> — once for each brightness value. With delay(10), the full fade takes about 2.5 seconds!
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 11: SECTION DIVIDER — PROJECT
+     ============================================ -->
+<section class="slide" style="background:linear-gradient(135deg,#10b981 0%,#34d399 50%,#6ee7b7 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:250px;height:250px;background:#a7f3d0;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🔆</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ecfdf5;margin-top:0.5em;">Part 4 — Project</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Potentiometer<br>LED Dimmer!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#d1fae5;margin-top:0.5em;">Turn the knob to control LED brightness in real time — using map()</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#a7f3d0);"></div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 12: PROJECT WIRING
+     ============================================ -->
+<section class="slide bg-dots" style="background-color:#ecfdf5;">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent4);">Wire Up the Dimmer Circuit</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.45em;">
+                <div class="step">
+                    <div class="step-num" style="background:var(--accent4);">1</div>
+                    <div><h3 style="font-size:var(--small-size);">Add Arduino Uno + Breadboard</h3><p style="font-size:var(--small-size);">Drag both onto your Tinkercad canvas.</p></div>
+                </div>
+                <div class="step">
+                    <div class="step-num" style="background:var(--accent4);">2</div>
+                    <div><h3 style="font-size:var(--small-size);">Add a Potentiometer</h3><p style="font-size:var(--small-size);">Left leg → 5V &nbsp;|&nbsp; Middle leg → A0 &nbsp;|&nbsp; Right leg → GND</p></div>
+                </div>
+                <div class="step">
+                    <div class="step-num" style="background:var(--accent4);">3</div>
+                    <div><h3 style="font-size:var(--small-size);">Add LED + 220Ω Resistor</h3><p style="font-size:var(--small-size);">LED Anode (+) → Pin ~9 (via resistor) &nbsp;|&nbsp; Cathode (−) → GND</p></div>
+                </div>
+                <div class="step">
+                    <div class="step-num" style="background:var(--accent4);">4</div>
+                    <div><h3 style="font-size:var(--small-size);">Use Pin 9 (PWM pin ~9)</h3><p style="font-size:var(--small-size);">PWM pins have ~ symbol. Pin 9 supports analogWrite()!</p></div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2">
+                <div class="pot-diagram" style="margin-bottom:0.5em;">
+                    <div style="color:#64748b;margin-bottom:0.3em;">Full circuit summary:</div>
+                    <div style="color:#fb923c;">5V → Pot Left leg</div>
+                    <div style="color:#fcd34d;">Pot Middle leg → A0</div>
+                    <div style="color:#6ee7b7;">Pot Right leg → GND</div>
+                    <div style="color:#94a3b8;margin:0.3em 0;">─────────────────</div>
+                    <div style="color:#fb923c;">Pin ~9 → 220Ω Resistor</div>
+                    <div style="color:#f9a8d4;">Resistor → LED Anode (+)</div>
+                    <div style="color:#6ee7b7;">LED Cathode (−) → GND</div>
+                </div>
+                <div class="brightness-demo">
+                    <div class="brightness-led"><div class="led-bulb" style="width:22px;height:26px;background:#fef08a;opacity:0.15;"></div><div class="led-label">0</div></div>
+                    <div class="brightness-led"><div class="led-bulb" style="width:22px;height:26px;background:#fef08a;opacity:0.35;"></div><div class="led-label">64</div></div>
+                    <div class="brightness-led"><div class="led-bulb" style="width:26px;height:30px;background:#fde047;opacity:0.55;"></div><div class="led-label">128</div></div>
+                    <div class="brightness-led"><div class="led-bulb" style="width:30px;height:34px;background:#facc15;opacity:0.75;"></div><div class="led-label">192</div></div>
+                    <div class="brightness-led"><div class="led-bulb" style="width:34px;height:38px;background:#eab308;opacity:1;box-shadow:0 0 12px #fde047;"></div><div class="led-label">255</div></div>
+                </div>
+                <p style="font-size:var(--small-size);color:#64748b;text-align:center;margin-top:0.3em;">LED brightness at different analogWrite values</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 13: FULL PROJECT CODE
+     ============================================ -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent4);">Full Project Code — with map()</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1">
+<pre><span class="kw">const</span> <span class="typ">int</span> <span class="pin">potPin</span> = <span class="pin">A0</span>;  <span class="cmt">// potentiometer</span>
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">ledPin</span> = <span class="num">9</span>;   <span class="cmt">// PWM LED pin</span>
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(<span class="pin">ledPin</span>, <span class="pin">OUTPUT</span>);
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">9600</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cmt">// Read pot: 0 to 1023</span>
+  <span class="typ">int</span> potVal = <span class="fn">analogRead</span>(<span class="pin">potPin</span>);
+
+  <span class="cmt">// Map 0-1023 → 0-255 for LED</span>
+  <span class="typ">int</span> brightness = <span class="fn">map</span>(potVal, <span class="num">0</span>, <span class="num">1023</span>,
+                            <span class="num">0</span>, <span class="num">255</span>);
+
+  <span class="fn">analogWrite</span>(<span class="pin">ledPin</span>, brightness);
+
+  <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"Pot: "</span>);
+  <span class="fn">Serial</span>.<span class="fn">print</span>(potVal);
+  <span class="fn">Serial</span>.<span class="fn">print</span>(<span class="str">"  Brightness: "</span>);
+  <span class="fn">Serial</span>.<span class="fn">println</span>(brightness);
+
+  <span class="fn">delay</span>(<span class="num">50</span>);
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-green">
+                    <h3 style="font-size:var(--body-size);">map(value, from_low, from_high, to_low, to_high)</h3>
+                    <p style="font-size:var(--small-size);">Converts a number from one range to another. Here: potentiometer's 0–1023 becomes LED's 0–255.</p>
+                    <div style="background:#ecfdf5;border-radius:8px;padding:0.4em;margin-top:0.4em;font-family:var(--font-code);font-size:var(--small-size);color:#065f46;">
+                        map(512, 0, 1023, 0, 255)<br>
+                        <span style="color:#10b981;">→ returns 127</span>
+                    </div>
+                </div>
+                <div class="card card-sky">
+                    <h3 style="font-size:var(--body-size);">Why use map()?</h3>
+                    <p style="font-size:var(--small-size);">analogRead gives 0–1023. analogWrite wants 0–255. map() scales one to fit the other automatically!</p>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">Serial Monitor output</h3>
+                    <div class="pot-diagram" style="font-size:var(--small-size);padding:0.6em;">
+                        <div style="color:#6ee7b7;">Pot: 0&nbsp;&nbsp; Brightness: 0</div>
+                        <div style="color:#6ee7b7;">Pot: 512  Brightness: 127</div>
+                        <div style="color:#6ee7b7;">Pot: 1023 Brightness: 255</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 14: HOMEWORK
+     ============================================ -->
+<section class="slide bg-sky">
+    <div class="blob" style="width:240px;height:240px;background:#7dd3fc;top:-60px;right:-60px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-hw reveal" style="background:#e0f2fe;color:var(--accent);border-color:#7dd3fc;">Homework</span>
+        <h2 class="reveal" data-delay="1">Your Homework Challenges</h2>
+        <div class="grid-3 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-sky">
+                <div class="icon-circle icon-sky" style="margin-bottom:0.4em;font-weight:800;font-family:var(--font-display);">1</div>
+                <h3 style="font-size:var(--body-size);color:var(--accent);">Breathing LED</h3>
+                <p style="font-size:var(--small-size);">Use two for loops to fade an LED from 0 to 255 and back. Change the delay to make it breathe fast and slow. Try delay(5) vs delay(20).</p>
+            </div>
+            <div class="card card-purple">
+                <div class="icon-circle icon-purple" style="margin-bottom:0.4em;font-weight:800;font-family:var(--font-display);">2</div>
+                <h3 style="font-size:var(--body-size);color:var(--accent2);">Speed Controller</h3>
+                <p style="font-size:var(--small-size);">Use the potentiometer to control the blink speed of an LED. Map pot value to a delay time. Knob left = slow blink, knob right = fast blink.</p>
+            </div>
+            <div class="card card-orange">
+                <div class="icon-circle icon-orange" style="margin-bottom:0.4em;font-weight:800;font-family:var(--font-display);">3</div>
+                <h3 style="font-size:var(--body-size);color:var(--accent3);">Research Task</h3>
+                <p style="font-size:var(--small-size);">Where do you find potentiometers in real life? Name 3 devices (e.g. volume knob on a speaker). What are they controlling in each case?</p>
+            </div>
+        </div>
+        <div class="reveal" data-delay="3" style="margin-top:0.5em;">
+            <div class="hl-yellow" style="font-size:var(--small-size);">
+                <strong>Bonus Challenge:</strong> Add a second LED on pin ~6. Use the same potentiometer but invert the mapping — when one LED gets brighter, the other gets dimmer!
+                <code style="font-family:var(--font-code);background:#fffbeb;padding:1px 5px;border-radius:4px;">map(potVal, 0, 1023, 255, 0)</code>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 15: QUIZ
+     ============================================ -->
+<section class="slide bg-purple">
+    <div class="blob" style="width:200px;height:200px;background:#c4b5fd;top:-40px;left:-40px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-quiz reveal">Quick Quiz</span>
+        <h2 class="reveal" data-delay="1" style="color:var(--accent2);">Test Your Knowledge!</h2>
+        <div class="two-col reveal" data-delay="2" style="margin-top:0.3em;">
+
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q1. What range does <code style="background:#f3e8ff;padding:1px 5px;border-radius:4px;font-family:var(--font-code);">analogRead()</code> return?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 0 to 255</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) 0 to 1023</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) 0 to 5</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 0 to 100</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q2. Which pins support <code style="background:#f3e8ff;padding:1px 5px;border-radius:4px;font-family:var(--font-code);">analogWrite()</code>?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) All digital pins</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) Pins A0–A5 only</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) PWM pins marked with ~</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Only pin 13</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q3. What does <code style="background:#f3e8ff;padding:1px 5px;border-radius:4px;font-family:var(--font-code);">map(512, 0, 1023, 0, 255)</code> return?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 512</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) 127</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) 255</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 50</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q4. How many legs does a potentiometer have?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 2</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) 3</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) 4</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) 6</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const navDotsContainer = document.getElementById('navDots');
+    const slideCounter = document.getElementById('slideCounter');
+    const total = slides.length;
+    let current = 0;
+
+    slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', `Slide ${i + 1}`);
+        dot.addEventListener('click', () => scrollToSlide(i));
+        navDotsContainer.appendChild(dot);
+    });
+
+    function updateUI(index) {
+        current = index;
+        const pct = total > 1 ? (index / (total - 1)) * 100 : 100;
+        progressBar.style.width = pct + '%';
+        slideCounter.textContent = `${index + 1} / ${total}`;
+        document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === index));
+        revealSlide(index);
+    }
+
+    function scrollToSlide(index) { slides[index].scrollIntoView({ behavior: 'smooth' }); }
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                updateUI(Array.from(slides).indexOf(entry.target));
+            }
+        });
+    }, { threshold: 0.5 });
+
+    slides.forEach(s => observer.observe(s));
+
+    function revealSlide(index) {
+        slides[index].querySelectorAll('.reveal,.reveal-right,.reveal-scale,.reveal-up').forEach(el => el.classList.add('visible'));
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            if (current < total - 1) scrollToSlide(current + 1);
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            if (current > 0) scrollToSlide(current - 1);
+        }
+    });
+
+    window.addEventListener('load', () => updateUI(0));
+
+    function answer(btn, result) {
+        const group = btn.closest('.card');
+        group.querySelectorAll('.quiz-option').forEach(b => {
+            b.style.pointerEvents = 'none';
+            if (b.getAttribute('onclick').includes("'correct'")) b.classList.add('correct');
+        });
+        const feedback = group.querySelector('.quiz-feedback');
+        if (result === 'correct') {
+            btn.classList.add('correct');
+            feedback.textContent = 'Correct! Great work!';
+            feedback.style.background = '#d1fae5';
+            feedback.style.color = '#065f46';
+        } else {
+            btn.classList.add('wrong');
+            feedback.textContent = 'Not quite — the green answer is correct!';
+            feedback.style.background = '#fee2e2';
+            feedback.style.color = '#991b1b';
+        }
+        feedback.classList.add('show');
+    }
+</script>
+</body>
+</html>

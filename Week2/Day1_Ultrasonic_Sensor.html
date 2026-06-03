@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 Day 1 — Ultrasonic Distance Sensor</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --cyan:#06b6d4;--cyan-dark:#0891b2;--cyan-light:#cffafe;
+  --blue:#3b82f6;--blue-light:#dbeafe;
+  --indigo:#6366f1;--indigo-light:#e0e7ff;
+  --green:#10b981;--green-light:#d1fae5;
+  --orange:#f97316;--orange-light:#ffedd5;
+  --slate:#1e293b;--slate-mid:#475569;--slate-light:#f8fafc;
+}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;height:100%;}
+body{font-family:'Nunito',sans-serif;background:#f0f9ff;color:var(--slate);}
+.slide{
+  scroll-snap-align:start;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;padding:2rem;position:relative;overflow:hidden;
+}
+h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+code,pre{font-family:'Fira Code',monospace;}
+
+/* Progress */
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .4s;z-index:100;}
+#nav-dots{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:100;}
+.dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;}
+.dot.active{background:var(--cyan);transform:scale(1.3);}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.reveal-delay-1{transition-delay:.1s;}
+.reveal-delay-2{transition-delay:.2s;}
+.reveal-delay-3{transition-delay:.3s;}
+.reveal-delay-4{transition-delay:.4s;}
+.reveal-delay-5{transition-delay:.5s;}
+
+/* Slide 1 — Title */
+.slide-title{background:linear-gradient(135deg,#0c4a6e 0%,#0e7490 50%,#06b6d4 100%);}
+.slide-title h1{font-size:clamp(2rem,5vw,3.5rem);color:#fff;text-align:center;line-height:1.2;}
+.slide-title .subtitle{font-size:clamp(1rem,2.5vw,1.4rem);color:#a5f3fc;text-align:center;margin-top:1rem;}
+.badge{display:inline-block;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:.4rem 1.2rem;border-radius:999px;font-size:.9rem;font-weight:700;margin-bottom:1.5rem;}
+.wave{position:absolute;bottom:0;left:0;width:100%;opacity:.3;}
+
+/* Cards */
+.card{background:#fff;border-radius:1.2rem;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.08);border-left:5px solid var(--cyan);}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;width:100%;max-width:900px;}
+.card-icon{font-size:2rem;margin-bottom:.5rem;}
+.card h3{font-size:1.1rem;color:var(--slate);margin-bottom:.4rem;}
+.card p{font-size:.9rem;color:var(--slate-mid);line-height:1.5;}
+
+/* Section divider */
+.slide-divider{color:#fff;text-align:center;}
+.divider-num{font-size:5rem;font-family:'Baloo 2',sans-serif;font-weight:800;opacity:.3;line-height:1;}
+.divider-title{font-size:clamp(1.8rem,4vw,2.8rem);font-family:'Baloo 2',sans-serif;font-weight:700;margin-top:.5rem;}
+.divider-sub{font-size:1.1rem;opacity:.85;margin-top:.5rem;}
+
+/* Code block */
+.code-block{background:#0f172a;border-radius:1rem;padding:1.5rem;width:100%;max-width:800px;overflow-x:auto;}
+.code-block pre{color:#e2e8f0;font-size:.82rem;line-height:1.7;}
+.kw{color:#7dd3fc;}.fn{color:#86efac;}.cm{color:#64748b;}.str{color:#fde68a;}.num{color:#fb923c;}
+
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:800px;}
+.step{display:flex;align-items:flex-start;gap:1rem;background:#fff;padding:1.2rem 1.5rem;border-radius:1rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.step-num{min-width:2.2rem;height:2.2rem;border-radius:50%;background:var(--cyan);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;}
+.step-text h4{font-size:1rem;color:var(--slate);margin-bottom:.2rem;}
+.step-text p{font-size:.88rem;color:var(--slate-mid);}
+
+/* Wiring table */
+.wire-table{width:100%;max-width:700px;border-collapse:collapse;}
+.wire-table th{background:var(--cyan);color:#fff;padding:.7rem 1rem;text-align:left;font-family:'Baloo 2',sans-serif;}
+.wire-table td{padding:.7rem 1rem;border-bottom:1px solid #e2e8f0;font-size:.9rem;}
+.wire-table tr:nth-child(even) td{background:#f0f9ff;}
+.pin{display:inline-block;padding:.2rem .6rem;border-radius:.4rem;font-family:'Fira Code',monospace;font-size:.82rem;font-weight:600;}
+.pin-vcc{background:#fee2e2;color:#b91c1c;}
+.pin-gnd{background:#1e293b;color:#fff;}
+.pin-data{background:#dbeafe;color:#1e40af;}
+.pin-out{background:#dcfce7;color:#166534;}
+
+/* Homework */
+.hw-list{display:flex;flex-direction:column;gap:.8rem;width:100%;max-width:700px;}
+.hw-item{display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem 1.4rem;border-radius:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.hw-badge{padding:.25rem .8rem;border-radius:999px;font-size:.75rem;font-weight:700;white-space:nowrap;}
+.hw-easy{background:#dcfce7;color:#166534;}
+.hw-medium{background:#fef9c3;color:#854d0e;}
+.hw-hard{background:#fee2e2;color:#991b1b;}
+.hw-bonus{background:#ede9fe;color:#5b21b6;}
+
+/* Quiz */
+.quiz-q{background:#fff;border-radius:1.2rem;padding:1.8rem;width:100%;max-width:750px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+.quiz-q h3{font-size:1.15rem;margin-bottom:1.2rem;color:var(--slate);}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+.opt{padding:.9rem 1.2rem;border-radius:.8rem;border:2px solid #e2e8f0;cursor:pointer;font-size:.9rem;font-family:'Nunito',sans-serif;background:#fff;transition:all .2s;text-align:left;}
+.opt:hover{border-color:var(--cyan);background:var(--cyan-light);}
+.opt.correct{background:#dcfce7;border-color:#16a34a;color:#166534;font-weight:700;}
+.opt.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b;}
+.quiz-nav{display:flex;gap:1rem;margin-top:1.5rem;justify-content:center;}
+.btn{padding:.7rem 1.8rem;border-radius:999px;border:none;cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:1rem;transition:all .2s;}
+.btn-cyan{background:var(--cyan);color:#fff;}
+.btn-cyan:hover{background:var(--cyan-dark);}
+#quiz-score{text-align:center;font-size:1.3rem;font-weight:700;margin-top:1rem;color:var(--cyan-dark);}
+.slide-header{text-align:center;margin-bottom:2rem;}
+.slide-header h2{font-size:clamp(1.6rem,3.5vw,2.4rem);color:var(--slate);}
+.slide-header p{color:var(--slate-mid);margin-top:.4rem;}
+.tag{display:inline-block;background:var(--cyan-light);color:var(--cyan-dark);padding:.2rem .8rem;border-radius:999px;font-size:.78rem;font-weight:700;margin-bottom:.5rem;}
+.big-formula{background:#0f172a;color:#7dd3fc;font-family:'Fira Code',monospace;padding:1.2rem 2rem;border-radius:1rem;font-size:1.3rem;text-align:center;margin:1rem 0;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="nav-dots"></div>
+
+<!-- Slide 1: Title -->
+<div class="slide slide-title">
+  <div class="badge reveal">Week 2 · Day 1</div>
+  <h1 class="reveal reveal-delay-1">Ultrasonic Distance<br>Sensor</h1>
+  <p class="subtitle reveal reveal-delay-2">Teaching Arduino to "see" with sound waves</p>
+  <div style="display:flex;gap:1.5rem;margin-top:2rem;flex-wrap:wrap;justify-content:center;" class="reveal reveal-delay-3">
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">HC-SR04 Sensor</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">pulseIn()</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.5rem 1.2rem;border-radius:999px;font-size:.9rem;">Distance Alarm</span>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 100"><path fill="#f0f9ff" d="M0,60 C360,100 1080,0 1440,60 L1440,100 L0,100 Z"/></svg>
+</div>
+
+<!-- Slide 2: Recap -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Week 1 Recap</div>
+    <h2>What we learned last week</h2>
+    <p>Building on our Week 1 foundation</p>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card"><div class="card-icon">💡</div><h3>Digital I/O</h3><p>pinMode, digitalWrite, digitalRead — controlling LEDs and reading buttons</p></div>
+    <div class="card"><div class="card-icon">〰️</div><h3>Analog & PWM</h3><p>analogRead (0–1023), analogWrite (0–255), potentiometer control</p></div>
+    <div class="card"><div class="card-icon">🔊</div><h3>Sensors & Output</h3><p>Buzzer, LDR, Servo motor, LCD display — real components working together</p></div>
+    <div class="card" style="border-color:var(--cyan);"><div class="card-icon">🤖</div><h3>Week 2 Goal</h3><p>Add distance sensing, motors, remote control & wireless communication!</p></div>
+  </div>
+</div>
+
+<!-- Slide 3: Agenda -->
+<div class="slide" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);">
+  <div class="slide-header reveal">
+    <div class="tag">Today's Plan</div>
+    <h2>Day 1 Agenda</h2>
+  </div>
+  <div class="steps reveal reveal-delay-1">
+    <div class="step"><div class="step-num">1</div><div class="step-text"><h4>How ultrasonic sensors work</h4><p>Sound waves, echo timing, speed of sound</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text"><h4>Meet the HC-SR04</h4><p>4 pins, wiring it up on the breadboard</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text"><h4>pulseIn() function</h4><p>Measuring time in microseconds, converting to cm</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text"><h4>Project: Distance Alarm</h4><p>LED + buzzer that triggers when something is too close</p></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text"><h4>Quiz & Homework</h4><p>Reinforce learning, 3 challenges + bonus</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 4: How it works -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">The Science</div>
+    <h2>How Ultrasonic Sensors Work</h2>
+    <p>Like a bat using echolocation!</p>
+  </div>
+  <div class="card-grid reveal reveal-delay-1" style="max-width:850px;">
+    <div class="card" style="border-color:#7c3aed;">
+      <div class="card-icon">📡</div>
+      <h3>1. Send a ping</h3>
+      <p>The TRIG pin sends an ultrasonic pulse (40,000 Hz — too high for humans to hear)</p>
+    </div>
+    <div class="card" style="border-color:var(--orange);">
+      <div class="card-icon">🔁</div>
+      <h3>2. Wait for echo</h3>
+      <p>The sound bounces off an object and returns to the ECHO pin</p>
+    </div>
+    <div class="card" style="border-color:var(--green);">
+      <div class="card-icon">⏱️</div>
+      <h3>3. Measure time</h3>
+      <p>Arduino measures how long the round trip took in microseconds</p>
+    </div>
+    <div class="card" style="border-color:var(--cyan);">
+      <div class="card-icon">📏</div>
+      <h3>4. Calculate distance</h3>
+      <p>Speed of sound = 343 m/s → divide duration by 58.2 to get centimetres</p>
+    </div>
+  </div>
+  <div class="big-formula reveal reveal-delay-2">distance (cm) = duration (µs) ÷ 58.2</div>
+</div>
+
+<!-- Slide 5: HC-SR04 Wiring -->
+<div class="slide" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);">
+  <div class="slide-header reveal">
+    <div class="tag">HC-SR04</div>
+    <h2>Wiring the Ultrasonic Sensor</h2>
+    <p>4 pins, easy to connect</p>
+  </div>
+  <table class="wire-table reveal reveal-delay-1">
+    <tr><th>HC-SR04 Pin</th><th>Arduino Pin</th><th>Description</th></tr>
+    <tr><td><span class="pin pin-vcc">VCC</span></td><td>5V</td><td>Power supply</td></tr>
+    <tr><td><span class="pin pin-gnd">GND</span></td><td>GND</td><td>Ground</td></tr>
+    <tr><td><span class="pin pin-data">TRIG</span></td><td>Digital Pin 9</td><td>Send trigger pulse (OUTPUT)</td></tr>
+    <tr><td><span class="pin pin-out">ECHO</span></td><td>Digital Pin 10</td><td>Receive echo pulse (INPUT)</td></tr>
+  </table>
+  <div class="card reveal reveal-delay-2" style="max-width:700px;margin-top:1.5rem;border-color:var(--orange);">
+    <div class="card-icon">💡</div>
+    <h3>Important!</h3>
+    <p>The HC-SR04 ECHO pin outputs 5V but some boards are 3.3V. For Arduino Uno it's fine. In Tinkercad, just connect it directly — it works perfectly for simulation.</p>
+  </div>
+</div>
+
+<!-- Slide 6: Basic Code -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Code</div>
+    <h2>Reading Distance — Basic Code</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1">
+    <pre><span class="kw">const int</span> trigPin = <span class="num">9</span>;
+<span class="kw">const int</span> echoPin = <span class="num">10</span>;
+<span class="kw">long</span> duration;
+<span class="kw">float</span> distanceCm;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(trigPin, OUTPUT);
+  <span class="fn">pinMode</span>(echoPin, INPUT);
+  Serial.<span class="fn">begin</span>(<span class="num">9600</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cm">// Send 10µs trigger pulse</span>
+  <span class="fn">digitalWrite</span>(trigPin, LOW);
+  <span class="fn">delayMicroseconds</span>(<span class="num">2</span>);
+  <span class="fn">digitalWrite</span>(trigPin, HIGH);
+  <span class="fn">delayMicroseconds</span>(<span class="num">10</span>);
+  <span class="fn">digitalWrite</span>(trigPin, LOW);
+
+  <span class="cm">// Measure echo time in microseconds</span>
+  duration = <span class="fn">pulseIn</span>(echoPin, HIGH);
+
+  <span class="cm">// Convert to centimetres</span>
+  distanceCm = duration / <span class="num">58.2</span>;
+
+  Serial.<span class="fn">print</span>(<span class="str">"Distance: "</span>);
+  Serial.<span class="fn">print</span>(distanceCm);
+  Serial.<span class="fn">println</span>(<span class="str">" cm"</span>);
+  <span class="fn">delay</span>(<span class="num">200</span>);
+}</pre>
+  </div>
+  <div class="card-grid reveal reveal-delay-2" style="max-width:700px;margin-top:1rem;">
+    <div class="card" style="border-color:var(--blue);"><h3>pulseIn()</h3><p>Waits for a pin to go HIGH, times it, then returns duration in microseconds</p></div>
+    <div class="card" style="border-color:var(--green);"><h3>delayMicroseconds()</h3><p>Like delay() but in microseconds (µs) — much more precise for sensor pulses</p></div>
+  </div>
+</div>
+
+<!-- Slide 7: Section Divider — Project -->
+<div class="slide slide-divider" style="background:linear-gradient(135deg,#0c4a6e,#0891b2);">
+  <div class="reveal">
+    <div class="divider-num">🚨</div>
+    <div class="divider-title">Project Time!</div>
+    <div class="divider-sub">Distance Alarm — LED + Buzzer triggered by proximity</div>
+  </div>
+</div>
+
+<!-- Slide 8: Project wiring -->
+<div class="slide" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);">
+  <div class="slide-header reveal">
+    <div class="tag">Project</div>
+    <h2>Distance Alarm — Wiring</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card"><div class="card-icon">📡</div><h3>HC-SR04</h3><p>VCC→5V, GND→GND, TRIG→Pin 9, ECHO→Pin 10</p></div>
+    <div class="card"><div class="card-icon">🔴</div><h3>Red LED</h3><p>Anode → 220Ω → Pin 7, Cathode → GND</p></div>
+    <div class="card"><div class="card-icon">🟢</div><h3>Green LED</h3><p>Anode → 220Ω → Pin 6, Cathode → GND</p></div>
+    <div class="card"><div class="card-icon">🔊</div><h3>Buzzer</h3><p>Positive → Pin 5, Negative → GND</p></div>
+  </div>
+  <div class="card reveal reveal-delay-2" style="max-width:700px;margin-top:1rem;background:#0f172a;border-color:var(--cyan);">
+    <p style="color:#a5f3fc;font-size:.9rem;"><strong style="color:#7dd3fc;">Logic:</strong> Distance &gt; 30cm → green LED on, silent. Distance 10–30cm → orange warning. Distance &lt; 10cm → red LED + buzzer alarm!</p>
+  </div>
+</div>
+
+<!-- Slide 9: Full project code -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Full Code</div>
+    <h2>Distance Alarm Code</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1" style="font-size:.75rem;">
+    <pre><span class="kw">const int</span> trigPin=<span class="num">9</span>, echoPin=<span class="num">10</span>;
+<span class="kw">const int</span> greenLed=<span class="num">6</span>, redLed=<span class="num">7</span>, buzzer=<span class="num">5</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(trigPin, OUTPUT);
+  <span class="fn">pinMode</span>(echoPin, INPUT);
+  <span class="fn">pinMode</span>(greenLed, OUTPUT);
+  <span class="fn">pinMode</span>(redLed, OUTPUT);
+  <span class="fn">pinMode</span>(buzzer, OUTPUT);
+  Serial.<span class="fn">begin</span>(<span class="num">9600</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="fn">digitalWrite</span>(trigPin, LOW);
+  <span class="fn">delayMicroseconds</span>(<span class="num">2</span>);
+  <span class="fn">digitalWrite</span>(trigPin, HIGH);
+  <span class="fn">delayMicroseconds</span>(<span class="num">10</span>);
+  <span class="fn">digitalWrite</span>(trigPin, LOW);
+  <span class="kw">long</span> dur = <span class="fn">pulseIn</span>(echoPin, HIGH);
+  <span class="kw">float</span> dist = dur / <span class="num">58.2</span>;
+
+  Serial.<span class="fn">print</span>(<span class="str">"Distance: "</span>); Serial.<span class="fn">print</span>(dist); Serial.<span class="fn">println</span>(<span class="str">" cm"</span>);
+
+  <span class="kw">if</span> (dist &lt; <span class="num">10</span>) {
+    <span class="fn">digitalWrite</span>(redLed, HIGH); <span class="fn">digitalWrite</span>(greenLed, LOW);
+    <span class="fn">tone</span>(buzzer, <span class="num">1000</span>);  <span class="cm">// ALARM!</span>
+  } <span class="kw">else if</span> (dist &lt; <span class="num">30</span>) {
+    <span class="fn">digitalWrite</span>(redLed, HIGH); <span class="fn">digitalWrite</span>(greenLed, HIGH);
+    <span class="fn">noTone</span>(buzzer);  <span class="cm">// Warning zone</span>
+  } <span class="kw">else</span> {
+    <span class="fn">digitalWrite</span>(greenLed, HIGH); <span class="fn">digitalWrite</span>(redLed, LOW);
+    <span class="fn">noTone</span>(buzzer);  <span class="cm">// All clear</span>
+  }
+  <span class="fn">delay</span>(<span class="num">100</span>);
+}</pre>
+  </div>
+</div>
+
+<!-- Slide 10: Tinkercad -->
+<div class="slide" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);">
+  <div class="slide-header reveal">
+    <div class="tag">Tinkercad</div>
+    <h2>Build It in Tinkercad!</h2>
+  </div>
+  <div class="steps reveal reveal-delay-1">
+    <div class="step"><div class="step-num">1</div><div class="step-text"><h4>Open Tinkercad Circuits</h4><p>Go to tinkercad.com → Circuits → Create new circuit</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text"><h4>Place HC-SR04</h4><p>Search "Ultrasonic" in components panel — the HC-SR04 sensor is built in!</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text"><h4>Wire up LEDs and buzzer</h4><p>Add 2 LEDs with 220Ω resistors and a piezo buzzer</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text"><h4>Paste the code and simulate</h4><p>Click "Code" → Blocks+Text → paste code → Start Simulation → hover over sensor!</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 11: How pulseIn works deep dive -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Deep Dive</div>
+    <h2>Understanding pulseIn()</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card" style="border-color:var(--cyan);grid-column:span 2;">
+      <h3>What does pulseIn(pin, HIGH) do?</h3>
+      <p>It watches the pin and waits for it to go HIGH. The moment it goes HIGH, it starts a timer. When the pin goes LOW again, it stops the timer and returns the time in <strong>microseconds</strong>.</p>
+    </div>
+    <div class="card" style="border-color:var(--blue);"><h3>Range</h3><p>HC-SR04 can detect objects from <strong>2 cm to 400 cm</strong> (about 13 feet)</p></div>
+    <div class="card" style="border-color:var(--green);"><h3>Accuracy</h3><p>Accurate to about <strong>±3 mm</strong> — great for most robotics projects</p></div>
+    <div class="card" style="border-color:var(--orange);"><h3>Timeout</h3><p>pulseIn() has a default timeout of <strong>1 second</strong>. If nothing reflects, it returns 0</p></div>
+    <div class="card" style="border-color:#7c3aed;"><h3>Formula check</h3><p>Sound = 343 m/s = 0.0343 cm/µs. Round trip ÷ 2 → <strong>÷ 58.2 = cm</strong></p></div>
+  </div>
+</div>
+
+<!-- Slide 12: Homework -->
+<div class="slide" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);">
+  <div class="slide-header reveal">
+    <div class="tag">Homework</div>
+    <h2>Take It Further!</h2>
+  </div>
+  <div class="hw-list reveal reveal-delay-1">
+    <div class="hw-item"><span class="hw-badge hw-easy">Easy</span><p>Add a Serial Monitor display that shows "CLOSE!", "WARNING" or "OK" depending on distance zone</p></div>
+    <div class="hw-item"><span class="hw-badge hw-medium">Medium</span><p>Replace the fixed LEDs with a <strong>5-LED bar graph</strong> — more LEDs light up as something gets closer</p></div>
+    <div class="hw-item"><span class="hw-badge hw-hard">Hard</span><p>Make the buzzer beep <strong>faster</strong> as the object gets closer (like a car parking sensor!) using tone frequency changes</p></div>
+    <div class="hw-item"><span class="hw-badge hw-bonus">Bonus</span><p>Add an LCD display that shows the exact distance in cm — update it every 200ms</p></div>
+  </div>
+</div>
+
+<!-- Slide 13: Quiz -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Quiz Time!</div>
+    <h2>Test Your Knowledge</h2>
+  </div>
+  <div id="quiz-container" class="reveal reveal-delay-1">
+    <div class="quiz-q" id="q-display">
+      <h3 id="q-text"></h3>
+      <div class="options" id="q-options"></div>
+    </div>
+    <div class="quiz-nav">
+      <button class="btn btn-cyan" onclick="nextQ()">Next Question →</button>
+    </div>
+    <div id="quiz-score"></div>
+  </div>
+</div>
+
+<!-- Slide 14: Summary -->
+<div class="slide" style="background:linear-gradient(135deg,#0c4a6e,#0891b2);">
+  <div class="slide-header reveal" style="color:#fff;">
+    <div class="tag" style="background:rgba(255,255,255,.2);color:#fff;">Day 1 Complete!</div>
+    <h2 style="color:#fff;">What You Learned Today</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1" style="max-width:800px;">
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:#fff;">
+      <div class="card-icon">📡</div><h3 style="color:#a5f3fc;">HC-SR04 Sensor</h3><p style="color:#cffafe;">4 pins: VCC, GND, TRIG, ECHO — ultrasonic distance measurement</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:#fff;">
+      <div class="card-icon">⏱️</div><h3 style="color:#a5f3fc;">pulseIn()</h3><p style="color:#cffafe;">Measures the time a pulse is HIGH in microseconds</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:#fff;">
+      <div class="card-icon">📐</div><h3 style="color:#a5f3fc;">Distance Formula</h3><p style="color:#cffafe;">duration ÷ 58.2 = distance in centimetres</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:#fff;">
+      <div class="card-icon">🚨</div><h3 style="color:#a5f3fc;">Distance Alarm</h3><p style="color:#cffafe;">Used if/else zones to trigger LEDs and buzzer based on proximity</p>
+    </div>
+  </div>
+  <p class="reveal reveal-delay-2" style="color:#a5f3fc;margin-top:1.5rem;font-size:1.1rem;">Tomorrow: DC Motors & the L298N Motor Driver! 🤖</p>
+</div>
+
+<script>
+const questions=[
+  {q:"What function measures how long a pin stays HIGH?",opts:["digitalRead()","pulseIn()","analogRead()","delay()"],ans:1},
+  {q:"What formula converts microseconds to centimetres for HC-SR04?",opts:["duration × 58.2","duration ÷ 2","duration ÷ 58.2","duration × 343"],ans:2},
+  {q:"Which pin on the HC-SR04 sends the ultrasonic pulse?",opts:["ECHO","VCC","GND","TRIG"],ans:3},
+  {q:"What is the maximum detection range of the HC-SR04?",opts:["10 cm","100 cm","400 cm","50 cm"],ans:2},
+];
+let qIdx=0,score=0,answered=false;
+function showQ(){
+  if(qIdx>=questions.length){document.getElementById('q-display').style.display='none';document.getElementById('quiz-score').innerHTML=`🎉 You scored ${score}/${questions.length}!`;return;}
+  const q=questions[qIdx];
+  document.getElementById('q-text').textContent=`Q${qIdx+1}: ${q.q}`;
+  const opts=document.getElementById('q-options');
+  opts.innerHTML='';answered=false;
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=()=>answer(b,i===q.ans);opts.querySelectorAll('.opt').forEach(x=>x.onclick=null);
+    opts.appendChild(b);
+  });
+}
+function answer(btn,correct){if(answered)return;answered=true;btn.classList.add(correct?'correct':'wrong');if(correct)score++;}
+function nextQ(){qIdx++;showQ();}
+showQ();
+
+// Nav dots
+const slides=document.querySelectorAll('.slide');
+const dotsEl=document.getElementById('nav-dots');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>slides[i].scrollIntoView({behavior:'smooth'});dotsEl.appendChild(d);});
+const dots=document.querySelectorAll('.dot');
+const prog=document.getElementById('progress');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const i=[...slides].indexOf(e.target);
+      dots.forEach((d,j)=>d.classList.toggle('active',i===j));
+      prog.style.width=`${((i+1)/slides.length)*100}%`;
+      e.target.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));
+    }
+  });
+},{threshold:0.5});
+slides.forEach(s=>obs.observe(s));
+document.addEventListener('keydown',e=>{
+  const active=[...slides].findIndex(s=>s.getBoundingClientRect().top>-10&&s.getBoundingClientRect().top<window.innerHeight/2);
+  if(e.key==='ArrowDown'||e.key===' ')slides[Math.min(active+1,slides.length-1)].scrollIntoView({behavior:'smooth'});
+  if(e.key==='ArrowUp')slides[Math.max(active-1,0)].scrollIntoView({behavior:'smooth'});
+});
+</script>
+</body>
+</html>

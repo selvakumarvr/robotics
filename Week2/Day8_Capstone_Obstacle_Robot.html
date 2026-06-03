@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 Day 8 — Capstone: Obstacle Avoiding Robot</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--purple:#8b5cf6;--pink:#ec4899;--orange:#f97316;--cyan:#06b6d4;--green:#10b981;--blue:#3b82f6;--slate:#1e293b;--slate-mid:#475569;}
+html{scroll-snap-type:y mandatory;overflow-y:scroll;height:100%;}
+body{font-family:'Nunito',sans-serif;background:#fdf4ff;color:var(--slate);}
+.slide{scroll-snap-align:start;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem;position:relative;overflow:hidden;}
+h1,h2,h3{font-family:'Baloo 2',sans-serif;}
+code,pre{font-family:'Fira Code',monospace;}
+#progress{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--purple),var(--pink),var(--orange),var(--cyan));transition:width .4s;z-index:100;}
+#nav-dots{position:fixed;right:1.2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:100;}
+.dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:all .3s;}
+.dot.active{background:var(--purple);transform:scale(1.3);}
+.reveal{opacity:0;transform:translateY(30px);transition:all .6s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.reveal-delay-1{transition-delay:.1s;}.reveal-delay-2{transition-delay:.2s;}.reveal-delay-3{transition-delay:.3s;}
+.slide-title{background:linear-gradient(135deg,#1a0533,#4c1d95,#7c3aed,#8b5cf6);}
+.slide-title h1{font-size:clamp(2rem,5vw,3.5rem);color:#fff;text-align:center;line-height:1.2;}
+.subtitle{font-size:clamp(1rem,2.5vw,1.4rem);color:#ddd6fe;text-align:center;margin-top:1rem;}
+.badge{display:inline-block;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:.4rem 1.2rem;border-radius:999px;font-size:.9rem;font-weight:700;margin-bottom:1.5rem;}
+.wave{position:absolute;bottom:0;left:0;width:100%;opacity:.3;}
+.card{background:#fff;border-radius:1.2rem;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,.08);border-left:5px solid var(--purple);}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;width:100%;max-width:900px;}
+.card h3{font-size:1.1rem;color:var(--slate);margin-bottom:.4rem;}
+.card p{font-size:.9rem;color:var(--slate-mid);line-height:1.5;}
+.card-icon{font-size:2rem;margin-bottom:.5rem;}
+.code-block{background:#0f172a;border-radius:1rem;padding:1.5rem;width:100%;max-width:820px;overflow-x:auto;}
+.code-block pre{color:#e2e8f0;font-size:.78rem;line-height:1.7;}
+.kw{color:#7dd3fc;}.fn{color:#86efac;}.cm{color:#64748b;}.str{color:#fde68a;}.num{color:#fb923c;}
+.steps{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:800px;}
+.step{display:flex;align-items:flex-start;gap:1rem;background:#fff;padding:1.2rem 1.5rem;border-radius:1rem;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.step-num{min-width:2.2rem;height:2.2rem;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;}
+.step-text h4{font-size:1rem;color:var(--slate);margin-bottom:.2rem;}
+.step-text p{font-size:.88rem;color:var(--slate-mid);}
+.hw-list{display:flex;flex-direction:column;gap:.8rem;width:100%;max-width:700px;}
+.hw-item{display:flex;align-items:center;gap:1rem;background:#fff;padding:1rem 1.4rem;border-radius:.9rem;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.hw-badge{padding:.25rem .8rem;border-radius:999px;font-size:.75rem;font-weight:700;white-space:nowrap;}
+.hw-easy{background:#dcfce7;color:#166534;}.hw-medium{background:#fef9c3;color:#854d0e;}.hw-hard{background:#fee2e2;color:#991b1b;}.hw-bonus{background:#ede9fe;color:#5b21b6;}
+.slide-header{text-align:center;margin-bottom:2rem;}
+.slide-header h2{font-size:clamp(1.6rem,3.5vw,2.4rem);color:var(--slate);}
+.slide-header p{color:var(--slate-mid);margin-top:.4rem;}
+.tag{display:inline-block;background:#ede9fe;color:#5b21b6;padding:.2rem .8rem;border-radius:999px;font-size:.78rem;font-weight:700;margin-bottom:.5rem;}
+.component-pill{display:inline-flex;align-items:center;gap:.5rem;background:#fff;border:2px solid;padding:.5rem 1rem;border-radius:999px;font-size:.9rem;font-weight:700;margin:.3rem;}
+.skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;width:100%;max-width:900px;}
+.skill-chip{background:#fff;border-radius:1rem;padding:1rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.06);border-top:4px solid;}
+.skill-chip .skill-icon{font-size:1.8rem;margin-bottom:.4rem;}
+.skill-chip h4{font-size:.9rem;color:var(--slate);font-family:'Baloo 2',sans-serif;}
+.skill-chip p{font-size:.78rem;color:var(--slate-mid);margin-top:.2rem;}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="nav-dots"></div>
+
+<!-- Slide 1 -->
+<div class="slide slide-title">
+  <div class="badge reveal">Week 2 · Day 8 — Capstone</div>
+  <h1 class="reveal reveal-delay-1">Obstacle Avoiding<br>Robot</h1>
+  <p class="subtitle reveal reveal-delay-2">Combining everything from Week 2 into one epic project!</p>
+  <div style="display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap;justify-content:center;" class="reveal reveal-delay-3">
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.4rem 1rem;border-radius:999px;font-size:.85rem;">HC-SR04</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.4rem 1rem;border-radius:999px;font-size:.85rem;">Servo Scan</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.4rem 1rem;border-radius:999px;font-size:.85rem;">L298N Motors</span>
+    <span style="background:rgba(255,255,255,.15);color:#fff;padding:.4rem 1rem;border-radius:999px;font-size:.85rem;">Auto Navigate</span>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 100"><path fill="#fdf4ff" d="M0,60 C360,100 1080,0 1440,60 L1440,100 L0,100 Z"/></svg>
+</div>
+
+<!-- Slide 2: Week 2 Recap -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Week 2 Recap</div>
+    <h2>Everything You've Learned</h2>
+  </div>
+  <div class="skills-grid reveal reveal-delay-1">
+    <div class="skill-chip" style="border-color:var(--cyan);">
+      <div class="skill-icon">📡</div><h4>Ultrasonic Sensor</h4><p>pulseIn, distance formula</p>
+    </div>
+    <div class="skill-chip" style="border-color:var(--orange);">
+      <div class="skill-icon">⚙️</div><h4>DC Motors</h4><p>L298N, H-bridge, PWM speed</p>
+    </div>
+    <div class="skill-chip" style="border-color:var(--purple);">
+      <div class="skill-icon">📺</div><h4>IR Remote</h4><p>IRremote library, HEX codes</p>
+    </div>
+    <div class="skill-chip" style="border-color:var(--pink);">
+      <div class="skill-icon">🌡️</div><h4>DHT11</h4><p>Temperature, humidity, float</p>
+    </div>
+    <div class="skill-chip" style="border-color:var(--blue);">
+      <div class="skill-icon">🖥️</div><h4>OLED Display</h4><p>I2C, Adafruit library</p>
+    </div>
+    <div class="skill-chip" style="border-color:#14b8a6;">
+      <div class="skill-icon">📶</div><h4>Bluetooth</h4><p>HC-05, SoftwareSerial</p>
+    </div>
+    <div class="skill-chip" style="border-color:var(--green);">
+      <div class="skill-icon">🤖</div><h4>Line Follower</h4><p>IR sensors, navigation logic</p>
+    </div>
+    <div class="skill-chip" style="border-color:#f59e0b;">
+      <div class="skill-icon">🏆</div><h4>Today</h4><p>Obstacle avoiding robot!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: Project Plan -->
+<div class="slide" style="background:linear-gradient(135deg,#fdf4ff,#ede9fe);">
+  <div class="slide-header reveal">
+    <div class="tag">Project Plan</div>
+    <h2>How the Robot Works</h2>
+  </div>
+  <div class="steps reveal reveal-delay-1">
+    <div class="step"><div class="step-num">1</div><div class="step-text"><h4>Move forward</h4><p>Both motors running, robot drives ahead</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text"><h4>Constantly scan ahead</h4><p>HC-SR04 measures distance every 100ms</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text"><h4>Obstacle detected! (&lt;20cm)</h4><p>Stop motors. Servo scans left and right to measure distances</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text"><h4>Choose the best direction</h4><p>Compare left and right distances → pick the wider path</p></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text"><h4>Turn and continue</h4><p>Turn left or right, resume forward motion</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 4: Wiring -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Wiring</div>
+    <h2>All Components Connected</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card" style="border-color:var(--cyan);">
+      <div class="card-icon">📡</div><h3>HC-SR04</h3><p>TRIG→Pin 9, ECHO→Pin 10, VCC→5V, GND→GND</p>
+    </div>
+    <div class="card" style="border-color:var(--orange);">
+      <div class="card-icon">🔵</div><h3>Servo (scan)</h3><p>Signal→Pin 3 (PWM), VCC→5V, GND→GND. Mount HC-SR04 on top!</p>
+    </div>
+    <div class="card" style="border-color:var(--purple);">
+      <div class="card-icon">⚙️</div><h3>Motor A (Left)</h3><p>IN1→Pin 4, IN2→Pin 5, ENA→Pin 6</p>
+    </div>
+    <div class="card" style="border-color:var(--green);">
+      <div class="card-icon">⚙️</div><h3>Motor B (Right)</h3><p>IN3→Pin 7, IN4→Pin 8, ENB→Pin 11</p>
+    </div>
+  </div>
+  <div class="card reveal reveal-delay-2" style="max-width:700px;margin-top:1rem;background:#0f172a;border-color:var(--purple);">
+    <p style="color:#ddd6fe;">💡 Mount the servo on the front of the robot chassis with the HC-SR04 on the servo arm. This lets the sensor scan left and right without moving the whole robot!</p>
+  </div>
+</div>
+
+<!-- Slide 5: Full Code Part 1 -->
+<div class="slide" style="background:linear-gradient(135deg,#fdf4ff,#ede9fe);">
+  <div class="slide-header reveal">
+    <div class="tag">Code — Part 1</div>
+    <h2>Setup & Motor Functions</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1" style="font-size:.72rem;">
+    <pre><span class="kw">#include</span> <span class="str">&lt;Servo.h&gt;</span>
+Servo scanner;
+<span class="kw">const int</span> trigPin=<span class="num">9</span>, echoPin=<span class="num">10</span>, servoPin=<span class="num">3</span>;
+<span class="kw">const int</span> in1=<span class="num">4</span>,in2=<span class="num">5</span>,ena=<span class="num">6</span>,in3=<span class="num">7</span>,in4=<span class="num">8</span>,enb=<span class="num">11</span>;
+<span class="kw">const int</span> SPEED=<span class="num">180</span>;
+
+<span class="kw">float</span> <span class="fn">getDistance</span>() {
+  <span class="fn">digitalWrite</span>(trigPin,LOW); <span class="fn">delayMicroseconds</span>(<span class="num">2</span>);
+  <span class="fn">digitalWrite</span>(trigPin,HIGH); <span class="fn">delayMicroseconds</span>(<span class="num">10</span>);
+  <span class="fn">digitalWrite</span>(trigPin,LOW);
+  <span class="kw">return</span> <span class="fn">pulseIn</span>(echoPin,HIGH) / <span class="num">58.2</span>;
+}
+<span class="kw">void</span> <span class="fn">forward</span>(){ <span class="fn">digitalWrite</span>(in1,HIGH);<span class="fn">digitalWrite</span>(in2,LOW);<span class="fn">analogWrite</span>(ena,SPEED);<span class="fn">digitalWrite</span>(in3,HIGH);<span class="fn">digitalWrite</span>(in4,LOW);<span class="fn">analogWrite</span>(enb,SPEED); }
+<span class="kw">void</span> <span class="fn">backward</span>(){ <span class="fn">digitalWrite</span>(in1,LOW);<span class="fn">digitalWrite</span>(in2,HIGH);<span class="fn">analogWrite</span>(ena,SPEED);<span class="fn">digitalWrite</span>(in3,LOW);<span class="fn">digitalWrite</span>(in4,HIGH);<span class="fn">analogWrite</span>(enb,SPEED); }
+<span class="kw">void</span> <span class="fn">turnLeft</span>(){ <span class="fn">analogWrite</span>(ena,<span class="num">0</span>);<span class="fn">digitalWrite</span>(in3,HIGH);<span class="fn">digitalWrite</span>(in4,LOW);<span class="fn">analogWrite</span>(enb,SPEED); }
+<span class="kw">void</span> <span class="fn">turnRight</span>(){ <span class="fn">digitalWrite</span>(in1,HIGH);<span class="fn">digitalWrite</span>(in2,LOW);<span class="fn">analogWrite</span>(ena,SPEED);<span class="fn">analogWrite</span>(enb,<span class="num">0</span>); }
+<span class="kw">void</span> <span class="fn">stopAll</span>(){ <span class="fn">analogWrite</span>(ena,<span class="num">0</span>);<span class="fn">analogWrite</span>(enb,<span class="num">0</span>); }
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(trigPin,OUTPUT);<span class="fn">pinMode</span>(echoPin,INPUT);
+  <span class="fn">for</span>(<span class="kw">int</span> p:{in1,in2,ena,in3,in4,enb}) <span class="fn">pinMode</span>(p,OUTPUT);
+  scanner.<span class="fn">attach</span>(servoPin); scanner.<span class="fn">write</span>(<span class="num">90</span>);
+  <span class="fn">delay</span>(<span class="num">1000</span>);
+}</pre>
+  </div>
+</div>
+
+<!-- Slide 6: Full Code Part 2 -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Code — Part 2</div>
+    <h2>Main Loop — Scan & Navigate</h2>
+  </div>
+  <div class="code-block reveal reveal-delay-1" style="font-size:.75rem;">
+    <pre><span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">float</span> dist = <span class="fn">getDistance</span>();
+
+  <span class="kw">if</span> (dist > <span class="num">20</span>) {
+    <span class="fn">forward</span>();  <span class="cm">// Clear path — go!</span>
+  } <span class="kw">else</span> {
+    <span class="fn">stopAll</span>(); <span class="fn">delay</span>(<span class="num">300</span>);
+    <span class="fn">backward</span>(); <span class="fn">delay</span>(<span class="num">400</span>);
+    <span class="fn">stopAll</span>();
+
+    <span class="cm">// Scan LEFT</span>
+    scanner.<span class="fn">write</span>(<span class="num">0</span>); <span class="fn">delay</span>(<span class="num">600</span>);
+    <span class="kw">float</span> leftDist = <span class="fn">getDistance</span>();
+
+    <span class="cm">// Scan RIGHT</span>
+    scanner.<span class="fn">write</span>(<span class="num">180</span>); <span class="fn">delay</span>(<span class="num">600</span>);
+    <span class="kw">float</span> rightDist = <span class="fn">getDistance</span>();
+
+    <span class="cm">// Centre scanner</span>
+    scanner.<span class="fn">write</span>(<span class="num">90</span>); <span class="fn">delay</span>(<span class="num">300</span>);
+
+    <span class="cm">// Choose the wider path</span>
+    <span class="kw">if</span> (leftDist > rightDist) {
+      <span class="fn">turnLeft</span>(); <span class="fn">delay</span>(<span class="num">500</span>);
+    } <span class="kw">else</span> {
+      <span class="fn">turnRight</span>(); <span class="fn">delay</span>(<span class="num">500</span>);
+    }
+    <span class="fn">stopAll</span>();
+  }
+  <span class="fn">delay</span>(<span class="num">50</span>);
+}</pre>
+  </div>
+</div>
+
+<!-- Slide 7: Extensions -->
+<div class="slide" style="background:linear-gradient(135deg,#fdf4ff,#ede9fe);">
+  <div class="slide-header reveal">
+    <div class="tag">Extensions</div>
+    <h2>Make It Even Smarter!</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1">
+    <div class="card" style="border-color:var(--cyan);">
+      <div class="card-icon">📶</div><h3>+ Bluetooth</h3><p>Add HC-05 — switch between AUTO (obstacle avoiding) and MANUAL (phone control) modes</p>
+    </div>
+    <div class="card" style="border-color:var(--blue);">
+      <div class="card-icon">🖥️</div><h3>+ OLED</h3><p>Show live distance readings, current mode, and obstacle count on OLED display</p>
+    </div>
+    <div class="card" style="border-color:var(--green);">
+      <div class="card-icon">👁️</div><h3>+ Line Following</h3><p>Add IR sensors — robot follows a line but avoids obstacles along the way!</p>
+    </div>
+    <div class="card" style="border-color:var(--orange);">
+      <div class="card-icon">🔊</div><h3>+ Buzzer Alert</h3><p>Beep when obstacle detected — like a real car parking sensor!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8: Skills Summary -->
+<div class="slide" style="background:#fff;">
+  <div class="slide-header reveal">
+    <div class="tag">Week 2 Complete!</div>
+    <h2>Your Week 2 Skills</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1" style="max-width:850px;">
+    <div class="card" style="border-color:var(--cyan);"><h3 style="color:var(--cyan);">🔊 Sensing</h3><p>HC-SR04 ultrasonic distance, DHT11 temp/humidity, IR remote signals</p></div>
+    <div class="card" style="border-color:var(--orange);"><h3 style="color:var(--orange);">⚙️ Actuators</h3><p>DC motors with L298N — speed, direction, two-channel control</p></div>
+    <div class="card" style="border-color:var(--blue);"><h3 style="color:var(--blue);">📺 Display</h3><p>OLED SSD1306 via I2C — graphics, text, shapes, animations</p></div>
+    <div class="card" style="border-color:var(--purple);"><h3 style="color:var(--purple);">📡 Wireless</h3><p>Bluetooth HC-05 — phone control via SoftwareSerial</p></div>
+    <div class="card" style="border-color:var(--green);"><h3 style="color:var(--green);">🤖 Autonomy</h3><p>Line following, obstacle avoidance — self-navigating robots!</p></div>
+    <div class="card" style="border-color:var(--pink);"><h3 style="color:var(--pink);">💻 Code Skills</h3><p>switch/case, custom functions, SoftwareSerial, multiple libraries</p></div>
+  </div>
+</div>
+
+<!-- Slide 9: What's Next -->
+<div class="slide" style="background:linear-gradient(135deg,#1a0533,#4c1d95,#7c3aed);">
+  <div class="slide-header reveal" style="color:#fff;">
+    <div class="tag" style="background:rgba(255,255,255,.2);color:#fff;">Week 2 Done!</div>
+    <h2 style="color:#fff;">You Built a Self-Driving Robot!</h2>
+  </div>
+  <div class="card-grid reveal reveal-delay-1" style="max-width:800px;">
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🔑</div><h3 style="color:#ddd6fe;">Week 3 Preview</h3><p style="color:#ede9fe;">Keypad security system, RFID card access, EEPROM memory, WiFi!</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🌐</div><h3 style="color:#ddd6fe;">IoT Coming Up</h3><p style="color:#ede9fe;">Connect Arduino to the internet — your robot will talk to the cloud!</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">🏆</div><h3 style="color:#ddd6fe;">Your Achievement</h3><p style="color:#ede9fe;">In 2 weeks you went from blinking an LED to building an autonomous robot. Amazing!</p>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);">
+      <div class="card-icon">📸</div><h3 style="color:#ddd6fe;">Show It Off!</h3><p style="color:#ede9fe;">Record a video of your robot avoiding obstacles — share it with family!</p>
+    </div>
+  </div>
+  <p class="reveal reveal-delay-2" style="color:#ddd6fe;margin-top:1.5rem;font-size:1.2rem;text-align:center;">Week 3 starts Monday — get ready for IoT! 🌐✨</p>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide');
+const dotsEl=document.getElementById('nav-dots');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>slides[i].scrollIntoView({behavior:'smooth'});dotsEl.appendChild(d);});
+const dots=document.querySelectorAll('.dot');
+const prog=document.getElementById('progress');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const i=[...slides].indexOf(e.target);dots.forEach((d,j)=>d.classList.toggle('active',i===j));prog.style.width=`${((i+1)/slides.length)*100}%`;e.target.querySelectorAll('.reveal').forEach(el=>el.classList.add('visible'));}});},{threshold:0.5});
+slides.forEach(s=>obs.observe(s));
+document.addEventListener('keydown',e=>{const active=[...slides].findIndex(s=>s.getBoundingClientRect().top>-10&&s.getBoundingClientRect().top<window.innerHeight/2);if(e.key==='ArrowDown'||e.key===' ')slides[Math.min(active+1,slides.length-1)].scrollIntoView({behavior:'smooth'});if(e.key==='ArrowUp')slides[Math.max(active-1,0)].scrollIntoView({behavior:'smooth'});});
+</script>
+</body>
+</html>

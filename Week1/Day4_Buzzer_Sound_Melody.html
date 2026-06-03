@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1 Day 4 — Buzzer, Sound & Melody</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;500&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent:#e11d48; --accent-light:#fb7185; --accent-glow:rgba(225,29,72,0.18);
+            --accent2:#f97316; --accent3:#8b5cf6; --accent4:#10b981; --accent5:#0ea5e9;
+            --warning:#f59e0b; --danger:#ef4444;
+            --text-primary:#1e0a12; --text-muted:#94a3b8;
+            --font-display:'Baloo 2',cursive; --font-body:'Nunito',sans-serif; --font-code:'Fira Code',monospace;
+            --title-size:clamp(1.8rem,5vw,3.6rem); --h2-size:clamp(1.3rem,3.5vw,2.2rem);
+            --h3-size:clamp(1rem,2.5vw,1.4rem); --body-size:clamp(0.78rem,1.5vw,1.05rem);
+            --small-size:clamp(0.68rem,1.1vw,0.88rem); --code-size:clamp(0.62rem,1.05vw,0.83rem);
+            --slide-padding:clamp(1.5rem,4vw,4rem); --content-gap:clamp(0.8rem,2vw,1.6rem);
+            --elem-gap:clamp(0.3rem,1vw,0.7rem); --radius:16px; --ease-out:cubic-bezier(0.16,1,0.3,1);
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;scroll-snap-type:y mandatory;height:100%;overflow-x:hidden;}
+        body{font-family:var(--font-body);background:#fff0f3;color:var(--text-primary);overflow-x:hidden;height:100%;line-height:1.5;}
+        .slide{width:100vw;height:100vh;height:100dvh;padding:var(--slide-padding);scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+        .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center;max-height:100%;overflow:hidden;gap:var(--content-gap);}
+        .progress-bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));z-index:1000;transition:width 0.3s ease;}
+        .nav-dots{position:fixed;right:clamp(0.5rem,1.5vw,1.5rem);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:100;}
+        .nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(225,29,72,0.2);cursor:pointer;transition:all 0.3s ease;border:none;padding:0;}
+        .nav-dot.active{background:var(--accent);transform:scale(1.5);}
+        .nav-dot:hover{background:var(--accent-light);}
+        .slide-counter{position:fixed;bottom:clamp(0.5rem,2vw,1.2rem);right:clamp(0.5rem,2vw,1.2rem);font-family:var(--font-code);font-size:var(--small-size);color:var(--text-muted);z-index:100;background:rgba(255,255,255,0.85);padding:3px 10px;border-radius:20px;}
+        h1{font-family:var(--font-display);font-size:var(--title-size);font-weight:800;line-height:1.15;}
+        h2{font-family:var(--font-display);font-size:var(--h2-size);font-weight:700;line-height:1.2;color:var(--accent);}
+        h3{font-family:var(--font-display);font-size:var(--h3-size);font-weight:700;line-height:1.3;}
+        p,li{font-size:var(--body-size);line-height:1.65;color:#334155;}
+        strong{font-weight:700;}
+        .accent{color:var(--accent);} .accent2{color:var(--accent2);} .accent3{color:var(--accent3);} .accent4{color:var(--accent4);} .accent5{color:var(--accent5);}
+        .bg-dots{background-image:radial-gradient(rgba(225,29,72,0.07) 1.5px,transparent 1.5px);background-size:28px 28px;}
+        .bg-white{background:#ffffff;}
+        .bg-rose{background:linear-gradient(135deg,#fff0f3 0%,#ffe4e6 50%,#fecdd3 100%);}
+        .bg-orange{background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 50%,#fed7aa 100%);}
+        .bg-purple{background:linear-gradient(135deg,#f3e8ff 0%,#e9d5ff 50%,#d8b4fe 100%);}
+        .bg-green{background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 50%,#a7f3d0 100%);}
+        .card{background:#fff;border-radius:var(--radius);padding:clamp(0.8rem,2vw,1.4rem);border:2px solid rgba(225,29,72,0.1);box-shadow:0 2px 12px rgba(225,29,72,0.06);transition:all 0.3s ease;}
+        .card:hover{border-color:rgba(225,29,72,0.25);box-shadow:0 6px 24px rgba(225,29,72,0.12);transform:translateY(-2px);}
+        .card-rose{border-left:4px solid var(--accent);background:linear-gradient(135deg,#fff 80%,#fff0f3);}
+        .card-orange{border-left:4px solid var(--accent2);background:linear-gradient(135deg,#fff 80%,#fff7ed);}
+        .card-purple{border-left:4px solid var(--accent3);background:linear-gradient(135deg,#fff 80%,#f3e8ff);}
+        .card-green{border-left:4px solid var(--accent4);background:linear-gradient(135deg,#fff 80%,#ecfdf5);}
+        .card-sky{border-left:4px solid var(--accent5);background:linear-gradient(135deg,#fff 80%,#e0f2fe);}
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:var(--content-gap);align-items:start;}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--elem-gap);}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--elem-gap);}
+        @media(max-width:768px){.two-col,.grid-3{grid-template-columns:1fr 1fr;}}
+        .icon-circle{width:clamp(36px,5vw,52px);height:clamp(36px,5vw,52px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(1rem,2.5vw,1.6rem);flex-shrink:0;}
+        .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:var(--small-size);font-weight:700;}
+        .badge-rose{background:#fff0f3;color:var(--accent);}
+        .badge-orange{background:#fff7ed;color:var(--accent2);}
+        .badge-purple{background:#f3e8ff;color:var(--accent3);}
+        .badge-green{background:#ecfdf5;color:var(--accent4);}
+        .badge-sky{background:#e0f2fe;color:var(--accent5);}
+        .section-label{font-family:var(--font-code);font-size:var(--small-size);letter-spacing:0.15em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+        .divider{height:3px;width:60px;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+        .subtitle{font-size:clamp(0.9rem,2vw,1.3rem);color:#475569;font-weight:500;}
+        .code-block{background:#1e0a12;border-radius:12px;padding:clamp(0.8rem,2vw,1.4rem);font-family:var(--font-code);font-size:var(--code-size);color:#fecdd3;overflow-x:auto;border:2px solid rgba(251,113,133,0.25);box-shadow:0 4px 16px rgba(225,29,72,0.12);}
+        .code-block .kw{color:#f0abfc;} .code-block .fn{color:#67e8f9;} .code-block .num{color:#fcd34d;}
+        .code-block .cmt{color:#6ee7b7;font-style:italic;} .code-block .str{color:#f9a8d4;} .code-block .pin{color:#fb923c;} .code-block .typ{color:#a5f3fc;}
+        .code-block pre{white-space:pre;line-height:1.8;}
+        .step{display:flex;align-items:flex-start;gap:clamp(0.5rem,1.5vw,1rem);padding:clamp(0.5rem,1.2vw,0.9rem);background:#fff;border-radius:12px;border:2px solid rgba(225,29,72,0.12);}
+        .step-num{min-width:clamp(28px,3.5vw,40px);height:clamp(28px,3.5vw,40px);border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:var(--body-size);flex-shrink:0;font-family:var(--font-display);}
+        .quiz-option{padding:clamp(0.5rem,1.2vw,0.85rem) clamp(0.8rem,2vw,1.2rem);border-radius:10px;background:#fff;border:2px solid rgba(225,29,72,0.15);cursor:pointer;font-size:var(--body-size);font-weight:600;color:#334155;transition:all 0.2s ease;text-align:left;font-family:var(--font-body);}
+        .quiz-option:hover{border-color:var(--accent);background:#fff0f3;transform:translateX(4px);}
+        .quiz-option.correct{background:#d1fae5;border-color:var(--accent4);color:#065f46;}
+        .quiz-option.wrong{background:#fee2e2;border-color:var(--danger);color:#991b1b;}
+        .quiz-feedback{font-size:var(--body-size);font-weight:700;padding:0.5em 1em;border-radius:10px;display:none;margin-top:0.5em;}
+        .quiz-feedback.show{display:block;}
+        .reveal,.reveal-right,.reveal-scale,.reveal-up{opacity:0;transition:opacity 0.6s var(--ease-out),transform 0.6s var(--ease-out);}
+        .reveal{transform:translateY(24px);} .reveal-right{transform:translateX(24px);} .reveal-scale{transform:scale(0.92);} .reveal-up{transform:translateY(-20px);}
+        .reveal.visible,.reveal-right.visible,.reveal-scale.visible,.reveal-up.visible{opacity:1;transform:none;}
+        [data-delay="1"]{transition-delay:0.1s;} [data-delay="2"]{transition-delay:0.2s;} [data-delay="3"]{transition-delay:0.3s;} [data-delay="4"]{transition-delay:0.4s;}
+        .big-emoji{font-size:clamp(3rem,8vw,6rem);line-height:1;display:block;text-align:center;}
+        .hl-rose{background:#fff0f3;border-left:4px solid var(--accent);color:#9f1239;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-orange{background:#fff7ed;border-left:4px solid var(--accent2);color:#9a3412;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-purple{background:#f3e8ff;border-left:4px solid var(--accent3);color:#6d28d9;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-green{background:#ecfdf5;border-left:4px solid var(--accent4);color:#065f46;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .hl-yellow{background:#fffbeb;border-left:4px solid var(--warning);color:#92400e;border-radius:12px;padding:clamp(0.6rem,1.4vw,1rem);font-size:var(--body-size);font-weight:600;}
+        .section-tag{display:inline-flex;align-items:center;gap:0.4em;padding:0.3em 0.9em;border-radius:30px;font-size:var(--small-size);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.4em;}
+        .tag-day{background:#fff0f3;color:var(--accent);border:2px solid #fecdd3;}
+        .tag-hw{background:#fff7ed;color:var(--accent2);border:2px solid #fed7aa;}
+        .tag-quiz{background:#f3e8ff;color:var(--accent3);border:2px solid #c4b5fd;}
+        .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.25;pointer-events:none;}
+        /* Note keys */
+        .piano-key{background:#fff;border-radius:0 0 8px 8px;border:2px solid #e2e8f0;padding:0.4em 0.2em;text-align:center;cursor:pointer;transition:all 0.15s ease;}
+        .piano-key:hover,.piano-key.active{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.05);}
+        .piano-keys{display:flex;gap:3px;justify-content:center;margin:0.4em 0;}
+        .note-table{border-collapse:collapse;width:100%;font-size:var(--small-size);}
+        .note-table th{background:#fff0f3;color:var(--accent);padding:0.3em 0.6em;text-align:left;font-family:var(--font-display);}
+        .note-table td{padding:0.25em 0.6em;border-bottom:1px solid #fecdd3;font-family:var(--font-code);}
+    </style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="slideCounter">1 / 15</div>
+
+<!-- SLIDE 1: TITLE -->
+<section class="slide bg-rose">
+    <div class="blob" style="width:300px;height:300px;background:#fecdd3;top:-80px;right:-80px;"></div>
+    <div class="blob" style="width:200px;height:200px;background:#e9d5ff;bottom:-60px;left:-60px;"></div>
+    <div class="slide-content" style="align-items:flex-start;">
+        <span class="section-tag tag-day reveal-up">Week 1 · Day 4</span>
+        <h1 class="reveal" style="margin-top:0.2em;">Make Some <span class="accent">Noise!</span></h1>
+        <p class="subtitle reveal" data-delay="2">Buzzers, tone(), frequencies and melodies — give your Arduino a voice</p>
+        <div class="divider reveal" data-delay="3" style="margin-top:0.8em;"></div>
+        <div class="reveal" data-delay="4" style="display:flex;gap:0.8em;flex-wrap:wrap;margin-top:0.5em;">
+            <span class="badge badge-rose">Piezo Buzzer</span>
+            <span class="badge badge-orange">tone() Function</span>
+            <span class="badge badge-purple">Music Notes</span>
+            <span class="badge badge-green">Arrays</span>
+            <span class="badge badge-sky">Melody Project</span>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 2: RECAP -->
+<section class="slide bg-dots" style="background-color:#fff0f3;">
+    <div class="slide-content">
+        <span class="section-label reveal">Quick Recap</span>
+        <h2 class="reveal" data-delay="1">What We Learned in Day 3</h2>
+        <div class="grid-2 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-sky"><div style="display:flex;align-items:center;gap:0.6em;"><div class="icon-circle" style="background:#e0f2fe;">📊</div><div><h3 style="font-size:var(--body-size);">Digital vs Analog</h3><p style="font-size:var(--small-size);">Digital = HIGH/LOW. Analog = any value 0–1023 using analogRead()</p></div></div></div>
+            <div class="card card-orange"><div style="display:flex;align-items:center;gap:0.6em;"><div class="icon-circle" style="background:#fff7ed;">🎚️</div><div><h3 style="font-size:var(--body-size);">Potentiometer</h3><p style="font-size:var(--small-size);">Variable resistor with 3 legs — reads 0–1023 from A0</p></div></div></div>
+            <div class="card card-purple"><div style="display:flex;align-items:center;gap:0.6em;"><div class="icon-circle" style="background:#f3e8ff;">💡</div><div><h3 style="font-size:var(--body-size);">PWM &amp; analogWrite()</h3><p style="font-size:var(--small-size);">0–255 to dim LEDs on ~ pins. Uses rapid ON/OFF switching</p></div></div></div>
+            <div class="card card-green"><div style="display:flex;align-items:center;gap:0.6em;"><div class="icon-circle" style="background:#ecfdf5;">🔁</div><div><h3 style="font-size:var(--body-size);">for Loops</h3><p style="font-size:var(--small-size);">Repeat code with a counter — i++, i-- to count up/down</p></div></div></div>
+        </div>
+        <div class="hl-rose reveal" data-delay="3" style="font-size:var(--small-size);">Today we add <strong>sound</strong> to our toolkit — using a buzzer and the <code style="font-family:var(--font-code);background:#fff0f3;">tone()</code> function to play notes and melodies!</div>
+    </div>
+</section>
+
+<!-- SLIDE 3: AGENDA -->
+<section class="slide bg-dots" style="background-color:#fff0f3;">
+    <div class="slide-content">
+        <span class="section-label reveal">Today's Agenda</span>
+        <h2 class="reveal" data-delay="1">What We'll Do Today</h2>
+        <div class="reveal" data-delay="2" style="display:flex;flex-direction:column;gap:0.45em;margin-top:0.3em;">
+            <div class="step"><div class="step-num">1</div><div><h3 style="font-size:var(--body-size);">What is a Buzzer?</h3><p style="font-size:var(--small-size);">Passive vs active — how they make sound</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent2);">2</div><div><h3 style="font-size:var(--body-size);">tone() and noTone()</h3><p style="font-size:var(--small-size);">Play a frequency on a pin for a set duration</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent3);">3</div><div><h3 style="font-size:var(--body-size);">Music Notes &amp; Frequencies</h3><p style="font-size:var(--small-size);">Every note is just a frequency (Hz) — C4 = 262 Hz!</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent4);">4</div><div><h3 style="font-size:var(--body-size);">Arrays</h3><p style="font-size:var(--small-size);">Store multiple notes in a list — int melody[] = {…}</p></div></div>
+            <div class="step"><div class="step-num" style="background:var(--accent5);">5</div><div><h3 style="font-size:var(--body-size);">Project: Play a Melody!</h3><p style="font-size:var(--small-size);">Store a tune in arrays and play it with a for loop</p></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 4: SECTION DIVIDER -->
+<section class="slide" style="background:linear-gradient(135deg,#e11d48 0%,#fb7185 50%,#fda4af 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:260px;height:260px;background:#fecdd3;top:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🔔</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ffe4e6;margin-top:0.5em;">Part 1</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Buzzer &amp;<br>tone()</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#fecdd3;margin-top:0.5em;">A piezo buzzer vibrates at a set frequency to produce sound</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#fecdd3);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 5: BUZZER BASICS + tone() -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Buzzer Basics &amp; tone()</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-rose">
+                    <h3 style="font-size:var(--body-size);">Passive Buzzer (what we use)</h3>
+                    <p style="font-size:var(--small-size);">Needs Arduino to send a frequency — gives us control over the pitch. Wire: one leg to pin 8, other leg to GND.</p>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">tone(pin, frequency)</h3>
+                    <p style="font-size:var(--small-size);">Plays a sound at the given frequency (Hz) until you call <code style="background:#fff7ed;padding:1px 4px;border-radius:4px;font-family:var(--font-code);">noTone(pin)</code>.</p>
+                </div>
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">tone(pin, frequency, duration)</h3>
+                    <p style="font-size:var(--small-size);">Plays for a set number of milliseconds, then stops automatically.</p>
+                </div>
+                <div class="code-block" style="font-size:var(--small-size);">
+<pre><span class="fn">tone</span>(<span class="num">8</span>, <span class="num">440</span>);       <span class="cmt">// A4 note, forever</span>
+<span class="fn">delay</span>(<span class="num">500</span>);
+<span class="fn">noTone</span>(<span class="num">8</span>);         <span class="cmt">// stop sound</span>
+
+<span class="cmt">// Or with duration:</span>
+<span class="fn">tone</span>(<span class="num">8</span>, <span class="num">440</span>, <span class="num">500</span>); <span class="cmt">// play 500ms</span></pre>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card" style="padding:0.8em;">
+                    <p style="font-size:var(--small-size);font-weight:700;color:var(--accent);margin-bottom:0.5em;">Frequency = Pitch</p>
+                    <table class="note-table">
+                        <tr><th>Note</th><th>Frequency</th><th>Sounds like</th></tr>
+                        <tr><td>C4</td><td>262 Hz</td><td>Middle C</td></tr>
+                        <tr><td>D4</td><td>294 Hz</td><td>Re</td></tr>
+                        <tr><td>E4</td><td>330 Hz</td><td>Mi</td></tr>
+                        <tr><td>F4</td><td>349 Hz</td><td>Fa</td></tr>
+                        <tr><td>G4</td><td>392 Hz</td><td>Sol</td></tr>
+                        <tr><td>A4</td><td>440 Hz</td><td>La (concert A)</td></tr>
+                        <tr><td>B4</td><td>494 Hz</td><td>Si</td></tr>
+                        <tr><td>C5</td><td>523 Hz</td><td>High C</td></tr>
+                    </table>
+                </div>
+                <div class="hl-rose" style="font-size:var(--small-size);">Higher frequency = higher pitch. Lower frequency = lower pitch. The human ear hears 20 Hz to 20,000 Hz!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 6: SECTION DIVIDER — ARRAYS -->
+<section class="slide" style="background:linear-gradient(135deg,#8b5cf6 0%,#a78bfa 50%,#c4b5fd 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:240px;height:240px;background:#ddd6fe;bottom:5%;right:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">📋</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ede9fe;margin-top:0.5em;">Part 2</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Arrays —<br>Lists of Data</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ede9fe;margin-top:0.5em;">Store multiple notes or durations in a single named list</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#c4b5fd);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 7: ARRAYS IN ARDUINO -->
+<section class="slide bg-dots" style="background-color:#f5f3ff;">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent3);">Arrays — Multiple Values in One Variable</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <p style="font-size:var(--body-size);">An array is like a row of boxes — each box holds one value and has an index number starting from 0.</p>
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">Declare an array</h3>
+                    <div class="code-block" style="margin-top:0.4em;font-size:var(--small-size);">
+<pre><span class="typ">int</span> melody[] = {
+  <span class="num">262</span>, <span class="num">294</span>, <span class="num">330</span>, <span class="num">349</span>,
+  <span class="num">392</span>, <span class="num">440</span>, <span class="num">494</span>, <span class="num">523</span>
+}; <span class="cmt">// C D E F G A B C5</span>
+
+<span class="typ">int</span> durations[] = {
+  <span class="num">400</span>, <span class="num">400</span>, <span class="num">400</span>, <span class="num">400</span>,
+  <span class="num">400</span>, <span class="num">400</span>, <span class="num">400</span>, <span class="num">800</span>
+};</pre>
+                    </div>
+                </div>
+                <div class="card card-rose">
+                    <h3 style="font-size:var(--body-size);">Access by index</h3>
+                    <div class="code-block" style="margin-top:0.4em;font-size:var(--small-size);">
+<pre>melody[<span class="num">0</span>]  <span class="cmt">// → 262 (C4)</span>
+melody[<span class="num">1</span>]  <span class="cmt">// → 294 (D4)</span>
+melody[<span class="num">7</span>]  <span class="cmt">// → 523 (C5)</span></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card" style="background:#f5f3ff;border:2px solid #c4b5fd;">
+                    <p style="font-size:var(--small-size);font-weight:800;color:var(--accent3);margin-bottom:0.4em;">Array boxes — index starts at 0!</p>
+                    <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:0.3em;">
+                        <div style="background:#8b5cf6;color:#fff;border-radius:8px;padding:0.4em 0.5em;text-align:center;font-family:var(--font-code);font-size:var(--small-size);min-width:44px;"><div style="font-size:0.7em;opacity:0.7;">[0]</div>262</div>
+                        <div style="background:#a78bfa;color:#fff;border-radius:8px;padding:0.4em 0.5em;text-align:center;font-family:var(--font-code);font-size:var(--small-size);min-width:44px;"><div style="font-size:0.7em;opacity:0.7;">[1]</div>294</div>
+                        <div style="background:#c4b5fd;color:#4c1d95;border-radius:8px;padding:0.4em 0.5em;text-align:center;font-family:var(--font-code);font-size:var(--small-size);min-width:44px;"><div style="font-size:0.7em;opacity:0.7;">[2]</div>330</div>
+                        <div style="background:#ddd6fe;color:#4c1d95;border-radius:8px;padding:0.4em 0.5em;text-align:center;font-family:var(--font-code);font-size:var(--small-size);min-width:44px;"><div style="font-size:0.7em;opacity:0.7;">[3]</div>349</div>
+                        <div style="background:#ede9fe;color:#4c1d95;border-radius:8px;padding:0.4em 0.5em;text-align:center;font-family:var(--font-code);font-size:var(--small-size);min-width:44px;"><div style="font-size:0.7em;opacity:0.7;">[4]</div>392</div>
+                    </div>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">sizeof() — how many elements?</h3>
+                    <div class="code-block" style="margin-top:0.4em;font-size:var(--small-size);">
+<pre><span class="typ">int</span> len = <span class="kw">sizeof</span>(melody)
+           / <span class="kw">sizeof</span>(melody[<span class="num">0</span>]);
+<span class="cmt">// gives number of notes</span></pre>
+                    </div>
+                </div>
+                <div class="hl-purple" style="font-size:var(--small-size);">Always remember: first index is <strong>0</strong>, not 1. An array of 8 items has indices 0 through 7!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 8: SECTION DIVIDER — PROJECT -->
+<section class="slide" style="background:linear-gradient(135deg,#10b981 0%,#34d399 50%,#6ee7b7 100%);text-align:center;align-items:center;">
+    <div class="blob" style="width:240px;height:240px;background:#a7f3d0;bottom:5%;left:5%;"></div>
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🎵</span>
+        <p class="section-label reveal" data-delay="1" style="color:#ecfdf5;margin-top:0.5em;">Part 3 — Project</p>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Play a<br>Melody!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#d1fae5;margin-top:0.5em;">Store notes and durations in arrays, then play them with a for loop</p>
+        <div class="divider reveal" data-delay="4" style="margin:0.8em auto;background:linear-gradient(90deg,#fff,#a7f3d0);"></div>
+    </div>
+</section>
+
+<!-- SLIDE 9: MELODY WIRING -->
+<section class="slide bg-dots" style="background-color:#ecfdf5;">
+    <div class="slide-content">
+        <h2 class="reveal" style="color:var(--accent4);">Buzzer Wiring in Tinkercad</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.45em;">
+                <div class="step"><div class="step-num" style="background:var(--accent4);">1</div><div><h3 style="font-size:var(--small-size);">Add Arduino Uno</h3><p style="font-size:var(--small-size);">Drag onto Tinkercad canvas.</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent4);">2</div><div><h3 style="font-size:var(--small-size);">Search "Piezo"</h3><p style="font-size:var(--small-size);">Find "Piezo" in the components panel — it looks like a small cylinder.</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent4);">3</div><div><h3 style="font-size:var(--small-size);">Wire: (+) leg → Pin 8</h3><p style="font-size:var(--small-size);">Connect the positive leg of the piezo to digital pin 8.</p></div></div>
+                <div class="step"><div class="step-num" style="background:var(--accent4);">4</div><div><h3 style="font-size:var(--small-size);">Wire: (−) leg → GND</h3><p style="font-size:var(--small-size);">Connect the negative leg to any GND pin on the Arduino.</p></div></div>
+                <div class="hl-yellow" style="font-size:var(--small-size);">No resistor needed for a piezo buzzer! It has high internal resistance already.</div>
+            </div>
+            <div class="reveal-right" data-delay="2">
+                <div style="background:#1e0a12;border-radius:12px;padding:0.8em 1em;font-family:var(--font-code);font-size:var(--small-size);color:#fecdd3;border:2px solid rgba(251,113,133,0.25);">
+                    <div style="color:#64748b;margin-bottom:0.3em;">Circuit diagram:</div>
+                    <div style="color:#fb923c;">Arduino Pin 8</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+                    <div style="color:#f9a8d4;">Piezo (+) leg</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;|</div>
+                    <div style="color:#f9a8d4;">Piezo (−) leg</div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+                    <div style="color:#6ee7b7;">Arduino GND</div>
+                </div>
+                <div class="hl-green" style="margin-top:0.6em;font-size:var(--small-size);">In Tinkercad: Click the buzzer icon during simulation to toggle sound on/off (your browser must allow audio).</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 10: FULL MELODY CODE -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Full Melody Code</h2>
+        <div class="two-col" style="margin-top:0.3em;align-items:start;">
+            <div class="code-block reveal" data-delay="1" style="font-size:clamp(0.58rem,0.95vw,0.78rem);">
+<pre><span class="kw">const</span> <span class="typ">int</span> <span class="pin">buzzer</span> = <span class="num">8</span>;
+
+<span class="cmt">// Note frequencies (C D E F G A B C5)</span>
+<span class="typ">int</span> melody[] = {
+  <span class="num">262</span>, <span class="num">294</span>, <span class="num">330</span>, <span class="num">349</span>,
+  <span class="num">392</span>, <span class="num">440</span>, <span class="num">494</span>, <span class="num">523</span>
+};
+
+<span class="cmt">// Duration in ms for each note</span>
+<span class="typ">int</span> durations[] = {
+  <span class="num">400</span>, <span class="num">400</span>, <span class="num">400</span>, <span class="num">400</span>,
+  <span class="num">400</span>, <span class="num">400</span>, <span class="num">400</span>, <span class="num">800</span>
+};
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="typ">int</span> len = <span class="kw">sizeof</span>(melody)
+             / <span class="kw">sizeof</span>(melody[<span class="num">0</span>]);
+
+  <span class="kw">for</span> (<span class="typ">int</span> i = <span class="num">0</span>; i &lt; len; i++) {
+    <span class="fn">tone</span>(<span class="pin">buzzer</span>, melody[i], durations[i]);
+    <span class="fn">delay</span>(durations[i] + <span class="num">50</span>); <span class="cmt">// gap</span>
+    <span class="fn">noTone</span>(<span class="pin">buzzer</span>);
+  }
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cmt">// melody plays once in setup()</span>
+}</pre>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-rose">
+                    <h3 style="font-size:var(--body-size);">Why use setup() for the melody?</h3>
+                    <p style="font-size:var(--small-size);">setup() runs <strong>once</strong> — perfect for a melody that plays once on startup. Move to loop() if you want it to repeat forever.</p>
+                </div>
+                <div class="card card-purple">
+                    <h3 style="font-size:var(--body-size);">delay(durations[i] + 50)</h3>
+                    <p style="font-size:var(--small-size);">We wait the duration PLUS 50ms extra. This creates a small gap between notes so they don't blur together.</p>
+                </div>
+                <div class="card card-orange">
+                    <h3 style="font-size:var(--body-size);">Try Happy Birthday!</h3>
+                    <p style="font-size:var(--small-size);">Replace the melody[] frequencies with: 264, 264, 297, 264, 352, 330 — and listen!</p>
+                </div>
+                <div class="hl-rose" style="font-size:var(--small-size);"><strong>Challenge:</strong> Add an LED that flashes in sync with each note — use digitalWrite(13, HIGH) before tone() and LOW after!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 11: EXTRA — BUTTON PIANO -->
+<section class="slide bg-dots" style="background-color:#fff0f3;">
+    <div class="slide-content">
+        <h2 class="reveal">Bonus Concept: Button Piano</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <p style="font-size:var(--body-size);">Combine what you know — buttons trigger different notes!</p>
+                <div class="code-block" style="font-size:var(--small-size);">
+<pre><span class="kw">const</span> <span class="typ">int</span> <span class="pin">btn1</span>=<span class="num">2</span>, <span class="pin">btn2</span>=<span class="num">3</span>, <span class="pin">btn3</span>=<span class="num">4</span>;
+<span class="kw">const</span> <span class="typ">int</span> <span class="pin">buz</span>=<span class="num">8</span>;
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(<span class="pin">btn1</span>, <span class="pin">INPUT_PULLUP</span>);
+  <span class="fn">pinMode</span>(<span class="pin">btn2</span>, <span class="pin">INPUT_PULLUP</span>);
+  <span class="fn">pinMode</span>(<span class="pin">btn3</span>, <span class="pin">INPUT_PULLUP</span>);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="kw">if</span>(!<span class="fn">digitalRead</span>(<span class="pin">btn1</span>)) <span class="fn">tone</span>(<span class="pin">buz</span>,<span class="num">262</span>);
+  <span class="kw">else if</span>(!<span class="fn">digitalRead</span>(<span class="pin">btn2</span>)) <span class="fn">tone</span>(<span class="pin">buz</span>,<span class="num">330</span>);
+  <span class="kw">else if</span>(!<span class="fn">digitalRead</span>(<span class="pin">btn3</span>)) <span class="fn">tone</span>(<span class="pin">buz</span>,<span class="num">392</span>);
+  <span class="kw">else</span> <span class="fn">noTone</span>(<span class="pin">buz</span>);
+}</pre>
+                </div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-rose" style="text-align:center;">
+                    <p style="font-size:var(--small-size);font-weight:700;color:var(--accent);margin-bottom:0.5em;">3-Key Piano</p>
+                    <div class="piano-keys">
+                        <div class="piano-key" style="min-width:55px;padding:1.5em 0.5em;"><div style="font-size:var(--small-size);font-weight:700;">C</div><div style="font-size:0.65em;color:#94a3b8;">262Hz</div></div>
+                        <div class="piano-key" style="min-width:55px;padding:1.5em 0.5em;"><div style="font-size:var(--small-size);font-weight:700;">E</div><div style="font-size:0.65em;color:#94a3b8;">330Hz</div></div>
+                        <div class="piano-key" style="min-width:55px;padding:1.5em 0.5em;"><div style="font-size:var(--small-size);font-weight:700;">G</div><div style="font-size:0.65em;color:#94a3b8;">392Hz</div></div>
+                    </div>
+                    <p style="font-size:var(--small-size);color:#64748b;margin-top:0.3em;">Press buttons 1, 2, 3 to play notes</p>
+                </div>
+                <div class="hl-orange" style="font-size:var(--small-size);">Add more buttons and notes to build a full piano! Arduino has enough digital pins for a whole octave.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 12: HOMEWORK -->
+<section class="slide bg-rose">
+    <div class="blob" style="width:240px;height:240px;background:#fecdd3;top:-60px;right:-60px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-hw reveal">Homework</span>
+        <h2 class="reveal" data-delay="1">Your Homework Challenges</h2>
+        <div class="grid-3 reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card card-rose"><div class="icon-circle" style="background:#fff0f3;margin-bottom:0.4em;font-weight:800;font-family:var(--font-display);">1</div><h3 style="font-size:var(--body-size);color:var(--accent);">Play a Song</h3><p style="font-size:var(--small-size);">Look up the note frequencies for "Twinkle Twinkle Little Star" or "Happy Birthday" and code it up.</p></div>
+            <div class="card card-purple"><div class="icon-circle" style="background:#f3e8ff;margin-bottom:0.4em;font-weight:800;font-family:var(--font-display);">2</div><h3 style="font-size:var(--body-size);color:var(--accent3);">LED + Sound Alarm</h3><p style="font-size:var(--small-size);">Make an alarm: press a button to trigger a siren sound (fast tone alternating between 500Hz and 1000Hz) while an LED blinks.</p></div>
+            <div class="card card-orange"><div class="icon-circle" style="background:#fff7ed;margin-bottom:0.4em;font-weight:800;font-family:var(--font-display);">3</div><h3 style="font-size:var(--body-size);color:var(--accent2);">Research Task</h3><p style="font-size:var(--small-size);">What other devices use piezo buzzers? List 3 examples. Why are piezo buzzers used instead of regular speakers?</p></div>
+        </div>
+        <div class="reveal" data-delay="3" style="margin-top:0.5em;"><div class="hl-yellow" style="font-size:var(--small-size);"><strong>Bonus:</strong> Build a 5-button piano in Tinkercad and see if you can play a tune on it!</div></div>
+    </div>
+</section>
+
+<!-- SLIDE 13-15: Quiz (split quiz here and use slides 13, 14 as review + 15 as quiz) -->
+<!-- SLIDE 13: TONES REVIEW -->
+<section class="slide bg-white">
+    <div class="slide-content">
+        <h2 class="reveal">Quick Reference Card</h2>
+        <div class="two-col" style="margin-top:0.3em;">
+            <div class="reveal" data-delay="1" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card card-rose"><h3 style="font-size:var(--body-size);">tone(pin, freq, duration)</h3><p style="font-size:var(--small-size);">Play a sound. All 3 params optional after pin &amp; freq.</p></div>
+                <div class="card card-orange"><h3 style="font-size:var(--body-size);">noTone(pin)</h3><p style="font-size:var(--small-size);">Stop sound on that pin.</p></div>
+                <div class="card card-purple"><h3 style="font-size:var(--body-size);">int arr[] = {1,2,3}</h3><p style="font-size:var(--small-size);">Declare an array. Access with arr[0], arr[1]…</p></div>
+                <div class="card card-green"><h3 style="font-size:var(--body-size);">sizeof(arr)/sizeof(arr[0])</h3><p style="font-size:var(--small-size);">Get the number of elements in an array.</p></div>
+            </div>
+            <div class="reveal-right" data-delay="2" style="display:flex;flex-direction:column;gap:0.5em;">
+                <div class="card" style="background:#f5f3ff;border:2px solid #c4b5fd;">
+                    <p style="font-size:var(--small-size);font-weight:800;color:var(--accent3);margin-bottom:0.4em;">Common Note Frequencies</p>
+                    <table class="note-table">
+                        <tr><th>Note</th><th>Hz</th><th>Note</th><th>Hz</th></tr>
+                        <tr><td>C4</td><td>262</td><td>G4</td><td>392</td></tr>
+                        <tr><td>D4</td><td>294</td><td>A4</td><td>440</td></tr>
+                        <tr><td>E4</td><td>330</td><td>B4</td><td>494</td></tr>
+                        <tr><td>F4</td><td>349</td><td>C5</td><td>523</td></tr>
+                    </table>
+                </div>
+                <div class="hl-rose" style="font-size:var(--small-size);"><strong>Official reference:</strong> Arduino's pitches.h header file has ALL note frequencies pre-defined — search "Arduino pitches.h" to find it!</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 14: SECTION DIVIDER QUIZ -->
+<section class="slide" style="background:linear-gradient(135deg,#8b5cf6 0%,#a78bfa 50%,#c4b5fd 100%);text-align:center;align-items:center;">
+    <div class="slide-content" style="align-items:center;">
+        <span class="big-emoji reveal">🧠</span>
+        <h1 class="reveal" data-delay="2" style="color:#fff;margin-top:0.2em;">Quiz Time!</h1>
+        <p class="subtitle reveal" data-delay="3" style="color:#ede9fe;margin-top:0.5em;">4 quick questions — let's see what you've got!</p>
+    </div>
+</section>
+
+<!-- SLIDE 15: QUIZ -->
+<section class="slide bg-purple">
+    <div class="blob" style="width:200px;height:200px;background:#c4b5fd;top:-40px;left:-40px;"></div>
+    <div class="slide-content">
+        <span class="section-tag tag-quiz reveal">Quick Quiz</span>
+        <h2 class="reveal" data-delay="1" style="color:var(--accent3);">Test Your Knowledge!</h2>
+        <div class="two-col reveal" data-delay="2" style="margin-top:0.3em;">
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q1. What does tone(8, 440) do?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) Blinks pin 8, 440 times</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) Plays a 440 Hz sound on pin 8</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) Delays for 440 ms</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Reads a frequency from pin 8</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q2. What is the index of the FIRST item in an array?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) 1</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) 0</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) -1</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Depends on the array</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q3. Higher frequency = ?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) Louder sound</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">B) Higher pitch</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">C) Longer note</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Lower pitch</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="card" style="padding:0.9em;">
+                <p style="font-size:var(--small-size);font-weight:700;margin-bottom:0.5em;">Q4. What does noTone(8) do?</p>
+                <div style="display:flex;flex-direction:column;gap:0.35em;">
+                    <button class="quiz-option" onclick="answer(this,'wrong')">A) Plays a silent note</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">B) Resets pin 8</button>
+                    <button class="quiz-option" onclick="answer(this,'correct')">C) Stops the sound on pin 8</button>
+                    <button class="quiz-option" onclick="answer(this,'wrong')">D) Sets pin 8 to LOW</button>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const slides=document.querySelectorAll('.slide'),progressBar=document.getElementById('progressBar'),navDotsContainer=document.getElementById('navDots'),slideCounter=document.getElementById('slideCounter'),total=slides.length;let current=0;
+    slides.forEach((_,i)=>{const dot=document.createElement('button');dot.className='nav-dot'+(i===0?' active':'');dot.setAttribute('aria-label',`Slide ${i+1}`);dot.addEventListener('click',()=>scrollToSlide(i));navDotsContainer.appendChild(dot);});
+    function updateUI(index){current=index;const pct=total>1?(index/(total-1))*100:100;progressBar.style.width=pct+'%';slideCounter.textContent=`${index+1} / ${total}`;document.querySelectorAll('.nav-dot').forEach((d,i)=>d.classList.toggle('active',i===index));revealSlide(index);}
+    function scrollToSlide(index){slides[index].scrollIntoView({behavior:'smooth'});}
+    const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting&&entry.intersectionRatio>=0.5){updateUI(Array.from(slides).indexOf(entry.target));}});},{threshold:0.5});
+    slides.forEach(s=>observer.observe(s));
+    function revealSlide(index){slides[index].querySelectorAll('.reveal,.reveal-right,.reveal-scale,.reveal-up').forEach(el=>el.classList.add('visible'));}
+    document.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();if(current<total-1)scrollToSlide(current+1);}else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();if(current>0)scrollToSlide(current-1);}});
+    window.addEventListener('load',()=>updateUI(0));
+    function answer(btn,result){const group=btn.closest('.card');group.querySelectorAll('.quiz-option').forEach(b=>{b.style.pointerEvents='none';if(b.getAttribute('onclick').includes("'correct'"))b.classList.add('correct');});const feedback=group.querySelector('.quiz-feedback');if(result==='correct'){btn.classList.add('correct');feedback.textContent='Correct! Great work!';feedback.style.background='#d1fae5';feedback.style.color='#065f46';}else{btn.classList.add('wrong');feedback.textContent='Not quite — the green answer is correct!';feedback.style.background='#fee2e2';feedback.style.color='#991b1b';}feedback.classList.add('show');}
+</script>
+</body>
+</html>
