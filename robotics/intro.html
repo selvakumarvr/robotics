@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Start Here · Electronics &amp; Arduino in 5 Slides</title>
+<meta name="description" content="An 8-slide primer that introduces young makers (ages 10-15) to electricity, circuits, breadboards, components, Arduino, signals, code, and what they can build." />
+<style>
+  :root{
+    --ink:#0b1220;
+    --paper:#ffffff;
+    --muted:#475569;
+    --soft:#e2e8f0;
+    --shadow: 0 24px 60px rgba(2,6,23,.25), 0 6px 16px rgba(2,6,23,.10);
+    --radius: 24px;
+  }
+  *{ box-sizing: border-box; }
+  html, body{ margin: 0; padding: 0; }
+  body{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Helvetica Neue", system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 700px at 10% -10%, #1e293b, transparent 60%),
+      radial-gradient(1200px 700px at 110% 110%, #0b1220, transparent 60%),
+      linear-gradient(180deg, #0f172a, #020617);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Top bar */
+  .topbar{
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 22px;
+    backdrop-filter: blur(12px);
+    background: rgba(15,23,42,.55);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    color: white;
+  }
+  .brand{
+    display: inline-flex; align-items: center; gap: 10px;
+    font-weight: 800; letter-spacing: -.2px;
+    background: linear-gradient(135deg, #f59e0b, #ec4899);
+    color: white;
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 14px;
+    box-shadow: 0 6px 18px rgba(236,72,153,.25);
+  }
+  .brand .emoji{ font-size: 18px; }
+  .crumbs{ color:#cbd5e1; font-size: 13px; }
+  .crumbs b{ color:#f8fafc; }
+  .top-links{ margin-left: auto; display: inline-flex; gap: 8px; flex-wrap: wrap; }
+  .top-links a{
+    color: #cbd5e1; text-decoration: none; font-size: 12px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.10);
+    padding: 7px 12px; border-radius: 999px; font-weight: 700;
+    transition: all .15s ease;
+  }
+  .top-links a:hover{ background: rgba(255,255,255,.14); color: white; }
+
+  /* Progress bar */
+  .progress{
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 3px; z-index: 100;
+    background: rgba(255,255,255,.06);
+  }
+  .progress > div{
+    height: 100%;
+    background: linear-gradient(90deg, #06b6d4, #ec4899, #f59e0b);
+    width: 20%;
+    transition: width .35s ease;
+    box-shadow: 0 0 16px rgba(236,72,153,.5);
+  }
+
+  /* Stage */
+  .stage{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 22px 130px;
+  }
+
+  /* Slide card */
+  .slide{
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: none;
+    animation: slideIn .35s ease both;
+  }
+  .slide.active{ display: block; }
+  @keyframes slideIn{
+    from { opacity: 0; transform: translateY(14px) scale(.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Slide header strip */
+  .slide-head{
+    padding: 22px 30px 8px;
+    color: white;
+    display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;
+  }
+  .slide-head .badge{
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.25);
+    color: white; padding: 4px 10px;
+    border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .slide-head h2{
+    margin: 0;
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -.5px;
+  }
+  .slide-head p.subtitle{
+    margin: 6px 0 0;
+    color: rgba(255,255,255,.92);
+    font-size: clamp(15px, 1.6vw, 18px);
+    width: 100%;
+  }
+
+  /* Slide body */
+  .slide-body{
+    background: white;
+    padding: 28px 30px 36px;
+  }
+
+  /* ==== SLIDE 1 — Electricity ==== */
+  .s1-head{ background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); }
+  .s1-hero{
+    display: grid; grid-template-columns: 1fr 1fr; gap: 26px;
+    align-items: center;
+  }
+  @media (max-width: 800px){ .s1-hero{ grid-template-columns: 1fr; } }
+  .s1-lead{
+    font-size: 17px; line-height: 1.6; color: #334155;
+  }
+  .s1-lead strong{ color: #ef4444; }
+  .term-row{
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin-top: 18px;
+  }
+  .term{
+    background: linear-gradient(180deg, #fef3c7, #fed7aa);
+    border: 1px solid #fcd34d;
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+  }
+  .term .big{ font-size: 28px; font-weight: 900; color: #b45309; line-height: 1; }
+  .term .unit{ font-size: 11px; color: #92400e; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+  .term .name{ font-size: 13px; color: #7c2d12; margin-top: 6px; font-weight: 600; }
+
+  .ohm-box{
+    margin-top: 18px;
+    background: linear-gradient(135deg, #fff7ed, #fef3c7);
+    border-left: 5px solid #f97316;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: #7c2d12;
+  }
+  .ohm-box code{
+    background: #fff;
+    color: #be185d;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 800;
+    border: 1px solid #fecdd3;
+  }
+
+  /* ==== SLIDE 2 — Circuit ==== */
+  .s2-head{ background: linear-gradient(135deg, #16a34a 0%, #0ea5a3 100%); }
+  .s2-grid{
+    display: grid; grid-template-columns: 1.1fr .9fr; gap: 26px;
+    align-items: center;
+  }
+  @media (max-width: 800px){ .s2-grid{ grid-template-columns: 1fr; } }
+  .s2-grid h3{ font-size: 19px; margin: 0 0 8px; color: #15803d; }
+  .s2-grid p{ font-size: 16px; line-height: 1.55; color: #334155; margin: 0 0 12px; }
+
+  .parts-row{
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+    margin-top: 6px;
+  }
+  @media (max-width: 600px){ .parts-row{ grid-template-columns: repeat(2, 1fr); } }
+  .part{
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .part .e{ font-size: 28px; }
+  .part .lbl{ font-size: 11px; color: #166534; font-weight: 700; margin-top: 4px; text-transform: uppercase; letter-spacing: .8px; }
+
+  .openclose-row{
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-top: 16px;
+  }
+  .oc{
+    background: #ecfdf5;
+    border: 2px dashed #6ee7b7;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    color: #065f46;
+  }
+  .oc.broken{ background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
+  .oc .verdict{ font-size: 22px; font-weight: 900; margin-top: 4px; }
+
+  /* ==== SLIDE 3 — Arduino ==== */
+  .s3-head{ background: linear-gradient(135deg, #06b6d4 0%, #0ea5a3 100%); }
+  .s3-grid{
+    display: grid; grid-template-columns: 1.1fr .9fr; gap: 26px;
+    align-items: center;
+  }
+  @media (max-width: 800px){ .s3-grid{ grid-template-columns: 1fr; } }
+  .s3-grid h3{ font-size: 19px; margin: 0 0 8px; color: #0e7490; }
+  .s3-grid p{ font-size: 16px; line-height: 1.55; color: #334155; margin: 0 0 12px; }
+
+  .pin-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .pin{
+    background: #ecfeff; border: 1px solid #a5f3fc; border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .pin .h{ font-weight: 800; color: #0e7490; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .pin .d{ font-size: 12px; color: #155e75; margin-top: 4px; line-height: 1.4; }
+
+  .funfact{
+    margin-top: 14px;
+    background: #f0fdfa;
+    border-left: 4px solid #14b8a6;
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: #134e4a;
+    font-size: 14px;
+  }
+  .funfact b{ color: #0f766e; }
+
+  /* ==== SLIDE 4 — Code ==== */
+  .s4-head{ background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+  .s4-grid{
+    display: grid; grid-template-columns: 1fr 1fr; gap: 26px;
+    align-items: stretch;
+  }
+  @media (max-width: 800px){ .s4-grid{ grid-template-columns: 1fr; } }
+
+  pre.code{
+    background: #0b1220;
+    color: #e2e8f0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 0;
+    font-family: "SF Mono", Consolas, Menlo, "Roboto Mono", monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    box-shadow: 0 12px 30px rgba(15,23,42,.35);
+  }
+  pre.code .kw{ color: #c084fc; font-weight: 700; }
+  pre.code .fn{ color: #60a5fa; }
+  pre.code .num{ color: #fbbf24; }
+  pre.code .cm{ color: #64748b; font-style: italic; }
+  pre.code .str{ color: #86efac; }
+
+  .explain{ display: flex; flex-direction: column; gap: 10px; }
+  .explain .row{
+    display: flex; align-items: flex-start; gap: 12px;
+    background: #faf5ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .explain .row .dot{
+    flex: 0 0 28px; width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: white; display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 13px;
+  }
+  .explain .row b{ color: #5b21b6; }
+  .explain .row code{
+    background: #f3e8ff; color: #6b21a8; padding: 1px 8px;
+    border-radius: 6px; font-size: 12.5px; font-family: "SF Mono", Consolas, monospace;
+    border: 1px solid #e9d5ff;
+  }
+  .explain .row .t{ color: #4c1d95; font-size: 13.5px; line-height: 1.45; }
+
+  /* ==== SLIDE 5 — Build ==== */
+  .s5-head{ background: linear-gradient(135deg, #ec4899 0%, #f59e0b 100%); }
+  .projects-row{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 800px){ .projects-row{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 420px){ .projects-row{ grid-template-columns: 1fr; } }
+  .proj{
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 6px 16px rgba(2,6,23,.06);
+    text-decoration: none; color: inherit;
+    transition: transform .15s ease, box-shadow .15s ease;
+    display: block;
+  }
+  .proj:hover{ transform: translateY(-3px); box-shadow: 0 12px 28px rgba(2,6,23,.14); }
+  .proj img{ width:100%; aspect-ratio: 16/10; object-fit: cover; display:block; background:#f1f5f9; }
+  .proj .pt{ padding: 8px 12px 11px; }
+  .proj .pt .t{ font-size: 12.5px; font-weight: 700; color: #1e293b; line-height: 1.3; }
+  .proj .pt .l{ font-size: 10px; color: #f97316; font-weight: 800; margin-top: 3px; letter-spacing: .5px; text-transform: uppercase; }
+
+  .ctas{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 10px; }
+  @media (max-width: 800px){ .ctas{ grid-template-columns: 1fr; } }
+  .cta{
+    text-decoration: none;
+    border-radius: 16px;
+    padding: 18px 16px;
+    color: white;
+    display: flex; flex-direction: column; gap: 4px;
+    box-shadow: 0 14px 30px rgba(2,6,23,.18);
+    transition: transform .15s ease;
+  }
+  .cta:hover{ transform: translateY(-3px); }
+  .cta .cta-emoji{ font-size: 32px; }
+  .cta .cta-title{ font-size: 17px; font-weight: 800; }
+  .cta .cta-sub{ font-size: 12px; opacity: .9; }
+  .cta.a{ background: linear-gradient(135deg, #0d9488, #06b6d4); }
+  .cta.b{ background: linear-gradient(135deg, #f97316, #ef4444); }
+  .cta.c{ background: linear-gradient(135deg, #7c3aed, #ec4899); }
+
+  .closer{
+    margin-top: 22px;
+    text-align: center;
+    font-size: 18px;
+    color: #be185d;
+    font-weight: 800;
+    letter-spacing: .3px;
+  }
+
+  /* Navigation footer */
+  .footer-nav{
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: rgba(15,23,42,.78);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,.08);
+    z-index: 20;
+    padding: 12px 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .nav-btn{
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    color: white;
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-weight: 700; font-size: 13px;
+    cursor: pointer;
+    transition: background .15s ease, transform .1s ease;
+    font-family: inherit;
+  }
+  .nav-btn:hover:not(:disabled){ background: rgba(255,255,255,.16); }
+  .nav-btn:active{ transform: translateY(1px); }
+  .nav-btn:disabled{ opacity: .35; cursor: not-allowed; }
+  .nav-btn.primary{
+    background: linear-gradient(135deg, #ec4899, #f59e0b);
+    border-color: transparent;
+    box-shadow: 0 8px 20px rgba(236,72,153,.35);
+  }
+  .dots{ display: inline-flex; gap: 6px; margin: 0 auto; }
+  .dot{
+    width: 28px; height: 6px; border-radius: 6px;
+    background: rgba(255,255,255,.15);
+    cursor: pointer; transition: background .2s ease, width .2s ease;
+  }
+  .dot.active{ background: linear-gradient(90deg, #ec4899, #f59e0b); width: 40px; }
+  .dot:hover:not(.active){ background: rgba(255,255,255,.30); }
+  .pageno{
+    color: #cbd5e1; font-size: 12px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ==== SLIDE 3 — Breadboard ==== */
+  .sb-head{ background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); }
+  .sb-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: center; }
+  @media (max-width: 800px){ .sb-grid{ grid-template-columns: 1fr; } }
+  .sb-grid h3{ font-size: 19px; margin: 0 0 8px; color: #5b21b6; }
+  .sb-grid p{ font-size: 16px; line-height: 1.55; color: #334155; margin: 0 0 12px; }
+  .bb-tip{
+    background: #faf5ff; border-left: 4px solid #8b5cf6; border-radius: 12px;
+    padding: 10px 14px; margin-bottom: 8px; color: #3730a3; font-size: 13.5px; line-height: 1.5;
+  }
+  .bb-tip b{ color: #5b21b6; }
+  .bb-tip .pip{ display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
+  .bb-tip.good{ background: #f0fdf4; border-left-color: #16a34a; color: #14532d; }
+  .bb-tip.good b{ color: #166534; }
+
+  /* ==== SLIDE 4 — Components ==== */
+  .sc-head{ background: linear-gradient(135deg, #f43f5e 0%, #fb923c 100%); }
+  .cg{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 800px){ .cg{ grid-template-columns: repeat(2, 1fr); } }
+  .comp{
+    background: linear-gradient(180deg, #fff7ed, #ffedd5);
+    border: 1px solid #fed7aa; border-radius: 14px;
+    padding: 14px 12px; text-align: center;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .comp .emo{ font-size: 36px; line-height: 1; }
+  .comp .nm{ font-weight: 800; color: #9a3412; font-size: 14px; }
+  .comp .ds{ font-size: 11.5px; color: #7c2d12; line-height: 1.4; }
+  .comp .tip{
+    margin-top: 4px; font-size: 10.5px; color: #7c2d12;
+    background: rgba(255,255,255,.65); border-radius: 6px; padding: 5px 7px;
+    font-weight: 600;
+  }
+  .resistor-card{
+    margin-top: 18px;
+    background: linear-gradient(135deg, #fef9c3, #fed7aa);
+    border: 1px solid #fcd34d; border-radius: 14px;
+    padding: 14px 18px;
+  }
+  .resistor-card .title{ font-weight: 800; color: #7c2d12; margin-bottom: 8px; font-size: 15px; }
+  .band-row{
+    display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px;
+    font-size: 9.5px; text-align: center; color: white; font-weight: 800;
+  }
+  .band-row .b{ padding: 6px 4px; border-radius: 4px; line-height: 1.25; }
+  .resistor-card .ex{ margin-top: 10px; font-size: 12.5px; color: #7c2d12; line-height: 1.5; }
+  .resistor-card .ex b{ color: #9a3412; }
+
+  /* ==== SLIDE 6 — Digital vs Analog ==== */
+  .sd-head{ background: linear-gradient(135deg, #0284c7 0%, #db2777 100%); }
+  .da-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 16px; }
+  @media (max-width: 700px){ .da-grid{ grid-template-columns: 1fr; } }
+  .da{
+    border-radius: 16px; padding: 16px 18px; border: 1px solid;
+    box-shadow: 0 6px 16px rgba(2,6,23,.06);
+  }
+  .da h3{ margin: 0 0 4px; font-size: 18px; }
+  .da .sub{ font-size: 13px; margin-bottom: 10px; }
+  .da.dig{ background: #eff6ff; border-color: #bfdbfe; }
+  .da.dig h3{ color: #1d4ed8; }
+  .da.dig .sub{ color: #1e40af; }
+  .da.ana{ background: #fdf2f8; border-color: #fbcfe8; }
+  .da.ana h3{ color: #be185d; }
+  .da.ana .sub{ color: #9d174d; }
+  .da ul{ margin: 8px 0 0; padding-left: 18px; font-size: 12.5px; color: #334155; line-height: 1.6; }
+  .da ul li{ margin-bottom: 4px; }
+  .da code{ background: rgba(0,0,0,.05); padding: 1px 6px; border-radius: 5px; font-size: 12px; font-weight: 700; font-family: "SF Mono", Consolas, monospace; }
+  .da.dig code{ color: #1e3a8a; }
+  .da.ana code{ color: #831843; }
+  .pwm-box{
+    background: linear-gradient(135deg, #fef3c7, #fed7aa);
+    border: 1px solid #fcd34d; border-radius: 14px;
+    padding: 14px 18px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center;
+  }
+  @media (max-width: 700px){ .pwm-box{ grid-template-columns: 1fr; } }
+  .pwm-box .pwm-txt{ color: #7c2d12; font-size: 13.5px; line-height: 1.5; }
+  .pwm-box .pwm-txt b{ color: #9a3412; }
+  .pwm-box .pwm-txt code{ background: #fff; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-family: "SF Mono", Consolas, monospace; font-size: 12px; }
+
+  /* Photo / illustration frames (used for the imported teaching images) */
+  .image-frame{
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 10px;
+    margin: 12px auto;
+    text-align: center;
+    box-shadow: 0 8px 22px rgba(2,6,23,.10);
+    max-width: 100%;
+  }
+  .image-frame img{
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+  }
+  .image-frame .caption{
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: #64748b;
+    font-style: italic;
+    line-height: 1.45;
+  }
+  .image-frame.tight{ max-width: 680px; }
+  .image-frame.wide{  max-width: 880px; }
+
+  .info-card{
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .info-card h3{ margin: 0 0 6px; font-size: 17px; }
+  .info-card p{ margin: 0 0 8px; font-size: 14px; line-height: 1.5; }
+  .info-card.teal{ background: linear-gradient(135deg, #ecfeff, #f0fdfa); border: 1px solid #99f6e4; }
+  .info-card.teal h3{ color: #0e7490; }
+  .info-card.teal p{ color: #155e75; }
+  .info-card.amber{ background: linear-gradient(135deg, #fef3c7, #fed7aa); border: 1px solid #fcd34d; }
+  .info-card.amber h3{ color: #9a3412; }
+  .info-card.amber p{ color: #7c2d12; }
+  .info-card.rose{ background: linear-gradient(180deg, #fff7ed, #ffedd5); border: 1px solid #fed7aa; }
+  .info-card.rose h3{ color: #9a3412; }
+  .info-card.rose p{ color: #7c2d12; }
+
+  /* SVG helpers */
+  svg.diagram{ width: 100%; height: auto; display: block; }
+</style>
+</head>
+<body>
+
+<div class="progress"><div id="prog"></div></div>
+
+<div class="topbar">
+  <span class="brand"><span class="emoji">⚡</span> Start Here</span>
+  <span class="crumbs">An 8-slide primer · <b>Electronics &amp; Arduino for Young Makers</b></span>
+  <span class="top-links">
+    <a href="index.html">📘 Arduino Adventures</a>
+    <a href="customer-projects.html">🛠️ 73 Maker Projects</a>
+  </span>
+</div>
+
+<main class="stage">
+
+  <!-- ============ SLIDE 1 ============ -->
+  <section class="slide active" data-i="0">
+    <div class="slide-head s1-head">
+      <span class="badge">Slide 1 of 8 · The basics</span>
+      <h2 style="width:100%">⚡ What is Electricity?</h2>
+      <p class="subtitle">Tiny invisible &ldquo;somethings&rdquo; (electrons) flowing through wires — a lot like water flowing through pipes.</p>
+    </div>
+    <div class="slide-body">
+      <div class="s1-hero">
+        <div>
+          <p class="s1-lead">
+            Imagine a battery is a <strong>water pump</strong>, and the wires are <strong>pipes</strong>.
+            The pump pushes water through the pipes, around a loop, and back. That&rsquo;s exactly what
+            happens with electricity — except instead of water, super-tiny <strong>electrons</strong> are moving.
+          </p>
+          <div class="term-row">
+            <div class="term">
+              <div class="big">V</div>
+              <div class="unit">Volts</div>
+              <div class="name">Voltage<br/><small>= pressure</small></div>
+            </div>
+            <div class="term">
+              <div class="big">A</div>
+              <div class="unit">Amps</div>
+              <div class="name">Current<br/><small>= flow rate</small></div>
+            </div>
+            <div class="term">
+              <div class="big">Ω</div>
+              <div class="unit">Ohms</div>
+              <div class="name">Resistance<br/><small>= how narrow</small></div>
+            </div>
+          </div>
+          <div class="ohm-box">
+            <b>Ohm&rsquo;s Law</b> ties them all together:
+            <code>V = I × R</code><br/>
+            <small>Bigger pressure or wider pipe → more flow. Easy!</small>
+          </div>
+        </div>
+        <div>
+          <!-- Water analogy SVG -->
+          <svg class="diagram" viewBox="0 0 420 320" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="water" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#60a5fa"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+              <linearGradient id="pumpG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fbbf24"/>
+                <stop offset="100%" stop-color="#f97316"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Outer pipe loop -->
+            <rect x="40" y="60" width="340" height="200" rx="40" fill="none" stroke="#cbd5e1" stroke-width="28"/>
+            <rect x="40" y="60" width="340" height="200" rx="40" fill="none" stroke="url(#water)" stroke-width="14" stroke-dasharray="6 4">
+              <animate attributeName="stroke-dashoffset" from="100" to="0" dur="2s" repeatCount="indefinite"/>
+            </rect>
+
+            <!-- Pump (battery) -->
+            <g transform="translate(40, 130)">
+              <rect x="-22" y="0" width="44" height="60" rx="8" fill="url(#pumpG)" stroke="#9a3412" stroke-width="2"/>
+              <text x="0" y="36" font-size="22" text-anchor="middle" fill="white" font-weight="900">🔋</text>
+              <text x="0" y="-8" font-size="11" text-anchor="middle" fill="#0f172a" font-weight="800">PUMP</text>
+              <text x="0" y="78" font-size="10" text-anchor="middle" fill="#334155">(battery)</text>
+            </g>
+
+            <!-- Narrow section (resistor) -->
+            <g transform="translate(380, 130)">
+              <rect x="-22" y="0" width="44" height="60" rx="6" fill="#facc15" stroke="#854d0e" stroke-width="2"/>
+              <path d="M -16 18 L -8 30 L -16 42 M 0 18 L 8 30 L 0 42 M 16 18 L 24 30 L 16 42" fill="none" stroke="#854d0e" stroke-width="2"/>
+              <text x="0" y="-8" font-size="11" text-anchor="middle" fill="#0f172a" font-weight="800">NARROW</text>
+              <text x="0" y="78" font-size="10" text-anchor="middle" fill="#334155">(resistor)</text>
+            </g>
+
+            <!-- Labels along the loop -->
+            <text x="210" y="40" text-anchor="middle" font-size="13" fill="#cbd5e1" font-weight="700">⬇ Current flows this way ⬇</text>
+            <text x="210" y="290" text-anchor="middle" font-size="12" fill="#94a3b8">More pressure (volts) → more flow (amps)</text>
+
+            <!-- Drops animated -->
+            <circle r="5" fill="#0284c7">
+              <animateMotion dur="3.2s" repeatCount="indefinite" rotate="auto">
+                <mpath href="#path"/>
+              </animateMotion>
+            </circle>
+            <circle r="5" fill="#0ea5e9">
+              <animateMotion dur="3.2s" begin="1s" repeatCount="indefinite">
+                <mpath href="#path"/>
+              </animateMotion>
+            </circle>
+            <circle r="5" fill="#38bdf8">
+              <animateMotion dur="3.2s" begin="2s" repeatCount="indefinite">
+                <mpath href="#path"/>
+              </animateMotion>
+            </circle>
+            <path id="path" d="M 60 160 L 60 100 Q 60 80 80 80 L 360 80 Q 380 80 380 100 L 380 220 Q 380 240 360 240 L 80 240 Q 60 240 60 220 Z" fill="none" stroke="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2 ============ -->
+  <section class="slide" data-i="1">
+    <div class="slide-head s2-head">
+      <span class="badge">Slide 2 of 8 · Build a loop</span>
+      <h2 style="width:100%">🔌 A Circuit is a Loop</h2>
+      <p class="subtitle">A circuit is a complete round trip: power leaves the battery, does something useful, and comes back home.</p>
+    </div>
+    <div class="slide-body">
+      <div class="s2-grid">
+        <div>
+          <h3>Light up an LED in 4 parts</h3>
+          <p>You need a <strong>power source</strong>, a <strong>thing that uses the power</strong> (like an LED), a <strong>resistor</strong> to slow the flow so the LED doesn&rsquo;t burn out, and <strong>wires</strong> to connect them in a loop.</p>
+
+          <div class="parts-row">
+            <div class="part"><div class="e">🔋</div><div class="lbl">Battery</div></div>
+            <div class="part"><div class="e">💡</div><div class="lbl">LED</div></div>
+            <div class="part"><div class="e">〰️</div><div class="lbl">Resistor</div></div>
+            <div class="part"><div class="e">🧱</div><div class="lbl">Breadboard</div></div>
+            <div class="part"><div class="e">🔘</div><div class="lbl">Button</div></div>
+          </div>
+
+          <div class="openclose-row">
+            <div class="oc">
+              <div>Closed loop ✓</div>
+              <div class="verdict">💡 ON</div>
+            </div>
+            <div class="oc broken">
+              <div>Loop is broken ✗</div>
+              <div class="verdict">⚫ OFF</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <!-- Circuit SVG -->
+          <svg class="diagram" viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="ledG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fde68a"/>
+                <stop offset="100%" stop-color="#f59e0b"/>
+              </linearGradient>
+              <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fef3c7" stop-opacity=".95"/>
+                <stop offset="100%" stop-color="#fef3c7" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+
+            <!-- Wire loop -->
+            <rect x="40" y="50" width="280" height="180" rx="12" fill="none" stroke="#334155" stroke-width="4"/>
+
+            <!-- Battery (left side) -->
+            <g transform="translate(30, 140)">
+              <rect x="-12" y="-30" width="24" height="60" rx="3" fill="#fb923c" stroke="#7c2d12" stroke-width="2"/>
+              <text x="0" y="-38" font-size="10" text-anchor="middle" font-weight="800" fill="#0f172a">9V</text>
+              <text x="-2" y="-5" font-size="14" text-anchor="middle" fill="white" font-weight="900">+</text>
+              <text x="-2" y="22" font-size="14" text-anchor="middle" fill="white" font-weight="900">−</text>
+            </g>
+
+            <!-- LED (top) -->
+            <g transform="translate(180, 50)">
+              <circle r="22" fill="url(#glow)"/>
+              <circle r="13" fill="url(#ledG)" stroke="#b45309" stroke-width="2"/>
+              <text y="4" font-size="14" text-anchor="middle">💡</text>
+              <text y="-30" font-size="10" text-anchor="middle" fill="#0f172a" font-weight="700">LED</text>
+            </g>
+
+            <!-- Resistor (right side) -->
+            <g transform="translate(320, 140)">
+              <rect x="-30" y="-10" width="60" height="20" rx="4" fill="#f1f5f9" stroke="#334155" stroke-width="2"/>
+              <rect x="-20" y="-10" width="6" height="20" fill="#92400e"/>
+              <rect x="-12" y="-10" width="6" height="20" fill="#fbbf24"/>
+              <rect x="-4" y="-10" width="6" height="20" fill="#ef4444"/>
+              <rect x="6" y="-10" width="6" height="20" fill="#10b981"/>
+              <text y="-22" font-size="10" text-anchor="middle" fill="#0f172a" font-weight="700">220Ω</text>
+            </g>
+
+            <!-- Switch / button (bottom) -->
+            <g transform="translate(180, 230)">
+              <circle r="14" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
+              <text y="4" font-size="11" text-anchor="middle" fill="white" font-weight="900">ON</text>
+              <text y="32" font-size="10" text-anchor="middle" fill="#0f172a" font-weight="700">button</text>
+            </g>
+
+            <!-- Flow arrows -->
+            <text x="110" y="44" font-size="12" fill="#0ea5e9" font-weight="800">→</text>
+            <text x="245" y="44" font-size="12" fill="#0ea5e9" font-weight="800">→</text>
+            <text x="335" y="190" font-size="12" fill="#0ea5e9" font-weight="800">↓</text>
+            <text x="245" y="252" font-size="12" fill="#0ea5e9" font-weight="800">←</text>
+            <text x="110" y="252" font-size="12" fill="#0ea5e9" font-weight="800">←</text>
+            <text x="25" y="190" font-size="12" fill="#0ea5e9" font-weight="800">↑</text>
+          </svg>
+          <div style="text-align:center;font-size:11px;color:#64748b;margin-top:6px;">A complete loop: battery → LED → resistor → button → back to battery</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 3 — BREADBOARD ============ -->
+  <section class="slide" data-i="2">
+    <div class="slide-head sb-head">
+      <span class="badge">Slide 3 of 8 · Build without solder</span>
+      <h2 style="width:100%">🧱 The Breadboard — Your Best Friend</h2>
+      <p class="subtitle">A plastic board with hidden metal strips inside. Poke wires and parts into the holes, and they connect automatically — no soldering needed!</p>
+    </div>
+    <div class="slide-body">
+      <div class="sb-grid">
+        <div>
+          <h3>How a breadboard &ldquo;thinks&rdquo;</h3>
+          <p>Every breadboard hides two kinds of metal strips inside the plastic. Once you know them, wiring becomes easy.</p>
+
+          <div class="bb-tip">
+            <span class="pip" style="background:#ef4444;"></span>
+            <b>Power rails (top &amp; bottom):</b> the long red and blue lines along the edges. All holes in one rail are linked, side to side. Red = <b>+</b>, blue/black = <b>−</b>.
+          </div>
+          <div class="bb-tip">
+            <span class="pip" style="background:#3b82f6;"></span>
+            <b>Terminal rows (the middle):</b> short <i>columns</i> of 5 holes are linked to each other. Plug your LED, resistor and wire into the same column → they connect!
+          </div>
+          <div class="bb-tip">
+            <span class="pip" style="background:#94a3b8;"></span>
+            <b>Center gap:</b> divides the top half from the bottom. Chips (ICs) sit across this gap so each leg gets its own column.
+          </div>
+          <div class="bb-tip good">
+            ✓ <b>Why we love it:</b> change your wiring 100 times, no damage. Perfect for learning.
+          </div>
+        </div>
+
+        <div>
+          <!-- Breadboard SVG -->
+          <svg class="diagram" viewBox="0 0 380 280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="holes" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+                <circle cx="7" cy="7" r="2.2" fill="#1f2937"/>
+              </pattern>
+            </defs>
+
+            <!-- Body -->
+            <rect x="10" y="10" width="360" height="260" rx="12" fill="#fef3c7" stroke="#94a3b8" stroke-width="2"/>
+
+            <!-- Top + rail -->
+            <rect x="20" y="20" width="340" height="20" rx="3" fill="#fef2f2"/>
+            <text x="12" y="35" font-size="14" font-weight="900" fill="#dc2626">+</text>
+            <text x="362" y="35" font-size="14" font-weight="900" fill="#dc2626">+</text>
+            <line x1="34" y1="30" x2="346" y2="30" stroke="#ef4444" stroke-width="2.5"/>
+            <rect x="34" y="22" width="312" height="16" fill="url(#holes)"/>
+
+            <!-- Top − rail -->
+            <rect x="20" y="44" width="340" height="20" rx="3" fill="#eff6ff"/>
+            <text x="12" y="59" font-size="14" font-weight="900" fill="#1d4ed8">−</text>
+            <text x="362" y="59" font-size="14" font-weight="900" fill="#1d4ed8">−</text>
+            <line x1="34" y1="54" x2="346" y2="54" stroke="#3b82f6" stroke-width="2.5"/>
+            <rect x="34" y="46" width="312" height="16" fill="url(#holes)"/>
+
+            <!-- Top half terminal holes (5 rows) -->
+            <rect x="34" y="74" width="312" height="60" fill="url(#holes)"/>
+            <!-- Row labels (a-e) -->
+            <text x="24" y="84" font-size="9" fill="#475569" font-weight="700">a</text>
+            <text x="24" y="98" font-size="9" fill="#475569" font-weight="700">b</text>
+            <text x="24" y="112" font-size="9" fill="#475569" font-weight="700">c</text>
+            <text x="24" y="126" font-size="9" fill="#475569" font-weight="700">d</text>
+            <text x="24" y="140" font-size="9" fill="#475569" font-weight="700">e</text>
+
+            <!-- Highlight one column (5 linked holes) -->
+            <rect x="120" y="73" width="14" height="62" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="3 2"/>
+            <text x="127" y="68" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="900">these 5 are linked ↓</text>
+
+            <!-- Center gap with label -->
+            <rect x="20" y="138" width="340" height="14" fill="#fde68a" stroke="#f59e0b" stroke-width="1"/>
+            <text x="190" y="148" text-anchor="middle" font-size="9" fill="#92400e" font-weight="700">— center gap (for chips) —</text>
+
+            <!-- Bottom half terminal holes -->
+            <rect x="34" y="154" width="312" height="60" fill="url(#holes)"/>
+            <text x="24" y="164" font-size="9" fill="#475569" font-weight="700">f</text>
+            <text x="24" y="178" font-size="9" fill="#475569" font-weight="700">g</text>
+            <text x="24" y="192" font-size="9" fill="#475569" font-weight="700">h</text>
+            <text x="24" y="206" font-size="9" fill="#475569" font-weight="700">i</text>
+            <text x="24" y="220" font-size="9" fill="#475569" font-weight="700">j</text>
+
+            <!-- Bottom − rail -->
+            <rect x="20" y="218" width="340" height="20" rx="3" fill="#eff6ff"/>
+            <text x="12" y="233" font-size="14" font-weight="900" fill="#1d4ed8">−</text>
+            <text x="362" y="233" font-size="14" font-weight="900" fill="#1d4ed8">−</text>
+            <line x1="34" y1="228" x2="346" y2="228" stroke="#3b82f6" stroke-width="2.5"/>
+            <rect x="34" y="220" width="312" height="16" fill="url(#holes)"/>
+
+            <!-- Bottom + rail -->
+            <rect x="20" y="242" width="340" height="20" rx="3" fill="#fef2f2"/>
+            <text x="12" y="257" font-size="14" font-weight="900" fill="#dc2626">+</text>
+            <text x="362" y="257" font-size="14" font-weight="900" fill="#dc2626">+</text>
+            <line x1="34" y1="252" x2="346" y2="252" stroke="#ef4444" stroke-width="2.5"/>
+            <rect x="34" y="244" width="312" height="16" fill="url(#holes)"/>
+          </svg>
+          <div style="text-align:center;font-size:11px;color:#64748b;margin-top:6px;">Top &amp; bottom: long power rails. Middle: short 5-hole columns separated by a center gap.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 4 — COMPONENTS ============ -->
+  <section class="slide" data-i="3">
+    <div class="slide-head sc-head">
+      <span class="badge">Slide 4 of 8 · Your toolbox</span>
+      <h2 style="width:100%">🧩 Meet the Components</h2>
+      <p class="subtitle">A friendly tour of the parts you&rsquo;ll see in nearly every project. Learn these once and you&rsquo;ll be able to read almost any circuit.</p>
+    </div>
+    <div class="slide-body">
+      <div class="cg">
+        <div class="comp">
+          <div class="emo">💡</div>
+          <div class="nm">LED</div>
+          <div class="ds">A light that glows when current flows through it.</div>
+          <div class="tip">Long leg = + (anode). Short leg = − (cathode). Polarity matters!</div>
+        </div>
+        <div class="comp">
+          <div class="emo">〰️</div>
+          <div class="nm">Resistor</div>
+          <div class="ds">Slows the flow. Protects LEDs from burning out.</div>
+          <div class="tip">Color bands tell you the value in ohms (Ω).</div>
+        </div>
+        <div class="comp">
+          <div class="emo">🔘</div>
+          <div class="nm">Pushbutton</div>
+          <div class="ds">Connects two wires only while you hold it down.</div>
+          <div class="tip">Let go → loop opens, circuit OFF.</div>
+        </div>
+        <div class="comp">
+          <div class="emo">🎚️</div>
+          <div class="nm">Potentiometer</div>
+          <div class="ds">A turnable knob. A resistor whose value you can change.</div>
+          <div class="tip">Great for volume, brightness, speed.</div>
+        </div>
+        <div class="comp">
+          <div class="emo">☀️</div>
+          <div class="nm">Photoresistor (LDR)</div>
+          <div class="ds">Resistance drops in bright light, rises in the dark.</div>
+          <div class="tip">Perfect for night lights &amp; sun sensors.</div>
+        </div>
+        <div class="comp">
+          <div class="emo">🔔</div>
+          <div class="nm">Buzzer</div>
+          <div class="ds">Makes a beep or musical tone when powered.</div>
+          <div class="tip">Vary the frequency → make melodies.</div>
+        </div>
+        <div class="comp">
+          <div class="emo">⚙️</div>
+          <div class="nm">Servo Motor</div>
+          <div class="ds">Spins to an exact angle, from 0° to 180°.</div>
+          <div class="tip">Powers robot arms, doors, gates, grippers.</div>
+        </div>
+        <div class="comp">
+          <div class="emo">🔌</div>
+          <div class="nm">Jumper Wires</div>
+          <div class="ds">Colorful wires that make any connection in seconds.</div>
+          <div class="tip">Red = +, Black/Blue = −, others = signal.</div>
+        </div>
+      </div>
+
+      <div class="resistor-card">
+        <div class="title">🎨 Resistor color bands — a tiny cheat sheet</div>
+        <div class="band-row">
+          <div class="b" style="background:#0f172a;">0<br/>Black</div>
+          <div class="b" style="background:#7c2d12;">1<br/>Brown</div>
+          <div class="b" style="background:#dc2626;">2<br/>Red</div>
+          <div class="b" style="background:#f97316;">3<br/>Orange</div>
+          <div class="b" style="background:#facc15;color:#0f172a;">4<br/>Yellow</div>
+          <div class="b" style="background:#16a34a;">5<br/>Green</div>
+          <div class="b" style="background:#2563eb;">6<br/>Blue</div>
+          <div class="b" style="background:#7c3aed;">7<br/>Violet</div>
+          <div class="b" style="background:#6b7280;">8<br/>Gray</div>
+          <div class="b" style="background:#f1f5f9;color:#0f172a;">9<br/>White</div>
+        </div>
+        <div class="ex">
+          <b>How to read it:</b> Band 1 = first digit, Band 2 = second digit, Band 3 = number of zeros to add. <br/>
+          Example — <b style="color:#7c2d12;">Red&nbsp;</b> <b style="color:#7c2d12;">Red&nbsp;</b> <b style="color:#7c2d12;">Brown</b> &nbsp;= 2, 2, ×10 = <b>220 Ω</b> &mdash; the most common resistor for LEDs.
+        </div>
+      </div>
+
+      <!-- More sensors gallery -->
+      <div class="info-card rose" style="margin-top:18px;">
+        <h3>🌟 And there are SO many more sensors out there&hellip;</h3>
+        <p>
+          Sensors are the <b>senses</b> of your project — they let Arduino feel light, sound, motion,
+          distance, temperature, location and more. Each one is a small module you can plug into the breadboard.
+        </p>
+        <div class="image-frame wide">
+          <img src="assets/intro/sensors-gallery.png" alt="GPS locator, gyroscope, ultrasonic rangefinder, pressure/force sensor and accelerometer modules"/>
+          <div class="caption">A tiny sample: <b>GPS locators</b>, <b>gyroscopes</b>, <b>ultrasonic rangefinders</b>, <b>pressure/force sensors</b> and <b>accelerometers</b> — all easy to wire to Arduino.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 5 — ARDUINO ============ -->
+  <section class="slide" data-i="4">
+    <div class="slide-head s3-head">
+      <span class="badge">Slide 5 of 8 · The brain</span>
+      <h2 style="width:100%">🧠 Meet Arduino: A Tiny Computer Brain</h2>
+      <p class="subtitle">A small board that you program once, then it does its job — over and over — for years.</p>
+    </div>
+    <div class="slide-body">
+
+      <!-- Big picture: what Arduino actually DOES -->
+      <div class="info-card teal">
+        <h3>📡 Inputs → Brain → Outputs</h3>
+        <p>
+          Arduino is the <b>middleman</b>. It listens to the world through <b>input transducers</b>
+          (sensors, switches, sliders, levers), thinks for a moment using your code, then drives
+          <b>output transducers</b> (motors, buzzers, LEDs, screens). That&rsquo;s the whole secret.
+        </p>
+        <div class="image-frame tight">
+          <img src="assets/intro/io-flow.png" alt="Arduino reads sensor inputs from a person, and drives output actuators like a motor and buzzer"/>
+          <div class="caption">A person steps on a switch (input) → Arduino reads it → Arduino spins a motor or makes a buzzer sound (output).</div>
+        </div>
+      </div>
+
+      <div class="s3-grid">
+        <div>
+          <h3>What&rsquo;s on the board?</h3>
+          <p>The Arduino UNO is the most popular learner board. It has just a few important parts you need to know:</p>
+
+          <div class="pin-grid">
+            <div class="pin"><div class="h">🔌 USB port</div><div class="d">Plugs into your computer. Sends code and power.</div></div>
+            <div class="pin"><div class="h">🧠 Chip (ATmega328)</div><div class="d">The actual brain that runs your program.</div></div>
+            <div class="pin"><div class="h">⚡ Power pins (5V, 3.3V, GND)</div><div class="d">Power for your sensors, LEDs and motors.</div></div>
+            <div class="pin"><div class="h">🟢 Digital pins (0-13)</div><div class="d">ON or OFF only. Great for LEDs &amp; buttons.</div></div>
+            <div class="pin"><div class="h">🔵 Analog pins (A0-A5)</div><div class="d">A whole range of values. Great for sensors.</div></div>
+            <div class="pin"><div class="h">🔴 Reset button</div><div class="d">Press it to restart your program.</div></div>
+          </div>
+
+          <div class="funfact">
+            <b>Cool fact:</b> Arduino UNO costs about the same as a pizza, runs on a 9V battery, and can drive lights, motors, screens, robots, music makers&hellip; the list never ends.
+          </div>
+        </div>
+
+        <div>
+          <!-- Arduino UNO simplified SVG -->
+          <svg class="diagram" viewBox="0 0 380 280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="boardG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#14b8a6"/>
+                <stop offset="100%" stop-color="#0f766e"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Board -->
+            <rect x="20" y="30" width="340" height="220" rx="12" fill="url(#boardG)" stroke="#134e4a" stroke-width="3"/>
+            <text x="190" y="64" text-anchor="middle" font-size="16" font-weight="900" fill="white">Arduino UNO</text>
+
+            <!-- USB port (left) -->
+            <rect x="0" y="65" width="40" height="38" rx="3" fill="#9ca3af" stroke="#374151" stroke-width="2"/>
+            <text x="14" y="58" font-size="9" font-weight="700" fill="#0f172a">USB</text>
+
+            <!-- Power jack (left bottom) -->
+            <rect x="0" y="170" width="40" height="34" rx="3" fill="#1f2937" stroke="#0f172a" stroke-width="2"/>
+            <text x="20" y="220" text-anchor="middle" font-size="9" font-weight="700" fill="#0f172a">DC</text>
+
+            <!-- Microcontroller -->
+            <rect x="155" y="120" width="80" height="60" rx="2" fill="#1f2937" stroke="#0f172a" stroke-width="2"/>
+            <text x="195" y="148" text-anchor="middle" font-size="10" font-weight="700" fill="#fbbf24">ATmega</text>
+            <text x="195" y="162" text-anchor="middle" font-size="10" font-weight="700" fill="#fbbf24">328P</text>
+            <text x="195" y="178" text-anchor="middle" font-size="9" fill="#cbd5e1">(brain)</text>
+
+            <!-- Digital pins top -->
+            <g>
+              <rect x="60" y="36" width="280" height="14" fill="#0f172a"/>
+              <text x="200" y="46" text-anchor="middle" font-size="9" font-weight="700" fill="#22c55e">DIGITAL PINS (0 - 13)</text>
+            </g>
+
+            <!-- Analog pins bottom -->
+            <g>
+              <rect x="200" y="230" width="140" height="14" fill="#0f172a"/>
+              <text x="270" y="240" text-anchor="middle" font-size="9" font-weight="700" fill="#3b82f6">ANALOG (A0-A5)</text>
+            </g>
+
+            <!-- Power pins -->
+            <g>
+              <rect x="60" y="230" width="120" height="14" fill="#0f172a"/>
+              <text x="120" y="240" text-anchor="middle" font-size="9" font-weight="700" fill="#fb923c">POWER (5V/GND)</text>
+            </g>
+
+            <!-- Reset button -->
+            <circle cx="60" cy="90" r="8" fill="#dc2626" stroke="#7f1d1d" stroke-width="2"/>
+            <text x="60" y="76" text-anchor="middle" font-size="9" font-weight="700" fill="#0f172a">⟲</text>
+
+            <!-- LED indicators -->
+            <circle cx="280" cy="90" r="4" fill="#fbbf24"/>
+            <circle cx="295" cy="90" r="4" fill="#22c55e"/>
+            <text x="287" y="78" text-anchor="middle" font-size="8" fill="#0f172a" font-weight="700">LEDs</text>
+          </svg>
+          <div style="text-align:center;font-size:11px;color:#64748b;margin-top:6px;">A simplified map of the Arduino UNO board</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 6 — DIGITAL vs ANALOG ============ -->
+  <section class="slide" data-i="5">
+    <div class="slide-head sd-head">
+      <span class="badge">Slide 6 of 8 · Talking to the world</span>
+      <h2 style="width:100%">📡 Digital vs Analog Signals</h2>
+      <p class="subtitle">Arduino has two ways of listening and talking: <b>digital</b> (just on or off) and <b>analog</b> (a whole range). Knowing the difference unlocks every project.</p>
+    </div>
+    <div class="slide-body">
+      <div class="da-grid">
+        <!-- Digital -->
+        <div class="da dig">
+          <h3>🟦 Digital — ON or OFF</h3>
+          <div class="sub">Only two values, like a light switch.</div>
+          <svg class="diagram" viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg">
+            <line x1="20" y1="75" x2="290" y2="75" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="20" y1="20" x2="290" y2="20" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2 2"/>
+            <text x="0" y="78" font-size="9" fill="#64748b">0V</text>
+            <text x="0" y="22" font-size="9" fill="#64748b">5V</text>
+            <polyline points="20,75 60,75 60,20 100,20 100,75 140,75 140,20 180,20 180,75 220,75 220,20 260,20 260,75 290,75"
+                      fill="none" stroke="#2563eb" stroke-width="3"/>
+          </svg>
+          <ul>
+            <li><b>HIGH</b> = 5V = ON = <code>1</code></li>
+            <li><b>LOW</b> = 0V = OFF = <code>0</code></li>
+            <li>Used for: buttons, LEDs, switches</li>
+            <li>Code: <code>digitalRead(2)</code> · <code>digitalWrite(13, HIGH)</code></li>
+          </ul>
+        </div>
+
+        <!-- Analog -->
+        <div class="da ana">
+          <h3>🟪 Analog — a Whole Range</h3>
+          <div class="sub">Smooth, in-between values like a dimmer knob.</div>
+          <svg class="diagram" viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg">
+            <line x1="20" y1="75" x2="290" y2="75" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="20" y1="20" x2="290" y2="20" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2 2"/>
+            <text x="0" y="78" font-size="9" fill="#64748b">0</text>
+            <text x="0" y="22" font-size="9" fill="#64748b">1023</text>
+            <path d="M 20 47 Q 60 5 100 47 T 180 47 T 260 47 T 340 47"
+                  fill="none" stroke="#db2777" stroke-width="3"/>
+          </svg>
+          <ul>
+            <li>Reads <b>0 to 1023</b> (1024 steps)</li>
+            <li>Used for: knobs, light sensors, mic, temperature</li>
+            <li>Code: <code>analogRead(A0)</code></li>
+            <li>Maps to voltage: 0 → 0V · 1023 → 5V</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pwm-box">
+        <div class="pwm-txt">
+          <b>✨ PWM — &ldquo;fake&rdquo; analog output</b><br/>
+          Digital pins are only ON/OFF — but on <b>PWM pins (~3, ~5, ~6, ~9, ~10, ~11)</b> Arduino flickers the pin so fast (≈1000 times a second) that an LED <i>looks</i> dimmer. That trick is called <b>PWM</b>.<br/><br/>
+          <code>analogWrite(9, 128)</code> = pin 9 at <b>half brightness</b> (range 0&ndash;255).
+        </div>
+        <svg class="diagram" viewBox="0 0 280 110" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="100" x2="270" y2="100" stroke="#94a3b8" stroke-width="1"/>
+          <text x="10" y="12" font-size="10" font-weight="800" fill="#92400e">25% duty → dim</text>
+          <polyline points="10,100 20,100 20,75 30,75 30,100 50,100 50,75 60,75 60,100 80,100 80,75 90,75 90,100 110,100 110,75 120,75 120,100"
+                    fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+          <text x="150" y="12" font-size="10" font-weight="800" fill="#9a3412">75% duty → bright</text>
+          <polyline points="150,100 150,40 180,40 180,100 190,100 190,40 220,40 220,100 230,100 230,40 260,40 260,100 270,100"
+                    fill="none" stroke="#ef4444" stroke-width="2.5"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 7 — CODE ============ -->
+  <section class="slide" data-i="6">
+    <div class="slide-head s4-head">
+      <span class="badge">Slide 7 of 8 · Tell it what to do</span>
+      <h2 style="width:100%">💻 Code = A Recipe for the Brain</h2>
+      <p class="subtitle">You write a tiny program, send it over USB, and Arduino runs it forever. Here&rsquo;s the classic &ldquo;Hello World&rdquo; — Blink.</p>
+    </div>
+    <div class="slide-body">
+
+      <!-- Real wiring diagram for Blink -->
+      <div class="info-card amber">
+        <h3>🔧 Here&rsquo;s what we&rsquo;ll wire up</h3>
+        <p>
+          One Arduino UNO. One LED. One 220 Ω resistor. Two jumper wires. That&rsquo;s the whole hardware —
+          the code on the right makes it blink on and off forever.
+        </p>
+        <div class="image-frame wide">
+          <img src="assets/intro/blink-wiring.png" alt="Arduino UNO connected to a breadboard with a 220 ohm resistor and a red LED, wired for the Blink project"/>
+          <div class="caption">Arduino pin 13 → 220 Ω resistor → LED long leg (+). LED short leg (−) → Arduino GND. That&rsquo;s the entire circuit!</div>
+        </div>
+      </div>
+
+      <div class="s4-grid">
+        <pre class="code"><span class="cm">// 🌟 Blink: turn an LED on and off forever</span>
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="cm">// runs ONCE when Arduino starts</span>
+  <span class="fn">pinMode</span>(<span class="num">13</span>, OUTPUT);
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  <span class="cm">// runs FOREVER, top to bottom</span>
+  <span class="fn">digitalWrite</span>(<span class="num">13</span>, HIGH); <span class="cm">// ON</span>
+  <span class="fn">delay</span>(<span class="num">1000</span>);             <span class="cm">// wait 1s</span>
+  <span class="fn">digitalWrite</span>(<span class="num">13</span>, LOW);  <span class="cm">// OFF</span>
+  <span class="fn">delay</span>(<span class="num">1000</span>);             <span class="cm">// wait 1s</span>
+}</pre>
+
+        <div class="explain">
+          <div class="row">
+            <div class="dot">1</div>
+            <div class="t"><b>setup()</b> runs <b>once</b> at start-up. Here we tell pin 13 that we&rsquo;ll be sending power <i>out</i> of it (an <code>OUTPUT</code>).</div>
+          </div>
+          <div class="row">
+            <div class="dot">2</div>
+            <div class="t"><b>loop()</b> runs <b>over and over forever</b>. That&rsquo;s how Arduino keeps doing its job.</div>
+          </div>
+          <div class="row">
+            <div class="dot">3</div>
+            <div class="t"><code>digitalWrite(13, HIGH)</code> = pin 13 ON. <code>HIGH</code> means 5 volts. The LED lights up.</div>
+          </div>
+          <div class="row">
+            <div class="dot">4</div>
+            <div class="t"><code>delay(1000)</code> = pause for 1000 milliseconds (1 second). Without this, the LED would flash too fast to see!</div>
+          </div>
+          <div class="row">
+            <div class="dot">5</div>
+            <div class="t">Then <code>digitalWrite(13, LOW)</code> turns it back OFF (<code>LOW</code> = 0 volts) and we wait again. Forever. 💫</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 8 — BUILD ============ -->
+  <section class="slide" data-i="7">
+    <div class="slide-head s5-head">
+      <span class="badge">Slide 8 of 8 · Your turn!</span>
+      <h2 style="width:100%">🚀 What Can YOU Build?</h2>
+      <p class="subtitle">Real makers — including students your age — have built every single one of these. You can too. Pick one!</p>
+    </div>
+    <div class="slide-body">
+
+      <div class="projects-row">
+        <a class="proj" target="_blank" rel="noopener" href="https://www.programmingelectronics.com/self-balancing-cube/">
+          <img loading="lazy" alt="Self Balancing Cube" src="https://eadn-wc01-1929780.nxedge.io/wp-content/uploads/2023/06/Balance-Cube-Thumbnail-300x169.png"/>
+          <div class="pt"><div class="l">Real project</div><div class="t">Self-Balancing Cube</div></div>
+        </a>
+        <a class="proj" target="_blank" rel="noopener" href="https://www.programmingelectronics.com/arduino-fitbit/">
+          <img loading="lazy" alt="Hamster Fitbit" src="https://eadn-wc01-1929780.nxedge.io/wp-content/uploads/2021/03/PetBit-Featured-Image-768x432.png"/>
+          <div class="pt"><div class="l">Real project</div><div class="t">PetBit — Hamster Fitbit</div></div>
+        </a>
+        <a class="proj" target="_blank" rel="noopener" href="https://www.programmingelectronics.com/useless-box-arduino-project/">
+          <img loading="lazy" alt="Useless Box" src="https://eadn-wc01-1929780.nxedge.io/wp-content/uploads/2021/02/Useless-box-Featured-Image-768x432.jpg"/>
+          <div class="pt"><div class="l">Real project</div><div class="t">The Useless Box</div></div>
+        </a>
+        <a class="proj" target="_blank" rel="noopener" href="https://www.programmingelectronics.com/model-traffic-lights-with-arduino/">
+          <img loading="lazy" alt="Model Traffic Lights" src="https://eadn-wc01-1929780.nxedge.io/wp-content/uploads/2025/01/traffic-6-e1735941276895-300x225.jpeg"/>
+          <div class="pt"><div class="l">Real project</div><div class="t">Model Traffic Lights</div></div>
+        </a>
+        <a class="proj" target="_blank" rel="noopener" href="https://www.programmingelectronics.com/childrens-museum-exhibit-member-project/">
+          <img loading="lazy" alt="Put Out The Fire" src="https://eadn-wc01-1929780.nxedge.io/wp-content/uploads/2020/01/Arduino-Museum-Exhibit-thumbnail-768x432.jpg"/>
+          <div class="pt"><div class="l">Real project</div><div class="t">Put Out The Fire (Museum)</div></div>
+        </a>
+        <a class="proj" target="_blank" rel="noopener" href="https://www.programmingelectronics.com/arduino-controlled-aquaponics-garden-student-project/">
+          <img loading="lazy" alt="Aquaponics" src="https://eadn-wc01-1929780.nxedge.io/wp-content/uploads/2017/04/Arduino-Aquaponics-Control-featured-image-768x402.png"/>
+          <div class="pt"><div class="l">Real project</div><div class="t">Aquaponics: Fish + Plants</div></div>
+        </a>
+      </div>
+
+      <div class="ctas">
+        <a class="cta a" href="index.html">
+          <div class="cta-emoji">📘</div>
+          <div class="cta-title">Arduino Adventures</div>
+          <div class="cta-sub">The full kid-friendly Arduino course — electricity, components, code, quizzes &amp; hands-on projects.</div>
+        </a>
+        <a class="cta c" href="customer-projects.html">
+          <div class="cta-emoji">🛠️</div>
+          <div class="cta-title">73 Maker Projects</div>
+          <div class="cta-sub">Real Arduino projects built by other students &amp; makers. Filter, search, get inspired.</div>
+        </a>
+      </div>
+
+      <div class="closer">Pick one. Try it. Have fun. 🌟</div>
+    </div>
+  </section>
+
+</main>
+
+<nav class="footer-nav">
+  <button class="nav-btn" id="prevBtn">← Prev</button>
+  <span class="dots" id="dots"></span>
+  <span class="pageno" id="pageno">1 / 8</span>
+  <button class="nav-btn primary" id="nextBtn">Next →</button>
+</nav>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const total = slides.length;
+  const prog = document.getElementById("prog");
+  const dotsWrap = document.getElementById("dots");
+  const pageno = document.getElementById("pageno");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  let idx = 0;
+
+  // build dots
+  for(let i=0;i<total;i++){
+    const d = document.createElement("span");
+    d.className = "dot" + (i===0?" active":"");
+    d.dataset.i = i;
+    dotsWrap.appendChild(d);
+  }
+  const dots = Array.from(dotsWrap.querySelectorAll(".dot"));
+
+  function go(n){
+    n = Math.max(0, Math.min(total-1, n));
+    if(n === idx) return;
+    slides[idx].classList.remove("active");
+    dots[idx].classList.remove("active");
+    idx = n;
+    slides[idx].classList.add("active");
+    dots[idx].classList.add("active");
+    pageno.textContent = `${idx+1} / ${total}`;
+    prog.style.width = (((idx+1)/total)*100) + "%";
+    prevBtn.disabled = idx === 0;
+    nextBtn.textContent = idx === total-1 ? "Finish ✓" : "Next →";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  prevBtn.addEventListener("click", () => go(idx-1));
+  nextBtn.addEventListener("click", () => {
+    if(idx === total-1){
+      // when finishing — open the full Arduino deck in a new tab
+      window.location.href = "index.html";
+    } else {
+      go(idx+1);
+    }
+  });
+  dotsWrap.addEventListener("click", (e) => {
+    const d = e.target.closest(".dot");
+    if(d) go(parseInt(d.dataset.i,10));
+  });
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); go(idx+1); }
+    else if(e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(idx-1); }
+    else if(e.key === "Home") go(0);
+    else if(e.key === "End")  go(total-1);
+    else if(/^[1-9]$/.test(e.key)) go(parseInt(e.key,10)-1);
+  });
+
+  // init
+  prog.style.width = ((1/total)*100) + "%";
+  prevBtn.disabled = true;
+})();
+</script>
+
+</body>
+</html>
