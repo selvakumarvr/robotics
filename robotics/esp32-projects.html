@@ -1,0 +1,1731 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ESP32 Build &amp; Sell · 32 Projects from Hobby to Pro</title>
+<meta name="description" content="32 curated ESP32 project ideas organised by skill level — from $10 weekend builds to commercial-grade products. Every project shows BOM, build time, sell price, target market and the pitch you'd use to demo it." />
+<style>
+:root {
+  --bg-1:#0f172a;
+  --ink:#0b1220;
+  --paper:#ffffff;
+  --muted:#475569;
+  --soft:#e2e8f0;
+  --shadow: 0 20px 60px rgba(2,6,23,.18), 0 4px 12px rgba(2,6,23,.08);
+  --radius: 22px;
+  --radius-sm: 12px;
+
+  --c-cover-1:#4338ca;  --c-cover-2:#06b6d4;
+  --c-t1-1:#16a34a;     --c-t1-2:#22c55e;
+  --c-t2-1:#d97706;     --c-t2-2:#f59e0b;
+  --c-t3-1:#7c3aed;     --c-t3-2:#a855f7;
+  --c-t4-1:#be123c;     --c-t4-2:#dc2626;
+  --c-sell-1:#db2777;   --c-sell-2:#ec4899;
+  --c-res-1:#0891b2;    --c-res-2:#06b6d4;
+  --c-end-1:#06b6d4;    --c-end-2:#7c3aed;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { background: var(--bg-1); }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Helvetica Neue", "Nunito", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 800px at 10% -10%, #1e293b, transparent 60%),
+    radial-gradient(1200px 800px at 110% 110%, #0b1220, transparent 60%),
+    linear-gradient(180deg, #0f172a, #020617);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .toc { position: fixed; inset: 0 auto 0 0; transform: translateX(-100%); transition: transform .25s ease; z-index: 50; width: 280px; }
+  .toc.open { transform: translateX(0); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+  .toc-toggle { display: inline-flex !important; }
+}
+
+.toc {
+  background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+  color: #e2e8f0;
+  padding: 18px 14px;
+  border-right: 1px solid rgba(255,255,255,.06);
+  overflow-y: auto;
+  max-height: 100vh;
+  position: sticky; top: 0;
+}
+.toc h2 { font-size: 14px; letter-spacing: 1.2px; text-transform: uppercase; color: #94a3b8; margin: 6px 8px 14px; font-weight: 700; }
+.toc .brand {
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, #db2777, #06b6d4);
+  color: white; padding: 12px 14px; border-radius: 14px; margin-bottom: 14px;
+  font-weight: 800;
+}
+.toc .brand-emoji { font-size: 22px; }
+.toc .brand small { display: block; font-weight: 400; opacity: .85; font-size: 11px; letter-spacing: .8px; text-transform: uppercase; }
+.toc-section { margin-bottom: 14px; }
+.toc-section-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+  color: #cbd5e1; padding: 6px 10px;
+  background: rgba(255,255,255,.04); border-radius: 8px; margin-bottom: 6px;
+  font-weight: 700;
+}
+.toc-section .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.toc-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 12.5px; color: #cbd5e1; line-height: 1.25;
+  transition: background .15s ease, color .15s ease;
+  user-select: none;
+}
+.toc-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+.toc-item.active {
+  background: linear-gradient(90deg, rgba(99,102,241,.25), rgba(236,72,153,.18));
+  color: #fff; font-weight: 600;
+}
+.toc-item .num { font-variant-numeric: tabular-nums; color: #94a3b8; font-size: 11px; min-width: 22px; }
+.toc-item.active .num { color: #f8fafc; }
+.nav-other {
+  margin-top: 14px; background: rgba(255,255,255,.03);
+  border: 1px dashed rgba(255,255,255,.12); border-radius: 10px;
+  padding: 10px; font-size: 12px; color: #cbd5e1; line-height: 1.6;
+}
+.nav-other a { color: #7dd3fc; text-decoration: none; font-weight: 700; display: block; }
+.nav-other a:hover { text-decoration: underline; }
+
+.dot-cover { background: linear-gradient(135deg, var(--c-cover-1), var(--c-cover-2)); }
+.dot-t1    { background: linear-gradient(135deg, var(--c-t1-1),    var(--c-t1-2)); }
+.dot-t2    { background: linear-gradient(135deg, var(--c-t2-1),    var(--c-t2-2)); }
+.dot-t3    { background: linear-gradient(135deg, var(--c-t3-1),    var(--c-t3-2)); }
+.dot-t4    { background: linear-gradient(135deg, var(--c-t4-1),    var(--c-t4-2)); }
+.dot-sell  { background: linear-gradient(135deg, var(--c-sell-1),  var(--c-sell-2)); }
+.dot-res   { background: linear-gradient(135deg, var(--c-res-1),   var(--c-res-2)); }
+.dot-end   { background: linear-gradient(135deg, var(--c-end-1),   var(--c-end-2)); }
+
+.deck-wrap { padding: 24px 28px 100px; max-width: 1280px; width: 100%; margin: 0 auto; }
+.topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.toc-toggle {
+  display: none; padding: 8px 12px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10);
+  color: white; border-radius: 999px; font-weight: 700; font-size: 12px; cursor: pointer;
+}
+.progress-wrap { flex: 1; height: 6px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden; }
+.progress {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #06b6d4, #ec4899, #f59e0b);
+  transition: width .35s ease;
+  box-shadow: 0 0 12px rgba(236,72,153,.4);
+}
+.counter {
+  color: #cbd5e1; font-size: 12px; font-variant-numeric: tabular-nums;
+  background: rgba(255,255,255,.06); padding: 6px 10px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  font-weight: 700;
+}
+
+.slide {
+  background: var(--paper);
+  border-radius: var(--radius);
+  padding: 26px 30px 22px;
+  box-shadow: var(--shadow);
+  display: none;
+  flex-direction: column;
+  min-height: 70vh;
+  animation: pop .25s ease both;
+  --accent-1: var(--c-cover-1); --accent-2: var(--c-cover-2);
+  border-top: 6px solid transparent;
+  border-image: linear-gradient(90deg, var(--accent-1), var(--accent-2)) 1;
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.slide.s-cover { --accent-1: var(--c-cover-1); --accent-2: var(--c-cover-2); }
+.slide.s-t1    { --accent-1: var(--c-t1-1);    --accent-2: var(--c-t1-2); }
+.slide.s-t2    { --accent-1: var(--c-t2-1);    --accent-2: var(--c-t2-2); }
+.slide.s-t3    { --accent-1: var(--c-t3-1);    --accent-2: var(--c-t3-2); }
+.slide.s-t4    { --accent-1: var(--c-t4-1);    --accent-2: var(--c-t4-2); }
+.slide.s-sell  { --accent-1: var(--c-sell-1);  --accent-2: var(--c-sell-2); }
+.slide.s-res   { --accent-1: var(--c-res-1);   --accent-2: var(--c-res-2); }
+.slide.s-end   { --accent-1: var(--c-end-1);   --accent-2: var(--c-end-2); }
+
+.slide-header {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;
+}
+.slide-header .pill {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: white; padding: 4px 10px; border-radius: 999px;
+  font-weight: 800; letter-spacing: .8px;
+}
+.slide h1 {
+  margin: 4px 0 10px; font-size: clamp(22px, 3vw, 32px); line-height: 1.15;
+  color: var(--ink); font-weight: 800; letter-spacing: -.4px;
+}
+.slide .sub { margin: 0 0 14px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+
+/* Project card */
+.proj-card {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  margin-top: 6px;
+}
+@media (max-width: 800px){ .proj-card{ grid-template-columns: 1fr; } }
+
+.proj-hook {
+  font-size: 16px; line-height: 1.55; color: #1f2937;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-left: 4px solid var(--accent-1);
+  padding: 12px 14px; border-radius: 10px;
+  margin-bottom: 10px;
+}
+.proj-hook strong { color: var(--accent-1); }
+
+.kv-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.kv {
+  background: #f8fafc;
+  border: 1px solid var(--soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.kv .k {
+  font-size: 10.5px; font-weight: 800; color: #475569;
+  text-transform: uppercase; letter-spacing: .8px;
+}
+.kv .v { font-size: 14.5px; color: #0f172a; margin-top: 2px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kv.cost   .v { color: #b45309; }
+.kv.price  .v { color: #15803d; }
+.kv.margin .v { color: #be185d; }
+.kv.time   .v { color: #1e40af; }
+
+.bom-table {
+  width: 100%; border-collapse: collapse; margin-top: 8px;
+  background: #fff; border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--soft); font-size: 12.5px;
+}
+.bom-table th { background: #f1f5f9; color: #475569; font-weight: 700; font-size: 10.5px;
+  text-transform: uppercase; letter-spacing: .8px; padding: 7px 10px; text-align: left; }
+.bom-table td { padding: 6px 10px; border-top: 1px solid #f1f5f9; color: #1e293b; }
+.bom-table td.c { text-align: right; font-weight: 700; color: #b45309; font-variant-numeric: tabular-nums; }
+.bom-table tr:last-child td { border-top: 2px solid #cbd5e1; font-weight: 800; background: #fef9c3; }
+.bom-table tr:last-child td.c { color: #7c2d12; }
+
+.section-h {
+  margin: 12px 0 4px;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--accent-1);
+}
+
+.tag-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag {
+  font-size: 11px; padding: 3px 9px; border-radius: 999px;
+  background: #ede9fe; color: #5b21b6; font-weight: 700;
+}
+
+.callout {
+  margin-top: 10px;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px;
+  padding: 10px 14px; font-size: 13px; line-height: 1.5; color: #78350f;
+}
+.callout::before { content: "💰 Why it sells: "; font-weight: 800; color: #b45309; }
+
+.demo-card {
+  margin-top: 8px;
+  background: linear-gradient(135deg, #ecfeff, #cffafe);
+  border-left: 4px solid #06b6d4;
+  border-radius: 10px;
+  padding: 10px 14px; font-size: 13px; line-height: 1.5; color: #155e75;
+}
+.demo-card::before { content: "🎬 Demo pitch: "; font-weight: 800; color: #0e7490; }
+
+.where {
+  margin-top: 8px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 10px;
+  padding: 9px 12px; font-size: 12.5px; color: #4c1d95;
+}
+.where::before { content: "🛒 Sell at: "; font-weight: 800; color: #6d28d9; }
+
+.example-link {
+  margin-top: 8px; font-size: 12px;
+}
+.example-link a { color: #0e7490; text-decoration: none; font-weight: 700; }
+.example-link a:hover { text-decoration: underline; }
+
+.tut-list {
+  margin-top: 6px;
+  display: grid; grid-template-columns: 1fr; gap: 4px;
+}
+.tut-list a {
+  display: flex; align-items: center; gap: 8px;
+  text-decoration: none; padding: 7px 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 12.5px; color: #1f2937; font-weight: 600;
+  transition: background .12s ease, border-color .12s ease, transform .08s ease;
+}
+.tut-list a:hover { background: #eef2ff; border-color: #c7d2fe; transform: translateX(2px); }
+.tut-list .ico {
+  width: 22px; height: 22px; border-radius: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: white; flex-shrink: 0;
+}
+.tut-list .ico.video { background: #dc2626; }
+.tut-list .ico.guide { background: #2563eb; }
+.tut-list .ico.code  { background: #0f172a; }
+.tut-list .lbl  { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Channels grid (where-to-learn slide) */
+.channels-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  margin-top: 8px;
+}
+@media (max-width: 900px){ .channels-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px){ .channels-grid { grid-template-columns: 1fr; } }
+.ch-card {
+  background: #fff; border: 1px solid var(--soft); border-radius: 12px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 4px;
+}
+.ch-card .ch-name { font-weight: 800; color: var(--accent-1); font-size: 14px; }
+.ch-card .ch-kind { font-size: 10.5px; text-transform: uppercase; letter-spacing: .8px; color: #64748b; font-weight: 700; }
+.ch-card .ch-desc { font-size: 12.5px; color: #334155; line-height: 1.45; }
+.ch-card a { color: #0e7490; font-size: 12px; font-weight: 700; text-decoration: none; margin-top: 2px; }
+.ch-card a:hover { text-decoration: underline; }
+
+.diff-pips { display: inline-flex; gap: 3px; margin-left: 6px; }
+.diff-pips .pip {
+  width: 9px; height: 9px; border-radius: 999px; background: rgba(255,255,255,.4);
+  border: 1.5px solid white;
+}
+.diff-pips .pip.on { background: white; }
+
+/* Tier intro slide */
+.tier-intro {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+}
+@media (max-width: 800px){ .tier-intro{ grid-template-columns: 1fr; } }
+.tier-stats {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: white;
+  border-radius: 14px; padding: 18px;
+}
+.tier-stats h2 { margin: 0 0 6px; font-size: 22px; }
+.tier-stats .num { font-size: 38px; font-weight: 900; line-height: 1; }
+.tier-stats .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: .85; }
+.tier-stats .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.tier-stats .row > div { background: rgba(255,255,255,.15); border-radius: 10px; padding: 10px 12px; }
+
+.tier-list { padding-left: 18px; }
+.tier-list li { margin-bottom: 6px; font-size: 14px; color: #1f2937; line-height: 1.5; }
+
+/* Cover */
+.slide.cover h1 {
+  font-size: clamp(28px, 5vw, 56px);
+  background: linear-gradient(90deg, #db2777, #06b6d4, #f59e0b);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.slide.cover .cta-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.slide.cover .cta {
+  text-decoration: none; padding: 12px 18px; border-radius: 999px;
+  background: linear-gradient(135deg, #db2777, #f59e0b); color: white; font-weight: 800;
+  display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(219,39,119,.25);
+}
+.slide.cover .cta.ghost { background: transparent; border: 1.5px solid #cbd5e1; color: #1e293b; box-shadow: none; }
+.slide.cover .meta { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+.slide.cover .pill {
+  font-size: 11px; padding: 4px 10px; border-radius: 999px;
+  background: #f1f5f9; color: #475569; font-weight: 700; letter-spacing: .4px;
+}
+
+.slide-footer {
+  margin-top: auto; padding-top: 18px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; color: var(--muted); border-top: 1px dashed var(--soft);
+}
+
+/* Sell-strategy slide */
+.strat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (max-width: 800px){ .strat-grid{ grid-template-columns: 1fr; } }
+.strat-card {
+  background: #fff; border: 1px solid var(--soft); border-radius: 12px;
+  padding: 14px 16px;
+}
+.strat-card h3 { margin: 0 0 6px; font-size: 16px; color: var(--accent-1); }
+.strat-card p { margin: 0; font-size: 13.5px; line-height: 1.5; color: #1f2937; }
+
+.resource-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+.resource-table th, .resource-table td { border-bottom: 1px solid var(--soft); padding: 8px 10px; text-align: left; }
+.resource-table th { color: #475569; font-weight: 700; background: #f8fafc; font-size: 11px; text-transform: uppercase; letter-spacing: .8px; }
+.resource-table a { color: #0e7490; text-decoration: none; font-weight: 700; }
+.resource-table a:hover { text-decoration: underline; }
+
+/* Controls */
+.controls {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  display: flex; justify-content: center; align-items: center; gap: 12px;
+  background: rgba(15,23,42,.78); backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 10px 16px; z-index: 30;
+}
+.controls button {
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
+  color: white; padding: 9px 16px; border-radius: 999px;
+  font-weight: 700; font-size: 13px; cursor: pointer;
+  transition: background .15s ease, transform .1s ease;
+}
+.controls button:hover:not(:disabled) { background: rgba(255,255,255,.16); }
+.controls button:active { transform: translateY(1px); }
+.controls button:disabled { opacity: .35; cursor: not-allowed; }
+.controls .indicator { color: #cbd5e1; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="toc" id="toc">
+    <div class="brand">
+      <span class="brand-emoji">🛒</span>
+      <div>
+        ESP32 Build &amp; Sell
+        <small>32 projects · hobby → pro</small>
+      </div>
+    </div>
+    <h2>Contents</h2>
+    <div id="toc-list"></div>
+    <div class="nav-other">
+      <strong>Also see:</strong>
+      <a href="intro.html">⚡ Electronics primer</a>
+      <a href="next-steps.html">🚀 Next Steps (10 topics)</a>
+      <a href="index.html">📘 Arduino Adventures</a>
+      <a href="esp32.html">🛰️ ESP32 Adventures</a>
+      <a href="rtos.html">⏱️ RTOS Adventures</a>
+      <a href="customer-projects.html">🛠️ 73 Maker Projects</a>
+    </div>
+  </aside>
+
+  <main class="deck-wrap">
+    <div class="topbar">
+      <button class="toc-toggle" id="tocToggle">☰ Contents</button>
+      <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+      <div class="counter" id="counter">1 / 1</div>
+    </div>
+    <div id="deck"></div>
+  </main>
+</div>
+
+<nav class="controls" aria-label="Slide navigation">
+  <button id="prevBtn">← Prev</button>
+  <span class="indicator" id="indicator">1 / 1</span>
+  <button id="nextBtn">Next →</button>
+</nav>
+
+<script>
+/* ==========================================================================
+   ESP32 BUILD & SELL — 32 projects across 4 skill tiers
+   Each project shows BOM, build time, sell price, demo angle and market.
+   ========================================================================== */
+
+const SECTIONS = {
+  cover: { title: "Welcome",                        cls: "s-cover", dot: "dot-cover" },
+  learn: { title: "Where to learn",                 cls: "s-cover", dot: "dot-cover" },
+  t1:    { title: "Tier 1 — Beginner / Hobby",      cls: "s-t1",    dot: "dot-t1" },
+  t2:    { title: "Tier 2 — Intermediate / Side-business", cls: "s-t2", dot: "dot-t2" },
+  t3:    { title: "Tier 3 — Advanced / Crowd-funding",     cls: "s-t3", dot: "dot-t3" },
+  t4:    { title: "Tier 4 — Professional / Commercial",    cls: "s-t4", dot: "dot-t4" },
+  sell:  { title: "How to actually sell",           cls: "s-sell",  dot: "dot-sell" },
+  res:   { title: "Resources",                      cls: "s-res",   dot: "dot-res" },
+  end:   { title: "What's next?",                   cls: "s-end",   dot: "dot-end" },
+};
+
+/* TUTORIALS — source videos + written guides per project (lookup by project num).
+   Mix of:  ▶ video (YouTube)   📄 written guide   💻 code repo
+   YouTube /results URLs are used for resilience — always resolves to the most
+   popular up-to-date tutorial for that topic. */
+const TUTORIALS = {
+  /* ----- TIER 1 ----- */
+  1: [
+    { k:"video", l:"DroneBot Workshop · ESP32 relay/web server", h:"https://www.youtube.com/results?search_query=DroneBot+Workshop+ESP32+relay+web+server" },
+    { k:"guide", l:"Random Nerd Tutorials · ESP32 relay + web server", h:"https://randomnerdtutorials.com/esp32-relay-module-ac-web-server/" },
+    { k:"code",  l:"ESPHome smart-plug recipe", h:"https://esphome.io/cookbook/sonoff-s20.html" }
+  ],
+  2: [
+    { k:"video", l:"Andreas Spiess · ESP32 weather station", h:"https://www.youtube.com/results?search_query=Andreas+Spiess+ESP32+weather+station" },
+    { k:"guide", l:"Random Nerd Tutorials · ESP32 + BME280", h:"https://randomnerdtutorials.com/esp32-bme280-arduino-ide-pressure-temperature-humidity/" },
+    { k:"code",  l:"OLED + WebServer chart starter", h:"https://github.com/G6EJD/ESP32-8266-Weather-Station-OLED" }
+  ],
+  3: [
+    { k:"video", l:"ElectroPeak · ESP32 NeoPixel mood lamp", h:"https://www.youtube.com/results?search_query=ESP32+WS2812+mood+lamp+web+control" },
+    { k:"guide", l:"Random Nerd Tutorials · ESP32 + WS2812B", h:"https://randomnerdtutorials.com/esp32-ws2812b-led-strip-arduino-ide/" },
+    { k:"code",  l:"FastLED audio-reactive examples", h:"https://github.com/atuline/FastLED-Demos" }
+  ],
+  4: [
+    { k:"video", l:"ESP32 Telegram doorbell walk-through", h:"https://www.youtube.com/results?search_query=ESP32+doorbell+telegram+notification" },
+    { k:"guide", l:"Random Nerd Tutorials · Telegram + ESP32 alerts", h:"https://randomnerdtutorials.com/telegram-esp32-motion-detection-arduino/" }
+  ],
+  5: [
+    { k:"video", l:"Hackster · ESP32 self-watering plant", h:"https://www.youtube.com/results?search_query=ESP32+automatic+plant+watering+capacitive+soil" },
+    { k:"guide", l:"Random Nerd Tutorials · ESP32 soil-moisture", h:"https://randomnerdtutorials.com/esp32-soil-moisture-sensor-arduino/" },
+    { k:"code",  l:"Open-Plant ESPHome config", h:"https://github.com/Pro/esphome-plantmonitor" }
+  ],
+  6: [
+    { k:"video", l:"Build a CI/build-status LED light", h:"https://www.youtube.com/results?search_query=ESP32+github+actions+build+status+led" },
+    { k:"guide", l:"GitHub webhooks → ESP32 LED", h:"https://docs.github.com/en/webhooks" },
+    { k:"code",  l:"Sample build-status repo", h:"https://github.com/marc7000/esp32-build-status" }
+  ],
+  7: [
+    { k:"video", l:"ESP32-S3 BLE macropad build", h:"https://www.youtube.com/results?search_query=ESP32-S3+BLE+macropad+mechanical+keyboard" },
+    { k:"guide", l:"Random Nerd Tutorials · ESP32 BLE Keyboard", h:"https://randomnerdtutorials.com/esp32-ble-keyboard/" },
+    { k:"code",  l:"T-vK ESP32-BLE-Keyboard library", h:"https://github.com/T-vK/ESP32-BLE-Keyboard" }
+  ],
+  8: [
+    { k:"video", l:"atomic14 · ESP32 TFT picture frame", h:"https://www.youtube.com/results?search_query=atomic14+ESP32+TFT+picture+frame" },
+    { k:"guide", l:"Random Nerd Tutorials · ESP32 + 3.5\" TFT", h:"https://randomnerdtutorials.com/esp32-tft/" },
+    { k:"code",  l:"Bodmer TFT_eSPI starter sketches", h:"https://github.com/Bodmer/TFT_eSPI" }
+  ],
+
+  /* ----- TIER 2 ----- */
+  9: [
+    { k:"video", l:"Random Nerd Tutorials · ESP32-CAM video doorbell", h:"https://www.youtube.com/results?search_query=ESP32-CAM+video+doorbell+telegram" },
+    { k:"guide", l:"RNT · ESP32-CAM project hub", h:"https://randomnerdtutorials.com/projects-esp32-cam/" },
+    { k:"code",  l:"easytarget · ESP32-CAM Web Server", h:"https://github.com/easytarget/esp32-cam-webserver" }
+  ],
+  10: [
+    { k:"video", l:"Volos Projects · ESP32 air-quality monitor", h:"https://www.youtube.com/results?search_query=ESP32+CO2+air+quality+monitor+SCD40" },
+    { k:"guide", l:"Adafruit SCD-40 learn guide", h:"https://learn.adafruit.com/adafruit-scd-40-and-scd-41" },
+    { k:"code",  l:"AirNode reference firmware", h:"https://www.hackster.io/lukesxg/airnode-esp32-s3-co-air-quality-monitor-with-cloud-dashbo-5e16cc" }
+  ],
+  11: [
+    { k:"video", l:"DIY smart mirror end-to-end build", h:"https://www.youtube.com/results?search_query=DIY+smart+mirror+ESP32+magicmirror" },
+    { k:"guide", l:"MagicMirror² official docs", h:"https://docs.magicmirror.builders/" },
+    { k:"code",  l:"MagicMirror² repo + modules", h:"https://github.com/MichMich/MagicMirror" }
+  ],
+  12: [
+    { k:"video", l:"Andreas Spiess · ESP32 energy meter (CT-clamp)", h:"https://www.youtube.com/results?search_query=Andreas+Spiess+ESP32+energy+meter+CT+clamp" },
+    { k:"guide", l:"OpenEnergyMonitor learn (EmonLib)", h:"https://learn.openenergymonitor.org/" },
+    { k:"code",  l:"OpenEnergyMonitor EmonLib", h:"https://github.com/openenergymonitor/EmonLib" }
+  ],
+  13: [
+    { k:"video", l:"ESP32 + RC522 access-control build", h:"https://www.youtube.com/results?search_query=ESP32+RC522+RFID+access+control" },
+    { k:"guide", l:"Random Nerd Tutorials · ESP32 + RFID RC522", h:"https://randomnerdtutorials.com/esp32-mfrc522-rfid-reader-arduino/" },
+    { k:"code",  l:"Crypt_AccessIQ open-source repo", h:"https://github.com/rafiul254/Crypt_AccessIQ" }
+  ],
+  14: [
+    { k:"video", l:"How to build the Anemoia handheld NES", h:"https://www.youtube.com/results?search_query=ESP32+NES+emulator+handheld+anemoia" },
+    { k:"guide", l:"Hackster · Anemoia-ESP32 step-by-step", h:"https://www.hackster.io/shimmanaloto/how-to-build-a-performant-handheld-nes-on-the-esp32-fe1072" },
+    { k:"code",  l:"Anemoia-ESP32 source", h:"https://github.com/shimmanaloto/Anemoia-ESP32" }
+  ],
+  15: [
+    { k:"video", l:"ESP32 reef / aquarium controller", h:"https://www.youtube.com/results?search_query=ESP32+aquarium+reef+controller+pH+temperature" },
+    { k:"guide", l:"Hackster reef-controller projects", h:"https://www.hackster.io/projects/tags/aquarium" },
+    { k:"code",  l:"ReefBerry / OpenReefAqua reference", h:"https://github.com/Reef-Pi/reef-pi" }
+  ],
+  16: [
+    { k:"video", l:"ESP32 multi-zone grow-tent build", h:"https://www.youtube.com/results?search_query=ESP32+grow+tent+controller+VPD" },
+    { k:"guide", l:"ESPHome climate / VPD cookbook", h:"https://esphome.io/cookbook/index.html" },
+    { k:"code",  l:"Open Grow Box (ESPHome example)", h:"https://github.com/OpenAg-Brain/openag_brain" }
+  ],
+
+  /* ----- TIER 3 ----- */
+  17: [
+    { k:"video", l:"Build a pro outdoor weather station", h:"https://www.youtube.com/results?search_query=ESP32+outdoor+weather+station+5+sensors" },
+    { k:"guide", l:"Hackster · FireBeetle 2 ESP32-P4 station", h:"https://www.hackster.io/pradeeplogu0/building-a-professional-outdoor-weather-station-a0b5d5" },
+    { k:"code",  l:"DFRobot FireBeetle 2 ESP32 wiki", h:"https://wiki.dfrobot.com/SKU_DFR0975_FireBeetle_2_ESP32-P4" }
+  ],
+  18: [
+    { k:"video", l:"Andreas Spiess · LoRa / LoRaWAN deep dive", h:"https://www.youtube.com/results?search_query=Andreas+Spiess+LoRaWAN+ESP32+solar+node" },
+    { k:"guide", l:"Zbotic · solar LoRa farm node design", h:"https://zbotic.in/solar-powered-farm-sensor-node-off-grid-iot-design/" },
+    { k:"code",  l:"The Things Network · learn", h:"https://www.thethingsnetwork.org/docs/" }
+  ],
+  19: [
+    { k:"video", l:"Inkplate / e-paper dashboard builds", h:"https://www.youtube.com/results?search_query=Inkplate+ESP32+e-paper+dashboard" },
+    { k:"guide", l:"Inkplate documentation", h:"https://inkplate.readthedocs.io/" },
+    { k:"code",  l:"Inkplate Arduino library", h:"https://github.com/SolderedElectronics/Inkplate-Arduino-library" }
+  ],
+  20: [
+    { k:"video", l:"Kode Dot teardown + kodeOS demo", h:"https://www.youtube.com/results?search_query=Kode+Dot+ESP32-S3+kodeOS" },
+    { k:"guide", l:"CNX · Kode Dot pocket-devkit overview", h:"https://www.cnx-software.com/2025/11/11/kode-dot-an-easy-to-use-pocket-sized-battery-powered-esp32-s3-devkit/" },
+    { k:"code",  l:"kodeOS loader source", h:"https://github.com/kode-dot/kodeOS" }
+  ],
+  21: [
+    { k:"video", l:"WiCAN ESP32 OBD-II adapter build", h:"https://www.youtube.com/results?search_query=WiCAN+ESP32+OBD-II+CAN+adapter" },
+    { k:"guide", l:"Crowd Supply · WiCAN campaign page", h:"https://www.crowdsupply.com/meatpi-electronics/wican" },
+    { k:"code",  l:"meatpiHQ / WiCAN firmware", h:"https://github.com/meatpiHQ/WiCAN" }
+  ],
+  22: [
+    { k:"video", l:"DIY LoRa pet GPS tracker build", h:"https://www.youtube.com/results?search_query=ESP32+LoRa+GPS+pet+tracker" },
+    { k:"guide", l:"Heltec ESP32 + LoRa + GPS reference", h:"https://heltec.org/project/wifi-lora-32-v3/" },
+    { k:"code",  l:"OpenTracker reference firmware", h:"https://github.com/openTracker/openTracker" }
+  ],
+  23: [
+    { k:"video", l:"DigiBlur · DIY ESP32 thermostat", h:"https://www.youtube.com/results?search_query=ESP32+smart+thermostat+ESPHome+HVAC" },
+    { k:"guide", l:"ESPHome thermostat component docs", h:"https://esphome.io/components/climate/thermostat.html" },
+    { k:"code",  l:"openhasp thermostat example", h:"https://github.com/HASwitchPlate/openHASP" }
+  ],
+  24: [
+    { k:"video", l:"ESP32 smart locker / drop-box build", h:"https://www.youtube.com/results?search_query=ESP32+smart+locker+parcel+box+QR" },
+    { k:"guide", l:"Hackster · smart-locker projects", h:"https://www.hackster.io/projects/tags/locker" },
+    { k:"code",  l:"Open smart-locker reference firmware", h:"https://github.com/atomicobject/esp32-locker" }
+  ],
+
+  /* ----- TIER 4 ----- */
+  25: [
+    { k:"video", l:"DigiKey · Intro to The Things Network", h:"https://www.youtube.com/results?search_query=DigiKey+The+Things+Network+LoRaWAN+intro" },
+    { k:"guide", l:"TTN agriculture deployment guide", h:"https://www.thethingsindustries.com/docs/" },
+    { k:"code",  l:"Cayenne LPP payload library", h:"https://github.com/ElectronicCats/CayenneLPP" }
+  ],
+  26: [
+    { k:"video", l:"TinyML on ESP32 — bearing-fault detection", h:"https://www.youtube.com/results?search_query=TinyML+ESP32+vibration+bearing+fault+detection" },
+    { k:"guide", l:"Espressif ESP-DL / TFLite Micro guide", h:"https://docs.espressif.com/projects/esp-dl/en/latest/" },
+    { k:"code",  l:"esp-tflite-micro examples", h:"https://github.com/espressif/esp-tflite-micro" }
+  ],
+  27: [
+    { k:"video", l:"ESP32-S3 edge-AI people counter", h:"https://www.youtube.com/results?search_query=ESP32-S3+ESP-DL+person+detection+counter" },
+    { k:"guide", l:"Espressif ESP-DL person-detection demo", h:"https://github.com/espressif/esp-dl" },
+    { k:"code",  l:"esp-who face/human reference", h:"https://github.com/espressif/esp-who" }
+  ],
+  28: [
+    { k:"video", l:"Andreas Spiess · battery monitor with INA226", h:"https://www.youtube.com/results?search_query=Andreas+Spiess+INA226+ESP32+battery+monitor" },
+    { k:"guide", l:"Random Nerd Tutorials · INA226 current sensor", h:"https://randomnerdtutorials.com/esp32-ina226-current-sensor/" },
+    { k:"code",  l:"OpenBatteryMonitor reference", h:"https://github.com/jeffmer/ESP32_Battery_Monitor" }
+  ],
+  29: [
+    { k:"video", l:"Bluetooth Mesh on ESP32 explained", h:"https://www.youtube.com/results?search_query=ESP32+Bluetooth+Mesh+lighting+commercial" },
+    { k:"guide", l:"Espressif ESP-BLE-Mesh API docs", h:"https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/bluetooth/esp-ble-mesh.html" },
+    { k:"code",  l:"esp-idf BLE-mesh examples", h:"https://github.com/espressif/esp-idf/tree/master/examples/bluetooth/esp_ble_mesh" }
+  ],
+  30: [
+    { k:"video", l:"LVGL on ESP32-S3 touch UI build", h:"https://www.youtube.com/results?search_query=LVGL+ESP32-S3+touch+UI+POS+terminal" },
+    { k:"guide", l:"LVGL official documentation", h:"https://docs.lvgl.io/" },
+    { k:"code",  l:"LVGL ESP-IDF integration sample", h:"https://github.com/lvgl/lv_port_esp32" }
+  ],
+  31: [
+    { k:"video", l:"ESP32 wearable — MAX30102 SpO₂ + HR", h:"https://www.youtube.com/results?search_query=ESP32+MAX30102+wearable+heart+rate+SpO2" },
+    { k:"guide", l:"Circuit Digest · child-safety wearable", h:"https://circuitdigest.com/microcontroller-projects/ai-enhanced-child-safety-wearable-and-smart-home-system" },
+    { k:"code",  l:"SparkFun MAX3010x library", h:"https://github.com/sparkfun/SparkFun_MAX3010x_Sensor_Library" }
+  ],
+  32: [
+    { k:"video", l:"FOFOCA — open-source ESP32 AI robot", h:"https://www.youtube.com/results?search_query=FOFOCA+ESP32+open-source+AI+robot" },
+    { k:"guide", l:"Espressif blog · FOFOCA architecture", h:"https://developer.espressif.com/blog/2026/05/fofoca-esp32-ai-robot/" },
+    { k:"code",  l:"micro-ROS for ESP32 starter", h:"https://github.com/micro-ROS/micro_ros_arduino" }
+  ]
+};
+
+/* ==================== SLIDES ==================== */
+const SLIDES = [
+
+  /* ============= COVER ============= */
+  {
+    cover: true, section: "cover",
+    title: "🛒 ESP32 Build &amp; Sell",
+    sub: "32 hand-picked ESP32 project ideas, sorted by difficulty and commercial potential. Every project shows you the <strong>parts</strong>, <strong>build time</strong>, <strong>realistic sell price</strong>, the <strong>demo pitch</strong>, and <strong>where to sell it</strong>.",
+    metaPills: ["32 projects", "4 tiers", "$10 → $1500 BOM range", "Demo · Sell · Scale"],
+    cta: [
+      { label: "Start the tour →", action: "next" },
+      { label: "← ESP32 Adventures", href: "esp32.html", ghost: true },
+      { label: "← Maker Projects", href: "customer-projects.html", ghost: true }
+    ]
+  },
+
+  /* ==========================================================
+     WHERE TO LEARN — channels, sites, sources
+     ========================================================== */
+  {
+    section: "learn",
+    title: "📚 Where to learn — channels &amp; source videos",
+    sub: "Every project in this deck links to a specific video + written guide. Below are the channels and sites those tutorials come from — bookmark these first.",
+    channels: [
+      { name: "Random Nerd Tutorials", kind: "Written", desc: "Best long-form ESP32 written tutorials — relay, BME280, ESP32-CAM, BLE, etc.", url: "https://randomnerdtutorials.com/projects-esp32/" },
+      { name: "Andreas Spiess (#nodemcu)", kind: "YouTube", desc: "Deep-dive engineering content — LoRa, low-power, sensors, energy meters.", url: "https://www.youtube.com/@AndreasSpiess" },
+      { name: "DroneBot Workshop", kind: "YouTube", desc: "Beginner-friendly ESP32 / Arduino / robotics — clean explanations &amp; circuits.", url: "https://www.youtube.com/@Dronebotworkshop" },
+      { name: "DigiKey · Shawn Hymel", kind: "YouTube + articles", desc: "Intro to RTOS, ESP32 ML, LoRaWAN, embedded fundamentals.", url: "https://www.digikey.com/en/maker/tutorials" },
+      { name: "atomic14", kind: "YouTube", desc: "ESP32-S3 hardware, displays, audio, full crowdfunded products.", url: "https://www.youtube.com/@atomic14" },
+      { name: "Volos Projects", kind: "YouTube", desc: "Polished ESP32 build videos — clocks, monitors, weather, AQ.", url: "https://www.youtube.com/@VolosProjects" },
+      { name: "ElectroPeak", kind: "YouTube + tutorials", desc: "Step-by-step ESP32 + Arduino + IoT walkthroughs with full code.", url: "https://www.youtube.com/@ElectroPeakOfficial" },
+      { name: "Adafruit Learn", kind: "Written + video", desc: "Official guides for every sensor breakout — SCD-40, MAX30102, BME680, etc.", url: "https://learn.adafruit.com/" },
+      { name: "Espressif Developer Portal", kind: "Docs + blog", desc: "Official ESP32 reference designs, AI, BLE-Mesh, secure-boot, OTA.", url: "https://developer.espressif.com/" },
+      { name: "Hackster.io", kind: "Project library", desc: "Searchable end-to-end project write-ups with BOMs &amp; code links.", url: "https://www.hackster.io/esp32" },
+      { name: "ESPHome", kind: "Docs + cookbook", desc: "YAML-defined firmware. Most Tier-1/2 projects can ship with this.", url: "https://esphome.io/" },
+      { name: "Espressif YouTube", kind: "YouTube", desc: "Official Espressif demos — ESP32-S3 AI, ESP-IDF, FreeRTOS internals.", url: "https://www.youtube.com/@EspressifSystems" }
+    ],
+    note: "Each project card in this deck has a <strong>red ▶ video</strong>, a <strong>blue 📄 guide</strong>, and (when relevant) a <strong>black 💻 code repo</strong> link. Click straight through to the canonical tutorial for that build."
+  },
+
+  /* ==========================================================
+     TIER 1 — BEGINNER / HOBBY
+     ========================================================== */
+  {
+    section: "t1", tierIntro: true,
+    icon: "🌱",
+    tierName: "Tier 1 — Beginner / Hobby",
+    sub: "Weekend builds with a dev-board, jumper wires, and a single sensor. Perfect to learn, demo to friends, or sell as DIY kits on Etsy/eBay.",
+    statCount: 8,
+    statBom: "$10–30",
+    statTime: "1–3 days",
+    statSell: "$25–80",
+    bullets: [
+      "Use an off-the-shelf ESP32 DevKit V1 (or ESP32-C3 for tiny products)",
+      "Stick to <strong>Arduino IDE + ready libraries</strong> — no custom PCB needed",
+      "Cases: 3D-printed shells or off-the-shelf project boxes",
+      "Best income angles: kits on Etsy, eBay listings, school workshops, school-fair demos",
+      "Demo trick: every project should be usable from a phone within 30 seconds of unboxing"
+    ]
+  },
+  {
+    section: "t1", project: true, num: 1, difficulty: 1, icon: "🔌",
+    title: "WiFi Smart Plug / Switch",
+    hook: "The classic IoT first product. <strong>Toggle anything that plugs into a wall</strong> from your phone or by voice — no cloud lock-in.",
+    bom: [
+      ["ESP32 dev board", "$5"],
+      ["5 V relay module (1-ch)", "$2"],
+      ["HLK-PM01 AC→5V module", "$3"],
+      ["Wall enclosure + plug", "$3"]
+    ],
+    bomTotal: "$13",
+    time: "1 day",
+    sell: "$25–45",
+    margin: "~50%",
+    where: "Etsy · Amazon Handmade · Tindie",
+    demo: "Toggle from a phone web UI within seconds. Add Alexa/Google via the open-source ESPHome firmware.",
+    skills: ["WiFi", "Web server", "Relay control", "Home Assistant"],
+    why: "Sonoff, Wemo &amp; TP-Link sell millions. Differentiate with <strong>open firmware, local-only control, no cloud subscription</strong>."
+  },
+  {
+    section: "t1", project: true, num: 2, difficulty: 1, icon: "🌦️",
+    title: "Mini Weather Station + Web Dashboard",
+    hook: "Reads <strong>temp / humidity / pressure</strong> and serves a live HTML dashboard you open on any phone in the same WiFi.",
+    bom: [
+      ["ESP32 dev board", "$5"],
+      ["BME280 sensor", "$4"],
+      ["0.96\" OLED (I2C)", "$3"],
+      ["3D-printed shell", "$2"]
+    ],
+    bomTotal: "$14",
+    time: "1–2 days",
+    sell: "$35–55",
+    margin: "~55%",
+    where: "Etsy · School science-fair kits · Amazon",
+    demo: "Open <code>http://weather.local</code> from any phone, see live graphs of last 24 hours.",
+    skills: ["I2C sensors", "Async web server", "Chart.js", "mDNS"],
+    why: "Weather geeks, gardeners and students all want one. Perfect <strong>kit</strong> with printed instructions."
+  },
+  {
+    section: "t1", project: true, num: 3, difficulty: 1, icon: "💡",
+    title: "WiFi NeoPixel Mood Lamp",
+    hook: "WS2812 ring or strip controlled from a web colour-picker. Bonus: <strong>music-reactive mode</strong> via the on-chip ADC mic.",
+    bom: [
+      ["ESP32 dev board", "$5"],
+      ["WS2812 ring 24-LED", "$4"],
+      ["MAX9814 mic module", "$3"],
+      ["Diffuser globe + base", "$5"]
+    ],
+    bomTotal: "$17",
+    time: "1–2 days",
+    sell: "$40–70",
+    margin: "~55%",
+    where: "Etsy (huge gift market) · Instagram Shop",
+    demo: "Slide a colour wheel on the phone — lamp updates instantly. Tap 'music mode' to dance with the song.",
+    skills: ["FastLED / NeoPixel", "Web UI", "FFT for audio", "Diffuser design"],
+    why: "Mood lamps and 'WiFi RGB' decor are a permanent gift-market category. Custom shapes &amp; finishes = premium."
+  },
+  {
+    section: "t1", project: true, num: 4, difficulty: 1, icon: "🛎️",
+    title: "Smart Doorbell Notifier",
+    hook: "A push-button by the door fires a <strong>Telegram / Discord / push notification</strong> the moment a visitor presses it.",
+    bom: [
+      ["ESP32 dev board", "$5"],
+      ["Pushbutton + housing", "$2"],
+      ["5 V wall adapter", "$3"],
+      ["Optional MP3 chime DFPlayer", "$4"]
+    ],
+    bomTotal: "$10–14",
+    time: "1 day",
+    sell: "$25–40",
+    margin: "~55%",
+    where: "Etsy · Amazon Handmade",
+    demo: "Press the button — your phone buzzes with 'Someone is at the front door' in under 2 seconds.",
+    skills: ["Telegram bot API", "Webhooks", "Deep-sleep", "GPIO interrupts"],
+    why: "Renters can't drill in a Ring; this is the no-subscription, no-camera alternative."
+  },
+  {
+    section: "t1", project: true, num: 5, difficulty: 2, icon: "🪴",
+    title: "Self-Watering Plant Buddy",
+    hook: "Capacitive soil probe + tiny pump. When the soil dries below threshold, <strong>plant waters itself</strong> and texts you.",
+    bom: [
+      ["ESP32 dev board", "$5"],
+      ["Capacitive soil sensor", "$2"],
+      ["Mini 5 V pump + tubing", "$4"],
+      ["MOSFET + protection diode", "$1"],
+      ["3D-printed reservoir", "$3"]
+    ],
+    bomTotal: "$15",
+    time: "2 days",
+    sell: "$40–70",
+    margin: "~55%",
+    where: "Etsy · Plant subreddit · Local nurseries",
+    demo: "Push a piece of paper into the soil — within 10 s the pump runs and your phone gets 'Fern watered ✓'.",
+    skills: ["ADC", "PWM motor control", "Calibration", "Low-power deep-sleep"],
+    why: "Plant-parent culture is enormous on social media. Bundle 3 sensors + branding = premium gift."
+  },
+  {
+    section: "t1", project: true, num: 6, difficulty: 2, icon: "🟢",
+    title: "GitHub / Build Status LED Ticker",
+    hook: "Tiny shelf-friendly box with a single bright RGB LED that turns <strong>green / yellow / red</strong> based on your CI builds or PR queue.",
+    bom: [
+      ["ESP32-C3 mini", "$4"],
+      ["WS2812 single LED", "$1"],
+      ["Diffuser dome + base", "$3"]
+    ],
+    bomTotal: "$8",
+    time: "1 day",
+    sell: "$30–50",
+    margin: "~70%",
+    where: "Etsy · Indie Hackers · Dev gift shops",
+    demo: "Push a broken commit → light flashes red. Push fix → light goes green. Devs love it on Zoom.",
+    skills: ["GitHub Actions webhooks", "JSON parsing", "OTA updates"],
+    why: "High-margin geek gift. Easy to <strong>brand</strong> for specific dev tools (Linear, Sentry, Vercel, Netlify…)."
+  },
+  {
+    section: "t1", project: true, num: 7, difficulty: 2, icon: "⌨️",
+    title: "Bluetooth Macropad / Custom Keyboard",
+    hook: "Six-key wireless macropad emulating a BLE keyboard. Each key sends a key-combo to Mac/Windows for editing apps.",
+    bom: [
+      ["ESP32-S3 mini", "$6"],
+      ["6 mechanical key switches (Cherry MX)", "$4"],
+      ["Keycaps (set of 6)", "$4"],
+      ["3D-printed case", "$3"],
+      ["Tiny LiPo + charger", "$5"]
+    ],
+    bomTotal: "$22",
+    time: "3 days",
+    sell: "$60–120",
+    margin: "~55%",
+    where: "Etsy (huge keyboard niche) · Mechanical-keyboard subreddit · Tindie",
+    demo: "Press the macro → 'Save + Push + Open PR' all run automatically on the laptop.",
+    skills: ["BLE HID profile", "Battery management", "Sleep wake-on-key", "3D printing"],
+    why: "Mechanical-keyboard community pays $80-$200 for premium macropads. Customisation = premium."
+  },
+  {
+    section: "t1", project: true, num: 8, difficulty: 2, icon: "🖼️",
+    title: "WiFi Photo Frame (small)",
+    hook: "3.5\" colour TFT or e-paper frame. Pulls a random JPEG from a shared Dropbox / Google Drive folder every hour.",
+    bom: [
+      ["ESP32 + 3.5\" TFT ILI9488", "$15"],
+      ["microSD slot", "$1"],
+      ["Wood frame + stand", "$4"]
+    ],
+    bomTotal: "$20",
+    time: "2–3 days",
+    sell: "$60–100",
+    margin: "~55%",
+    where: "Etsy · Wedding / family-gift listings",
+    demo: "Drag a new photo into the shared Drive folder — the frame updates within minutes.",
+    skills: ["JPEG decoder", "HTTPS client", "Drive / Dropbox API", "Image scaling"],
+    why: "Grandparents pay good money for set-and-forget digital frames. Photo-rotation logic is the moat."
+  },
+
+  /* ==========================================================
+     TIER 2 — INTERMEDIATE
+     ========================================================== */
+  {
+    section: "t2", tierIntro: true,
+    icon: "🚀",
+    tierName: "Tier 2 — Intermediate / Side-business",
+    sub: "Multi-sensor builds with a real enclosure, OTA updates, and a polished phone or web app. These can become serious side-businesses on Tindie or Shopify.",
+    statCount: 8,
+    statBom: "$30–100",
+    statTime: "1–2 weeks",
+    statSell: "$80–250",
+    bullets: [
+      "Move from breadboard → <strong>perfboard or small PCB</strong> (JLCPCB, $5 for 10 boards)",
+      "Add <strong>OTA firmware updates</strong> — customers expect it",
+      "Use ESP32-S3 if you need USB-OTG, camera or extra RAM",
+      "Add a real <strong>setup flow</strong>: WiFiManager captive portal &amp; QR-code onboarding",
+      "Consider a free-plus-paid cloud tier (Firebase / ThingsBoard / Supabase) to justify recurring revenue"
+    ]
+  },
+  {
+    section: "t2", project: true, num: 9, difficulty: 2, icon: "📹",
+    title: "ESP32-CAM Video Doorbell",
+    hook: "Tap a button → live MJPEG stream on the owner's phone, snapshot e-mailed, motion alerts. Cheaper than a Ring.",
+    bom: [
+      ["ESP32-CAM (AI-Thinker)", "$8"],
+      ["PIR motion sensor", "$2"],
+      ["IR LEDs (night vision)", "$2"],
+      ["18650 LiPo + protection", "$6"],
+      ["Weatherproof enclosure", "$8"]
+    ],
+    bomTotal: "$26",
+    time: "1 week",
+    sell: "$75–130",
+    margin: "~55%",
+    where: "Tindie · eBay · Amazon (private label)",
+    demo: "Walk up — phone gets live preview within 2 s. Speak: a tiny speaker greets the visitor (optional).",
+    skills: ["ESP32-CAM streaming", "PIR debouncing", "Battery management", "SMTP / Telegram"],
+    why: "Smart-doorbell market is huge and Ring forces a subscription. Local-first, no monthly fee = strong story."
+  },
+  {
+    section: "t2", project: true, num: 10, difficulty: 3, icon: "🫁",
+    title: "Indoor Air-Quality Monitor (CO₂ / PM2.5 / VOC)",
+    hook: "Dual-sensor cross-validation for reliable CO₂, plus particulates &amp; VOC. Live dashboard, color-coded display, MQTT to cloud.",
+    bom: [
+      ["ESP32-S3 dev board", "$8"],
+      ["SCD40 CO₂ sensor (I²C)", "$22"],
+      ["SGP30 / SGP40 VOC", "$10"],
+      ["PMS5003 particulate sensor", "$18"],
+      ["Round 1.28\" GC9A01 LCD", "$8"],
+      ["Custom 3D-printed shell", "$4"]
+    ],
+    bomTotal: "$70",
+    time: "2 weeks",
+    sell: "$150–220",
+    margin: "~55%",
+    where: "Tindie · School / office HVAC consultants · Crowd Supply",
+    demo: "Exhale into the unit → CO₂ climbs to 2000 ppm, ring turns red, phone alert in 5 s.",
+    skills: ["Sensor cross-calibration", "TLS-MQTT", "ThingsBoard dashboards", "Captive setup portal"],
+    why: "Post-pandemic schools / offices buy these in bulk. <strong>AirNode</strong> is a working reference (Hackster, May 2026).",
+    realExample: { label: "AirNode case study →", href: "https://www.hackster.io/lukesxg/airnode-esp32-s3-co-air-quality-monitor-with-cloud-dashbo-5e16cc" }
+  },
+  {
+    section: "t2", project: true, num: 11, difficulty: 3, icon: "🪞",
+    title: "Smart Mirror with Live Widgets",
+    hook: "Two-way mirror in front of a small monitor running off-the-shelf MagicMirror² code, with the ESP32 driving sensors + voice trigger.",
+    bom: [
+      ["Old monitor (15-19\") or Pi-Touch", "$30"],
+      ["Two-way acrylic mirror", "$25"],
+      ["ESP32 + INMP441 mic", "$10"],
+      ["Wood frame", "$15"]
+    ],
+    bomTotal: "$80",
+    time: "1–2 weeks",
+    sell: "$250–400",
+    margin: "~55%",
+    where: "Etsy custom orders · Local interior-design referrals",
+    demo: "Stand in front: time + weather + Spotify-now-playing appears. Say 'mirror, traffic' → ETA pops up.",
+    skills: ["MagicMirror modules", "Voice wake-word", "MQTT bridge", "Carpentry"],
+    why: "Premium home-decor item. Customisation (size, frame finish) = high-margin custom orders."
+  },
+  {
+    section: "t2", project: true, num: 12, difficulty: 3, icon: "⚡",
+    title: "Whole-Home Energy Meter (CT clamp)",
+    hook: "Snap a non-invasive CT clamp around your mains feed → live watt/kWh dashboard, daily reports, anomaly detection.",
+    bom: [
+      ["ESP32 dev board", "$6"],
+      ["SCT-013 30A CT clamp", "$8"],
+      ["Burden resistor + op-amp", "$2"],
+      ["ZMPT101B voltage sensor", "$4"],
+      ["DIN-rail enclosure", "$8"]
+    ],
+    bomTotal: "$28",
+    time: "1–2 weeks",
+    sell: "$90–160",
+    margin: "~60%",
+    where: "Amazon · eBay · Solar installers (B2B)",
+    demo: "Switch the kettle on → live graph jumps from 80 W to 2000 W in 200 ms.",
+    skills: ["ADC sampling", "RMS calc", "InfluxDB / Grafana", "Mains safety"],
+    why: "Sonoff POW Elite proves the market. Add per-circuit breakdown + solar import-export = premium tier."
+  },
+  {
+    section: "t2", project: true, num: 13, difficulty: 3, icon: "🔓",
+    title: "RFID Access Control / Attendance Clock",
+    hook: "Tap your card → door unlocks (or you clock-in). Logs to Firebase, viewable on a React dashboard.",
+    bom: [
+      ["ESP32 dev board", "$6"],
+      ["RC522 RFID reader (13.56 MHz)", "$3"],
+      ["1.8\" ILI9341 TFT", "$6"],
+      ["Active buzzer + LEDs", "$2"],
+      ["Solenoid lock + relay (optional)", "$15"],
+      ["Wall enclosure", "$5"]
+    ],
+    bomTotal: "$22 (no lock) / $37 with lock",
+    time: "1–2 weeks",
+    sell: "$120–250 (B2B clock) / $300+ (door-lock kit)",
+    margin: "~60%",
+    where: "B2B small offices · gyms · co-working spaces · Tindie",
+    demo: "Tap a card → screen says 'Welcome Sarah · clocked in 09:02', buzzer beeps, dashboard logs the entry.",
+    skills: ["MFRC522 SPI", "Firebase RTDB", "React frontend", "Schedule enforcement"],
+    why: "Real working open-source product: <strong>Crypt_AccessIQ</strong>. Sell to small businesses tired of $50/month SaaS.",
+    realExample: { label: "Crypt_AccessIQ build write-up →", href: "https://rafiulislam25.medium.com/crypt-accessiq-building-a-full-stack-iot-access-control-system-with-esp32-firebase-and-react-09d68e6e8618" }
+  },
+  {
+    section: "t2", project: true, num: 14, difficulty: 3, icon: "🎮",
+    title: "Retro Game Handheld (NES Emulator)",
+    hook: "Pocket NES emulator at <strong>60 fps with audio</strong>. Plays your old ROMs from a microSD. No PSRAM required.",
+    bom: [
+      ["ESP32-WROOM-32 dev board", "$5"],
+      ["320×240 ST7789 SPI TFT", "$5"],
+      ["8 tactile buttons + D-pad", "$2"],
+      ["PAM8403 audio amp + speaker", "$3"],
+      ["microSD slot + card", "$3"],
+      ["LiPo 1000 mAh + charger", "$5"]
+    ],
+    bomTotal: "$23",
+    time: "1–2 weeks",
+    sell: "$60–110",
+    margin: "~60%",
+    where: "Etsy · Reddit r/EmulationOnDevice · Tindie",
+    demo: "Hand a friend your custom-printed case running their favourite childhood game — instant nostalgia sell.",
+    skills: ["SPI display drivers", "Audio DAC", "DMA frame transfer", "Power management"],
+    why: "Retro handhelds are an evergreen niche. Atomic14 raised £12k crowdfunding a ZX-Spectrum version.",
+    realExample: { label: "Anemoia-ESP32 build guide →", href: "https://www.hackster.io/shimmanaloto/how-to-build-a-performant-handheld-nes-on-the-esp32-fe1072" }
+  },
+  {
+    section: "t2", project: true, num: 15, difficulty: 3, icon: "🐠",
+    title: "Aquarium / Reef Controller",
+    hook: "Controls heater + lights + pump + dosing pumps, monitors temp/pH/TDS, sends alerts to your phone.",
+    bom: [
+      ["ESP32 dev board", "$6"],
+      ["DS18B20 water-proof temp", "$3"],
+      ["pH probe + amplifier", "$25"],
+      ["TDS probe", "$8"],
+      ["4-ch relay board", "$5"],
+      ["Peristaltic dosing pump", "$15"]
+    ],
+    bomTotal: "$62",
+    time: "2 weeks",
+    sell: "$180–280",
+    margin: "~55%",
+    where: "Reef/aquarium niche forums · Etsy · local pet shops (B2B)",
+    demo: "pH drifts out of range → phone alert + automatic dosing pump fires for 3 s.",
+    skills: ["Analog probes", "Relay control", "Long-running stability", "Setpoint PID"],
+    why: "Reef hobbyists spend $300+ on commercial controllers (Apex, Neptune). Open-source = strong differentiation."
+  },
+  {
+    section: "t2", project: true, num: 16, difficulty: 3, icon: "🌿",
+    title: "Multi-Zone Indoor Grow Hub",
+    hook: "Manage 4 grow tents from one phone: temp, humidity, soil, light timers, fan control. Bonus VPD calculation.",
+    bom: [
+      ["ESP32 dev board", "$6"],
+      ["4× DHT22 / SHT41", "$20"],
+      ["4× capacitive soil sensors", "$8"],
+      ["4× 240V relays (lights + fans)", "$8"],
+      ["DIN-rail enclosure", "$10"]
+    ],
+    bomTotal: "$52",
+    time: "2 weeks",
+    sell: "$150–280",
+    margin: "~60%",
+    where: "Cannabis/hydroponics forums (legal markets) · Etsy",
+    demo: "VPD chart on phone — adjust humidity, watch leaf-temp curve change in real-time.",
+    skills: ["Multi-sensor I²C bus", "VPD math", "Web dashboard", "Schedule engine"],
+    why: "Legal-cannabis growers in US/Canada/EU pay premium for purpose-built controllers (versus repurposed BMS units)."
+  },
+
+  /* ==========================================================
+     TIER 3 — ADVANCED / CROWD-FUNDING
+     ========================================================== */
+  {
+    section: "t3", tierIntro: true,
+    icon: "🚢",
+    tierName: "Tier 3 — Advanced / Crowdfunding-grade",
+    sub: "Custom PCBs, polished enclosures, OTA, certification-ready firmware. These are the kind of projects that successfully crowdfund $30k–$1M on Kickstarter / Crowd Supply.",
+    statCount: 8,
+    statBom: "$100–500",
+    statTime: "1–3 months",
+    statSell: "$200–1000",
+    bullets: [
+      "Design a <strong>custom PCB</strong> with an ESP32-WROOM/MINI module (pre-certified — easier FCC/CE)",
+      "Invest in a <strong>real enclosure</strong>: vacuum-formed, machined or injection-moulded (low-volume)",
+      "Polished onboarding: app store SDK, WiFi captive portal, BLE provisioning",
+      "Open-source firmware = community help, but design for <strong>secure-boot + signed OTA</strong>",
+      "Validate on <strong>Crowd Supply pre-launch</strong> (audience building before campaign launch)"
+    ]
+  },
+  {
+    section: "t3", project: true, num: 17, difficulty: 3, icon: "🌪️",
+    title: "Outdoor Pro Weather Station",
+    hook: "Five sensors on one I²C bus + GPS time-sync + live arc-gauge dashboard, AQI meter, compass and OpenStreetMap overlay.",
+    bom: [
+      ["FireBeetle 2 ESP32-P4 (or S3)", "$15"],
+      ["BME680 + SGP30 + ENS160", "$30"],
+      ["PMS5003 PM2.5", "$18"],
+      ["UV / light sensor (SI1145)", "$8"],
+      ["GPS module (NEO-6M)", "$10"],
+      ["IP65 weatherproof shell + Stevenson screen", "$25"],
+      ["Solar panel + 18650", "$15"]
+    ],
+    bomTotal: "$120",
+    time: "1 month",
+    sell: "$280–450",
+    margin: "~55%",
+    where: "Crowd Supply · Outdoor / hiking shops · Schools (B2B)",
+    demo: "Open URL → live dashboard with five gauges + Open-StreetMap pin, all refreshing every 2 s. No reloads.",
+    skills: ["Multi-sensor I²C", "WebSocket dashboard", "GPS NMEA", "Solar charging"],
+    why: "Hobbyist + climate-citizen-science market. Schools love these for STEM kits.",
+    realExample: { label: "Pro Weather Station write-up →", href: "https://www.hackster.io/pradeeplogu0/building-a-professional-outdoor-weather-station-a0b5d5" }
+  },
+  {
+    section: "t3", project: true, num: 18, difficulty: 4, icon: "🌾",
+    title: "Solar LoRa Farm Sensor Node",
+    hook: "Battery-powered field sensor that lives for years on solar. Wakes every 15 min, ships data via LoRaWAN to a gateway.",
+    bom: [
+      ["ESP32 module (low-power)", "$6"],
+      ["RFM95W / SX1278 LoRa", "$12"],
+      ["BME280 + capacitive soil sensor", "$8"],
+      ["6 V 2 W solar panel", "$10"],
+      ["TP4056 charger + 18650 3000 mAh", "$8"],
+      ["MCP1700 LDO (ultra-low Iq)", "$1"],
+      ["IP65 enclosure + cable glands", "$15"]
+    ],
+    bomTotal: "$60",
+    time: "1–2 months",
+    sell: "$140–220 per node · B2B per-acre packages $1k+",
+    margin: "~55–65%",
+    where: "Agri B2B (precision-farming distributors) · government / NGO programs",
+    demo: "Drop sensor in a field — 24 hours later, phone shows soil-moisture trend &amp; rain alerts from a dozen nodes.",
+    skills: ["Deep-sleep current measurement", "LoRaWAN protocol", "Power budgeting", "Outdoor enclosure design"],
+    why: "Agri-IoT is one of the few profitable niches with real B2B budgets &amp; subsidy programs.",
+    realExample: { label: "Solar farm node design →", href: "https://zbotic.in/solar-powered-farm-sensor-node-off-grid-iot-design/" }
+  },
+  {
+    section: "t3", project: true, num: 19, difficulty: 3, icon: "📰",
+    title: "E-Paper Dashboard / Smart Calendar",
+    hook: "Wall-sized colour e-paper showing your calendar, weather, news headlines and art — battery lasts months.",
+    bom: [
+      ["ESP32-S3-WROOM-2 module", "$8"],
+      ["13.3\" Inkplate or Waveshare colour e-paper", "$180"],
+      ["3000 mAh LiPo + charger", "$8"],
+      ["Custom wood frame", "$20"]
+    ],
+    bomTotal: "$220",
+    time: "1 month",
+    sell: "$380–600",
+    margin: "~55%",
+    where: "Crowd Supply · Etsy custom orders · Smart-home stores",
+    demo: "Hang on wall, plug in once — shows today's agenda, switches to art on weekends, never needs charging again.",
+    skills: ["E-paper partial-refresh", "ICAL parsing", "Image dithering", "PSRAM frame buffers"],
+    why: "Inkplate 13SPECTRA raised $131k on Crowd Supply at $329. Premium home-decor + functional = strong margin.",
+    realExample: { label: "Inkplate 13SPECTRA →", href: "https://www.crowdsupply.com/soldered/inkplate-13spectra" }
+  },
+  {
+    section: "t3", project: true, num: 20, difficulty: 4, icon: "📱",
+    title: "Pocket AI Devkit / Maker Console",
+    hook: "Wallet-sized AMOLED + battery + IMU + mic + speaker = pocket platform for apps. Each project becomes a launchable 'app'.",
+    bom: [
+      ["ESP32-S3 module + PSRAM", "$10"],
+      ["2.13\" AMOLED display", "$25"],
+      ["500 mAh LiPo + BQ25896 charger", "$8"],
+      ["MEMS mic + speaker", "$6"],
+      ["9-axis IMU (BMI270)", "$5"],
+      ["Custom PCB + magnetic connector", "$12"],
+      ["CNC-milled aluminium shell", "$30"]
+    ],
+    bomTotal: "$96",
+    time: "2–3 months",
+    sell: "$129–179 (Kickstarter pricing)",
+    margin: "~30–40% (volume)",
+    where: "Kickstarter · Crowd Supply · Tindie",
+    demo: "Open the menu → pick 'Voice GPT' app. Hold the side button → talk → it answers via speaker.",
+    skills: ["Custom PCB design", "Battery management IC", "OS/app architecture", "Industrial design"],
+    why: "<strong>Kode Dot</strong> raised $150k on Kickstarter at $129. There's hunger for 'maker phone'-style devices.",
+    realExample: { label: "Kode Dot Kickstarter coverage →", href: "https://www.cnx-software.com/2025/11/11/kode-dot-an-easy-to-use-pocket-sized-battery-powered-esp32-s3-devkit/" }
+  },
+  {
+    section: "t3", project: true, num: 21, difficulty: 4, icon: "🚗",
+    title: "OBD-II / CAN-Bus Vehicle Adapter",
+    hook: "Plug-in OBD-II dongle exposing live engine data over WiFi/BLE to a phone app. Open-source &amp; tunable.",
+    bom: [
+      ["ESP32-C3 module", "$4"],
+      ["SN65HVD230 CAN transceiver", "$2"],
+      ["DC-DC 12V→3.3V (TVS protected)", "$3"],
+      ["OBD-II housing", "$8"]
+    ],
+    bomTotal: "$17",
+    time: "1–2 months",
+    sell: "$50–100",
+    margin: "~60%",
+    where: "Crowd Supply · Amazon · Specialist car forums",
+    demo: "Plug into car's OBD port, open app, see live RPM/coolant/torque/MPG. Save trip logs.",
+    skills: ["CAN-bus protocol", "OBD-II PIDs", "BLE GATT services", "Mobile app"],
+    why: "<strong>WiCAN</strong> raised $53k on Crowd Supply with this exact pattern. Modders + DIY mechanics buy hundreds.",
+    realExample: { label: "WiCAN on Crowd Supply →", href: "https://www.crowdsupply.com/" }
+  },
+  {
+    section: "t3", project: true, num: 22, difficulty: 4, icon: "🐾",
+    title: "Pet GPS Tracker (LoRa)",
+    hook: "Collar-sized device with GPS + LoRa modem. Long-range tracking without a cellular subscription.",
+    bom: [
+      ["ESP32 module", "$5"],
+      ["NEO-7M GPS", "$6"],
+      ["SX1262 LoRa", "$8"],
+      ["Tiny 600 mAh LiPo", "$5"],
+      ["Custom waterproof shell + collar mount", "$15"],
+      ["LoRa gateway base station", "$40"]
+    ],
+    bomTotal: "$80 + gateway",
+    time: "2–3 months",
+    sell: "$150–250 (collar) + optional gateway",
+    margin: "~50%",
+    where: "Pet stores B2B · Crowd Supply · Vet partnerships",
+    demo: "Drop tracker in a field, walk away — phone shows pin moving across the OSM map in real time.",
+    skills: ["LoRa physical link budget", "RF antenna design", "GNSS power optimisation", "Mobile app"],
+    why: "Tractive/Whistle charge $7/month subscriptions. Subscription-free LoRa product = strong story for rural owners."
+  },
+  {
+    section: "t3", project: true, num: 23, difficulty: 3, icon: "🌡️",
+    title: "Smart Thermostat / HVAC Brain",
+    hook: "Replace dumb thermostat with WiFi + app + scheduling + multi-room sensor support + Home-Assistant integration.",
+    bom: [
+      ["ESP32-S3 dev board", "$8"],
+      ["2.8\" touch TFT", "$12"],
+      ["SHT41 temp/humidity", "$5"],
+      ["24 V AC relays (2-ch)", "$4"],
+      ["DC-DC 24V→3.3V", "$3"],
+      ["Wall-plate enclosure", "$10"]
+    ],
+    bomTotal: "$42",
+    time: "1–2 months",
+    sell: "$150–250",
+    margin: "~55%",
+    where: "Smart-home enthusiasts · DIY HVAC stores · Crowd Supply",
+    demo: "Touch screen sets schedule, phone over-rides remotely, Home-Assistant shows full history.",
+    skills: ["HVAC wiring (R/W/Y/G)", "PID controller", "Touch UI", "Local + cloud sync"],
+    why: "Nest costs $250 &amp; phones home. A privacy-first, local-only thermostat sells well to HA community."
+  },
+  {
+    section: "t3", project: true, num: 24, difficulty: 4, icon: "📦",
+    title: "Smart Parcel Locker / Drop-box",
+    hook: "Apartment / office drop-box: QR code unlocks one of N compartments, web admin tracks every drop &amp; pick-up.",
+    bom: [
+      ["ESP32-S3 + custom PCB", "$15"],
+      ["6× solenoid locks", "$60"],
+      ["6× reed switches", "$3"],
+      ["4.3\" TFT touch", "$25"],
+      ["Camera (ESP32-CAM 'evidence shot')", "$10"],
+      ["Metal cabinet (off-the-shelf)", "$100"]
+    ],
+    bomTotal: "$215",
+    time: "2–3 months",
+    sell: "B2B $700–1500 per unit",
+    margin: "~55%",
+    where: "Co-living / co-working / hostels (direct B2B sales) · Property managers",
+    demo: "Delivery driver scans QR → compartment 3 pops open → tenant picks up &amp; gets phone notification.",
+    skills: ["Mechanical design", "Locker mgmt logic", "QR/encrypted tokens", "B2B sales!"],
+    why: "Hot category as e-commerce delivery grows. Direct sales to one property gets you 6+ units immediately."
+  },
+
+  /* ==========================================================
+     TIER 4 — PROFESSIONAL / COMMERCIAL
+     ========================================================== */
+  {
+    section: "t4", tierIntro: true,
+    icon: "🏭",
+    tierName: "Tier 4 — Professional / Commercial",
+    sub: "Custom hardware, CE / FCC certified, recurring-revenue business models, B2B sales motions. These are 'real-company' products that ship in volume.",
+    statCount: 8,
+    statBom: "$50–500 (volume)",
+    statTime: "3–12 months",
+    statSell: "B2B $300–2000 per unit + recurring revenue",
+    bullets: [
+      "Use the <strong>ESP32-WROOM module</strong> on a custom PCB — modular FCC certification covers your radio block",
+      "Plan budget: <strong>$25k–50k for the MVP cycle</strong> (firmware + cloud + app + EVT/DVT)",
+      "Add <strong>secure-boot v2 + flash encryption + signed OTA</strong> from day one (ESP32-C3/S3 ship with this)",
+      "Focus on <strong>one 'hair-on-fire' customer pain</strong>, not features",
+      "Sell direct (B2B), not just on marketplaces. Repeatable contracts > one-off purchases"
+    ]
+  },
+  {
+    section: "t4", project: true, num: 25, difficulty: 4, icon: "🌽",
+    title: "Precision-Agriculture Sensor Mesh",
+    hook: "20-100 node LoRaWAN mesh covering an entire farm: soil moisture, leaf wetness, EC, microclimate. Predictive irrigation.",
+    bom: [
+      ["ESP32 + LoRa node (BOM ~$60 in volume)", "$60"],
+      ["Multi-probe sensor suite", "$40"],
+      ["Outdoor weatherproof + solar", "$30"],
+      ["LoRaWAN gateway (commercial)", "$300"]
+    ],
+    bomTotal: "$130/node + gateway",
+    time: "6–12 months",
+    sell: "B2B per-acre subscription: $50–150/acre/year + node cost",
+    margin: "~60% gross + 80% on subscriptions",
+    where: "Direct sales to large farms · agritech distributors · government schemes",
+    demo: "Tablet shows farm-wide soil map, with one parcel highlighted red → 'irrigate now' suggestion accepted by a tap.",
+    skills: ["LoRaWAN payloads (Cayenne LPP)", "Multi-tenant cloud", "Agronomy domain expertise", "Reseller channels"],
+    why: "PM-KUSUM &amp; equivalent schemes globally subsidise 60% of agri-IoT. Multi-year contracts &amp; expansion deals are common."
+  },
+  {
+    section: "t4", project: true, num: 26, difficulty: 4, icon: "📈",
+    title: "Industrial Vibration / Predictive-Maintenance Sensor",
+    hook: "Magnet-mounts to motors, measures vibration spectrum, edge-detects bearing faults, sends alerts before failure.",
+    bom: [
+      ["ESP32-S3 + custom PCB", "$10"],
+      ["IIS3DWB high-bandwidth accel (26 kHz)", "$15"],
+      ["MEMS temp sensor", "$3"],
+      ["18650 LiFePO4 + DC-DC", "$10"],
+      ["IP67 magnetic enclosure", "$25"]
+    ],
+    bomTotal: "$63 (volume)",
+    time: "6 months",
+    sell: "B2B $400–800/unit + $20/mo/sensor cloud subscription",
+    margin: "~65% hardware · ~85% subscription",
+    where: "Factories · HVAC service companies · water/wastewater plants (direct B2B)",
+    demo: "Plant manager opens dashboard — bearing on pump #7 shows abnormal 4.3 kHz peak → 'replace within 2 weeks' alert.",
+    skills: ["FFT &amp; spectrum analysis", "Edge-ML (TensorFlow Lite Micro)", "Predictive analytics", "B2B SaaS pricing"],
+    why: "Predictive maintenance market is huge ($30B+). One factory contract = 50-200 units + recurring revenue."
+  },
+  {
+    section: "t4", project: true, num: 27, difficulty: 4, icon: "👀",
+    title: "Edge-AI People-Counter Camera",
+    hook: "Anonymous people-flow analytics for retail/offices. ESP32-S3 runs a person-detector locally — no faces, no PII.",
+    bom: [
+      ["ESP32-S3 + 8 MB PSRAM custom PCB", "$15"],
+      ["OV5640 camera module", "$8"],
+      ["PoE / DC-power", "$8"],
+      ["Wide-angle lens", "$5"],
+      ["Aluminium enclosure", "$25"]
+    ],
+    bomTotal: "$60 (volume)",
+    time: "6 months",
+    sell: "B2B $300–600/unit + $15/mo dashboard fee",
+    margin: "~65%",
+    where: "Retail chains · co-working · museums · restaurants (direct B2B)",
+    demo: "Mount on ceiling, open dashboard → real-time counter, hourly heatmap of one entrance.",
+    skills: ["ESP-DL / TFLite Micro", "ROI-based counting algorithm", "Privacy-by-design", "B2B SaaS"],
+    why: "Privacy-first alternative to cloud-camera analytics. Retail tenants pay for hourly footfall trends."
+  },
+  {
+    section: "t4", project: true, num: 28, difficulty: 4, icon: "☀️",
+    title: "Off-Grid Solar / Battery System Monitor",
+    hook: "Watches your off-grid PV+battery system: current/voltage on each leg, alerts on under-voltage, daily energy report.",
+    bom: [
+      ["ESP32 + INA226 (×4)", "$15"],
+      ["Hall-effect current sensors (50A)", "$20"],
+      ["3.5\" touch TFT", "$15"],
+      ["DIN-rail enclosure + IP-rated", "$25"]
+    ],
+    bomTotal: "$75 (volume)",
+    time: "4–6 months",
+    sell: "B2C $250–400 / B2B $400-700",
+    margin: "~55%",
+    where: "Solar installers · van-life / RV community · off-grid forums",
+    demo: "Camera sees the touch screen — battery SOC, instantaneous PV power, predicted runtime, all live.",
+    skills: ["Multi-channel current sensing", "Energy accounting (kWh)", "MQTT to Home-Assistant", "Touch UI/UX"],
+    why: "Van-life &amp; off-grid homes are booming. Premium category &mdash; Victron sells $400+ display units."
+  },
+  {
+    section: "t4", project: true, num: 29, difficulty: 4, icon: "🔦",
+    title: "Commercial Bluetooth-Mesh Lighting",
+    hook: "Drop-in BLE-mesh fixtures that talk to each other, no hub. Office floor → 100+ lights commission via a phone app.",
+    bom: [
+      ["ESP32-C3 mini (custom PCB inside fixture)", "$3"],
+      ["LED driver + dimming MOSFET", "$8"],
+      ["Power supply (built into fixture)", "$10"]
+    ],
+    bomTotal: "$21 (per fixture, volume)",
+    time: "8–12 months · certification heavy",
+    sell: "B2B $80–150 per fixture (selling thousands per office floor)",
+    margin: "~50% (volume drives this)",
+    where: "Commercial-lighting distributors · electrical wholesalers · office fit-out integrators",
+    demo: "Walk into an unconfigured floor with phone — app discovers 60 fixtures, you tap 'commission' → all named &amp; zoned in 2 min.",
+    skills: ["BLE mesh provisioning", "DALI / 0-10 V dimming", "FCC + lighting certifications", "Channel sales"],
+    why: "Office retrofits are massive deals. One floor = $20k of hardware + 5-year service contracts."
+  },
+  {
+    section: "t4", project: true, num: 30, difficulty: 4, icon: "🧾",
+    title: "Self-Order / POS Terminal for Restaurants",
+    hook: "Tablet-replacement terminal: takes orders, prints kitchen tickets, swipes cards. Customisable for small restaurants.",
+    bom: [
+      ["ESP32-S3 + 7\" RGB-touch display", "$60"],
+      ["Thermal receipt printer", "$30"],
+      ["NFC + QR scanner module", "$15"],
+      ["Plastic enclosure", "$30"]
+    ],
+    bomTotal: "$135 (volume)",
+    time: "6–9 months",
+    sell: "B2B $250–500 per terminal + $30/mo software",
+    margin: "~50% hardware · ~80% software",
+    where: "Restaurants directly · franchise chains · POS integrators (channel)",
+    demo: "Customer taps QR → menu loads, picks two items, swipes card → printer ticks out in kitchen in 5 s.",
+    skills: ["Touch-UI engineering", "PCI-DSS overview", "Receipt-printer protocols", "Restaurant operations expertise"],
+    why: "Square &amp; Toast charge huge ongoing fees. Cheaper hardware-software bundles win small chains."
+  },
+  {
+    section: "t4", project: true, num: 31, difficulty: 4, icon: "🩺",
+    title: "AI-Enhanced Safety Wearable (kids / elderly)",
+    hook: "Wrist device tracking heart rate, SpO₂, steps, fall-detection, GPS. Pairs with smart-home hub for full lifestyle picture.",
+    bom: [
+      ["ESP32-S3 module", "$6"],
+      ["MAX30102 SpO₂ + HR", "$5"],
+      ["BMI270 IMU", "$5"],
+      ["1.28\" round AMOLED", "$15"],
+      ["GPS module", "$10"],
+      ["Custom PCB + LiPo + housing", "$30"]
+    ],
+    bomTotal: "$71 (volume)",
+    time: "9–12 months",
+    sell: "B2C $129–199 + $5/mo cloud subscription",
+    margin: "~45% hardware · ~80% subscription",
+    where: "Direct-to-consumer (Shopify + ads) · partnerships with care-home networks",
+    demo: "Tap the wearable to a phone, see SpO₂, HR, steps; press &amp; hold to broadcast 'help' to caregivers.",
+    skills: ["Medical-grade signal processing", "BLE LE Audio", "App + watchface design", "Regulatory awareness"],
+    why: "Aging populations + child-safety concerns = recurring market. Wearable + service bundle is sticky.",
+    realExample: { label: "Child-safety wearable case study →", href: "https://circuitdigest.com/microcontroller-projects/ai-enhanced-child-safety-wearable-and-smart-home-system" }
+  },
+  {
+    section: "t4", project: true, num: 32, difficulty: 4, icon: "🤖",
+    title: "Open-Source AI Home Robot Platform",
+    hook: "ESP32 handles real-time motor / sensors, Raspberry Pi runs an edge-AI brain (Nemotron / Llama). Sell as a reference / kit.",
+    bom: [
+      ["Pi 5 (brain)", "$80"],
+      ["ESP32 motor / IMU controller", "$8"],
+      ["ESP32-C3 OLED status display", "$5"],
+      ["Tank chassis + 2 motors", "$50"],
+      ["Ultrasonic + IR sensors", "$15"],
+      ["LiPo battery + BMS", "$25"]
+    ],
+    bomTotal: "$185 (volume)",
+    time: "6–12 months",
+    sell: "Kits $399–599 · finished units $799+ · commercial / education contracts",
+    margin: "~50%",
+    where: "Education resellers · STEM-kit distributors · maker community",
+    demo: "Robot rolls around the room avoiding obstacles, voice command 'go to kitchen' → it navigates &amp; reports.",
+    skills: ["Heterogeneous architecture (ESP32 + Pi)", "ROS2 / MQTT IPC", "Edge inference", "Mechanical &amp; chassis"],
+    why: "Schools/universities buy robotics kits for $400+ in bulk. Reference design = recurring kit revenue.",
+    realExample: { label: "FOFOCA Espressif blog →", href: "https://developer.espressif.com/blog/2026/05/fofoca-esp32-ai-robot/" }
+  },
+
+  /* ==========================================================
+     HOW TO SELL
+     ========================================================== */
+  {
+    section: "sell", title: "💰 How to actually sell what you build",
+    sub: "Choosing the right channel matters as much as the project itself.",
+    customCards: [
+      { h: "Etsy / Amazon Handmade", t: "Best for finished, gift-able, low-tech products: lamps, photo frames, doorbells. Decent margins, lots of foot traffic, but you compete on listing photos &amp; reviews." },
+      { h: "Tindie", t: "The marketplace for maker hardware. Buyers are technical and tolerate kits + soldering. Great for niche-but-deep markets (CAN adapters, dev tools)." },
+      { h: "Crowd Supply / Kickstarter", t: "Pre-launch audience building → product validates BEFORE you tool up. Most ESP32-S3 success stories of 2025-26 came from here (Kode Dot, Inkplate, WiCAN, Hacknect)." },
+      { h: "Shopify direct (D2C)", t: "Highest margin, but you pay for traffic. Best when product has clear hero-feature + a content/community moat (YouTube, blog, Reddit)." },
+      { h: "B2B direct sales", t: "Underrated for makers. One factory or property manager = 50+ unit order. Slower sales cycle, much higher LTV. Industrial &amp; agri Tier-4 projects live here." },
+      { h: "Marketplaces (Amazon, eBay)", t: "Highest volume but FBA + competition crushes margins. Use only when product is commodity-like and brand is already known." }
+    ]
+  },
+  {
+    section: "sell", title: "🧪 The MVP playbook (real numbers from 2025-26)",
+    customCards: [
+      { h: "1. Solve a hair-on-fire pain", t: "AirNode = 'I want to know my CO₂ without enterprise gear'. Crypt_AccessIQ = 'I want a $50 access system, not a $500/mo SaaS'. Specific pain → loyal early buyers." },
+      { h: "2. Build with off-the-shelf modules first", t: "Use pre-certified ESP32-WROOM modules until you've sold 1000 units. Each module ships with FCC ID + CE mark — you only need to certify your final radiator." },
+      { h: "3. Talk to 10 customers before custom PCB", t: "Get pre-orders or LOIs before spending $5k on a PCB run. Even Etsy listings can validate demand in a weekend." },
+      { h: "4. Plan for $25k–50k to get to a real MVP", t: "Firmware + cloud + app + EVT/DVT + tooling. atomic14's ZX-Spectrum-on-ESP32 funded at £12.8k revenue → £4.3k profit in 13 months." },
+      { h: "5. Keep 20-30% contingency", t: "Tariffs, customs, returns, certification re-tests… these always cost more than your spreadsheet says." },
+      { h: "6. Subscriptions = your friend", t: "Even $5/month for a dashboard is gold compared to one-off hardware sales. Tier 4 products live or die on recurring revenue." }
+    ]
+  },
+
+  /* ==========================================================
+     RESOURCES
+     ========================================================== */
+  {
+    section: "res", title: "🔗 Resources, marketplaces &amp; references",
+    customHtml: `
+      <table class="resource-table">
+        <tr><th>Resource</th><th>What's there</th></tr>
+        <tr><td><a href="https://www.crowdsupply.com/" target="_blank">Crowd Supply</a></td><td>Hardware-only crowdfunding · best for serious ESP32 products. Integrated distribution via Mouser.</td></tr>
+        <tr><td><a href="https://www.tindie.com/" target="_blank">Tindie</a></td><td>Maker-to-maker marketplace · sell PCBs, kits, dev tools direct to technical buyers.</td></tr>
+        <tr><td><a href="https://www.hackster.io/" target="_blank">Hackster.io</a></td><td>Detailed project write-ups · great pattern for documenting your build before selling.</td></tr>
+        <tr><td><a href="https://developer.espressif.com/" target="_blank">Espressif developer portal</a></td><td>Official ESP-IDF docs, reference designs, AI/voice/edge guides.</td></tr>
+        <tr><td><a href="https://predictabledesigns.com/" target="_blank">Predictable Designs</a></td><td>End-to-end hardware-startup playbook · BOMs, certification, prototype-to-production.</td></tr>
+        <tr><td><a href="https://jlcpcb.com/" target="_blank">JLCPCB</a></td><td>$5 PCB prototypes + low-cost assembly (PCBA). Most Crowd Supply ESP32 products are built here.</td></tr>
+        <tr><td><a href="https://www.lcsc.com/" target="_blank">LCSC</a></td><td>Chinese parts distributor used by JLCPCB. Cheapest ESP32 modules &amp; passives in volume.</td></tr>
+        <tr><td><a href="https://esphome.io/" target="_blank">ESPHome</a></td><td>YAML-based firmware framework. Ship your smart-home products with this and customers can integrate instantly.</td></tr>
+        <tr><td><a href="https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html" target="_blank">ESP-IDF Get-Started</a></td><td>Official C/C++ SDK. Use this once you outgrow Arduino-ESP32.</td></tr>
+        <tr><td><a href="https://thingsboard.io/" target="_blank">ThingsBoard</a></td><td>Open-source IoT dashboard with self-hosted &amp; SaaS tiers. Used in AirNode and many production deploys.</td></tr>
+        <tr><td><a href="https://www.atomic14.com/2025/07/21/crowd-funding-retro.html" target="_blank">atomic14 Crowdfunding retrospective</a></td><td>Honest financials of crowdfunding an ESP32 product (ZX Spectrum). Required reading.</td></tr>
+      </table>`,
+    note: "Bookmark these. Most successful 2025-26 ESP32 products started by combining 3 of these resources."
+  },
+
+  /* ==========================================================
+     CLOSING
+     ========================================================== */
+  {
+    section: "end", title: "🎯 Pick one. Build it this weekend. Ship it.",
+    bullets: [
+      "<strong>If you're new:</strong> start with Tier 1, #1 (smart plug) or #2 (weather station). Sell to 3 friends — that's it for week 1.",
+      "<strong>If you're building a side income:</strong> Tier 2, #10 (AQ monitor) or #13 (RFID access). Both have proven open-source references.",
+      "<strong>If you want to crowdfund:</strong> Tier 3, #19 (e-paper dashboard) or #20 (pocket devkit). Pre-launch on Crowd Supply for 6+ weeks first.",
+      "<strong>If you're building a company:</strong> Tier 4 — pick ONE vertical (factory, agri, retail, healthcare) and pre-sell 5 units before custom PCB.",
+      "<strong>The cardinal rule:</strong> sell something before you build the next thing. Hardware companies die from over-building, never from over-selling."
+    ],
+    cta: [
+      { label: "← ESP32 Adventures (basics)", href: "esp32.html", ghost: true },
+      { label: "← RTOS Adventures", href: "rtos.html", ghost: true },
+      { label: "← 73 Maker Projects", href: "customer-projects.html", ghost: true }
+    ]
+  }
+];
+
+/* ==========================================================================
+   RENDERER
+   ========================================================================== */
+const slides   = SLIDES;
+const tocEl    = document.getElementById("toc");
+const tocList  = document.getElementById("toc-list");
+const tocToggle= document.getElementById("tocToggle");
+const deck     = document.getElementById("deck");
+const counter  = document.getElementById("counter");
+const progress = document.getElementById("progress");
+const prevBtn  = document.getElementById("prevBtn");
+const nextBtn  = document.getElementById("nextBtn");
+const indicator= document.getElementById("indicator");
+let current = 0;
+
+function diffPips(level) {
+  let dots = "";
+  for (let i = 1; i <= 4; i++) {
+    dots += `<span class="pip ${i <= level ? 'on' : ''}"></span>`;
+  }
+  return `<span class="diff-pips" title="Difficulty ${level}/4">${dots}</span>`;
+}
+
+function renderProject(s) {
+  const bomRows = s.bom.map(([n,c]) => `<tr><td>${n}</td><td class="c">${c}</td></tr>`).join("");
+  const bomTotalRow = s.bomTotal ? `<tr><td>Total BOM</td><td class="c">${s.bomTotal}</td></tr>` : "";
+  const skillTags = (s.skills||[]).map(s => `<span class="tag">${s}</span>`).join("");
+  const ex = s.realExample
+    ? `<div class="example-link">🔗 <a href="${s.realExample.href}" target="_blank" rel="noopener">${s.realExample.label}</a></div>`
+    : "";
+
+  const tuts = TUTORIALS[s.num] || [];
+  const iconFor = (k) => k === "video" ? "▶" : k === "guide" ? "📄" : "💻";
+  const tutHtml = tuts.length ? `
+    <div class="section-h">📚 Source videos &amp; tutorials</div>
+    <div class="tut-list">
+      ${tuts.map(t => `
+        <a href="${t.h}" target="_blank" rel="noopener" title="${t.l}">
+          <span class="ico ${t.k}">${iconFor(t.k)}</span>
+          <span class="lbl">${t.l}</span>
+        </a>
+      `).join("")}
+    </div>
+  ` : "";
+
+  return `
+    <h1>${s.icon} ${s.title} ${diffPips(s.difficulty)}</h1>
+    <div class="proj-hook">${s.hook}</div>
+    <div class="proj-card">
+      <div>
+        <div class="section-h">Key numbers</div>
+        <div class="kv-grid">
+          <div class="kv cost"><div class="k">BOM cost</div><div class="v">${s.bomTotal}</div></div>
+          <div class="kv time"><div class="k">Build time</div><div class="v">${s.time}</div></div>
+          <div class="kv price"><div class="k">Sell price</div><div class="v">${s.sell}</div></div>
+          <div class="kv margin"><div class="k">Margin</div><div class="v">${s.margin}</div></div>
+        </div>
+        <div class="where">${s.where}</div>
+        <div class="demo-card">${s.demo}</div>
+        ${ex}
+        ${tutHtml}
+      </div>
+      <div>
+        <div class="section-h">Bill of materials</div>
+        <table class="bom-table">
+          <tr><th>Part</th><th style="text-align:right;">Cost</th></tr>
+          ${bomRows}
+          ${bomTotalRow}
+        </table>
+        <div class="section-h">Skills you'll practice</div>
+        <div class="tag-row">${skillTags}</div>
+        <div class="callout">${s.why}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTierIntro(s) {
+  const bullets = (s.bullets || []).map(b => `<li>${b}</li>`).join("");
+  return `
+    <h1>${s.icon} ${s.tierName}</h1>
+    <p class="sub">${s.sub}</p>
+    <div class="tier-intro">
+      <div class="tier-stats">
+        <h2>Tier at a glance</h2>
+        <div class="row">
+          <div><div class="num">${s.statCount}</div><div class="lbl">Projects</div></div>
+          <div><div class="num">${s.statBom}</div><div class="lbl">BOM range</div></div>
+          <div><div class="num">${s.statTime}</div><div class="lbl">Build time</div></div>
+          <div><div class="num">${s.statSell}</div><div class="lbl">Sell price</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-h">Strategy for this tier</div>
+        <ul class="tier-list">${bullets}</ul>
+      </div>
+    </div>`;
+}
+
+function renderCustomCards(s) {
+  const cards = (s.customCards || []).map(c =>
+    `<div class="strat-card"><h3>${c.h}</h3><p>${c.t}</p></div>`
+  ).join("");
+  const subHtml = s.sub ? `<p class="sub">${s.sub}</p>` : "";
+  return `<h1>${s.title}</h1>${subHtml}<div class="strat-grid">${cards}</div>`;
+}
+
+function renderCover(s) {
+  const pills = (s.metaPills || []).map(p => `<span class="pill">${p}</span>`).join("");
+  const cta   = (s.cta || []).map(c =>
+    c.action === "next"
+      ? `<a class="cta" href="#" data-next>${c.label}</a>`
+      : `<a class="cta ${c.ghost ? "ghost":""}" href="${c.href}" target="_blank">${c.label}</a>`
+  ).join("");
+  return `
+    <h1>${s.title}</h1>
+    <p class="sub">${s.sub || ""}</p>
+    <div class="meta">${pills}</div>
+    <div class="cta-row">${cta}</div>
+  `;
+}
+
+function renderStandard(s) {
+  const bullets = (s.bullets || []).map(b => `<li>${b}</li>`).join("");
+  const subHtml = s.sub ? `<p class="sub">${s.sub}</p>` : "";
+  const customHtml = s.customHtml || "";
+  const noteHtml = s.note ? `<div class="callout" style="margin-top:14px;">${s.note}</div>` : "";
+
+  const channelsHtml = (s.channels || []).length
+    ? `<div class="channels-grid">${s.channels.map(c => `
+        <div class="ch-card">
+          <div class="ch-kind">${c.kind}</div>
+          <div class="ch-name">${c.name}</div>
+          <div class="ch-desc">${c.desc}</div>
+          <a href="${c.url}" target="_blank" rel="noopener">Open ↗</a>
+        </div>`).join("")}</div>`
+    : "";
+
+  const cta = (s.cta || []).map(c =>
+    `<a class="cta ${c.ghost ? 'ghost' : ''}" href="${c.href}" ${c.href && c.href.startsWith('http') ? 'target="_blank"' : ''}>${c.label}</a>`
+  ).join("");
+  const ctaHtml = cta ? `<div class="cta-row" style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">${cta}</div>` : "";
+  return `
+    <h1>${s.title}</h1>
+    ${subHtml}
+    ${bullets ? `<ul style="font-size:14.5px; line-height:1.6; color:#1f2937;">${bullets}</ul>` : ""}
+    ${channelsHtml}
+    ${customHtml}
+    ${noteHtml}
+    ${ctaHtml}
+  `;
+}
+
+function renderSlide(s, i) {
+  const meta = SECTIONS[s.section] || SECTIONS.cover;
+  const el = document.createElement("section");
+  el.className = `slide ${meta.cls}`;
+  el.dataset.i = i;
+  el.style.display = i === 0 ? "flex" : "none";
+
+  const header = `
+    <div class="slide-header">
+      <span class="pill">${meta.title}</span>
+      <span>slide ${i+1} / ${slides.length}</span>
+    </div>`;
+
+  let body = "";
+  if (s.cover) {
+    el.classList.add("cover");
+    body = renderCover(s);
+  } else if (s.tierIntro) {
+    body = renderTierIntro(s);
+  } else if (s.project) {
+    body = renderProject(s);
+  } else if (s.customCards) {
+    body = renderCustomCards(s);
+  } else {
+    body = renderStandard(s);
+  }
+
+  const footer = `
+    <div class="slide-footer">
+      <span class="crumbs">🛒 ESP32 Build &amp; Sell · 32 curated projects · 2026 edition</span>
+      <span>${meta.title} · ${i+1}/${slides.length}</span>
+    </div>`;
+
+  el.innerHTML = `${header}${body}${footer}`;
+  return el;
+}
+
+function renderTOC() {
+  let html = "";
+  let lastSec = null;
+  slides.forEach((s, i) => {
+    if (s.section !== lastSec) {
+      const meta = SECTIONS[s.section] || SECTIONS.cover;
+      if (lastSec !== null) html += `</div>`;
+      html += `<div class="toc-section">
+        <div class="toc-section-title"><span class="dot ${meta.dot}"></span>${meta.title}</div>`;
+      lastSec = s.section;
+    }
+    const title = (s.title || s.tierName || "").replace(/<[^>]+>/g, "");
+    html += `<div class="toc-item" data-i="${i}"><span class="num">${i+1}</span><span>${title}</span></div>`;
+  });
+  if (lastSec !== null) html += `</div>`;
+  tocList.innerHTML = html;
+}
+
+function go(i) {
+  current = Math.max(0, Math.min(slides.length - 1, i));
+  const slides_els = deck.querySelectorAll(".slide");
+  slides_els.forEach(el => el.style.display = "none");
+  if (slides_els[current]) slides_els[current].style.display = "flex";
+  counter.textContent = `${current+1} / ${slides.length}`;
+  indicator.textContent = `${current+1} / ${slides.length}`;
+  progress.style.width = `${((current+1)/slides.length)*100}%`;
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === slides.length - 1;
+  document.querySelectorAll(".toc-item").forEach(el => {
+    el.classList.toggle("active", Number(el.dataset.i) === current);
+  });
+  const activeToc = document.querySelector(".toc-item.active");
+  if (activeToc) activeToc.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  history.replaceState(null, "", `#${current+1}`);
+}
+
+function init() {
+  slides.forEach((s, i) => deck.appendChild(renderSlide(s, i)));
+  renderTOC();
+  const startHash = parseInt((location.hash || "").replace("#",""), 10);
+  go(Number.isInteger(startHash) && startHash > 0 ? startHash - 1 : 0);
+  prevBtn.addEventListener("click", () => go(current - 1));
+  nextBtn.addEventListener("click", () => go(current + 1));
+  tocToggle.addEventListener("click", () => tocEl.classList.toggle("open"));
+  tocList.addEventListener("click", (e) => {
+    const item = e.target.closest(".toc-item");
+    if (!item) return;
+    go(Number(item.dataset.i));
+    tocEl.classList.remove("open");
+  });
+  deck.addEventListener("click", (e) => {
+    if (e.target.matches("[data-next]")) { e.preventDefault(); go(current + 1); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); go(current + 1); }
+    if (e.key === "ArrowLeft"  || e.key === "PageUp")   { e.preventDefault(); go(current - 1); }
+    if (e.key === "Home") { e.preventDefault(); go(0); }
+    if (e.key === "End")  { e.preventDefault(); go(slides.length - 1); }
+  });
+  let touchStartX = null;
+  deck.addEventListener("touchstart", (e) => { touchStartX = e.touches[0].clientX; });
+  deck.addEventListener("touchend", (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (dx >  60) go(current - 1);
+    if (dx < -60) go(current + 1);
+    touchStartX = null;
+  });
+}
+init();
+</script>
+</body>
+</html>

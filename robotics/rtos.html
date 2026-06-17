@@ -1,0 +1,1677 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RTOS Adventures · Introduction to Real-Time Operating Systems</title>
+<meta name="description" content="A complete, single-file walk-through of Shawn Hymel's 12-part Introduction to RTOS series (Digi-Key). Covers FreeRTOS on the ESP32: tasks, scheduling, memory, queues, mutexes, semaphores, timers, ISRs, deadlock, priority inversion and multicore — with diagrams, code, quizzes and a cheatsheet." />
+<style>
+:root {
+  --bg-1:#0f172a;
+  --ink:#0b1220;
+  --paper:#ffffff;
+  --muted:#475569;
+  --soft:#e2e8f0;
+  --shadow: 0 20px 60px rgba(2,6,23,.18), 0 4px 12px rgba(2,6,23,.08);
+  --radius: 22px;
+  --radius-sm: 12px;
+
+  --c-cover-1:#4338ca;  --c-cover-2:#06b6d4;
+  --c-intro-1:#2563eb;  --c-intro-2:#06b6d4;
+  --c-start-1:#16a34a;  --c-start-2:#22c55e;
+  --c-sched-1:#d97706;  --c-sched-2:#f97316;
+  --c-mem-1:#7c3aed;    --c-mem-2:#a855f7;
+  --c-queue-1:#0d9488;  --c-queue-2:#14b8a6;
+  --c-mutex-1:#be185d;  --c-mutex-2:#db2777;
+  --c-sema-1:#9d174d;   --c-sema-2:#ec4899;
+  --c-timer-1:#4f46e5;  --c-timer-2:#6366f1;
+  --c-isr-1:#b91c1c;    --c-isr-2:#ef4444;
+  --c-dead-1:#475569;   --c-dead-2:#64748b;
+  --c-prio-1:#ea580c;   --c-prio-2:#f59e0b;
+  --c-multi-1:#0891b2;  --c-multi-2:#0ea5e9;
+  --c-play-1:#f59e0b;   --c-play-2:#ef4444;
+  --c-end-1:#06b6d4;    --c-end-2:#7c3aed;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { background: var(--bg-1); }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Helvetica Neue", "Nunito", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 800px at 10% -10%, #1e293b, transparent 60%),
+    radial-gradient(1200px 800px at 110% 110%, #0b1220, transparent 60%),
+    linear-gradient(180deg, #0f172a, #020617);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .toc { position: fixed; inset: 0 auto 0 0; transform: translateX(-100%); transition: transform .25s ease; z-index: 50; width: 280px; }
+  .toc.open { transform: translateX(0); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+  .toc-toggle { display: inline-flex !important; }
+}
+
+.toc {
+  background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+  color: #e2e8f0;
+  padding: 18px 14px;
+  border-right: 1px solid rgba(255,255,255,.06);
+  overflow-y: auto;
+  max-height: 100vh;
+  position: sticky; top: 0;
+}
+.toc h2 {
+  font-size: 14px; letter-spacing: 1.2px; text-transform: uppercase;
+  color: #94a3b8; margin: 6px 8px 14px; font-weight: 700;
+}
+.toc .brand {
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, #4338ca, #06b6d4);
+  color: white; padding: 12px 14px; border-radius: 14px; margin-bottom: 14px;
+  font-weight: 800;
+}
+.toc .brand-emoji { font-size: 22px; }
+.toc .brand small { display: block; font-weight: 400; opacity: .85; font-size: 11px; letter-spacing: .8px; text-transform: uppercase; }
+.toc-section { margin-bottom: 14px; }
+.toc-section-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+  color: #cbd5e1; padding: 6px 10px;
+  background: rgba(255,255,255,.04); border-radius: 8px; margin-bottom: 6px;
+  font-weight: 700;
+}
+.toc-section .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.toc-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; color: #cbd5e1; line-height: 1.25;
+  transition: background .15s ease, color .15s ease;
+  user-select: none;
+}
+.toc-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+.toc-item.active {
+  background: linear-gradient(90deg, rgba(99,102,241,.25), rgba(236,72,153,.18));
+  color: #fff; font-weight: 600;
+}
+.toc-item .num { font-variant-numeric: tabular-nums; color: #94a3b8; font-size: 11px; min-width: 22px; }
+.toc-item.active .num { color: #f8fafc; }
+.nav-other {
+  margin-top: 14px; background: rgba(255,255,255,.03);
+  border: 1px dashed rgba(255,255,255,.12); border-radius: 10px;
+  padding: 10px; font-size: 12px; color: #cbd5e1; line-height: 1.6;
+}
+.nav-other a { color: #7dd3fc; text-decoration: none; font-weight: 700; display: block; }
+.nav-other a:hover { text-decoration: underline; }
+
+.dot-cover  { background: linear-gradient(135deg, var(--c-cover-1),  var(--c-cover-2)); }
+.dot-intro  { background: linear-gradient(135deg, var(--c-intro-1),  var(--c-intro-2)); }
+.dot-start  { background: linear-gradient(135deg, var(--c-start-1),  var(--c-start-2)); }
+.dot-sched  { background: linear-gradient(135deg, var(--c-sched-1),  var(--c-sched-2)); }
+.dot-mem    { background: linear-gradient(135deg, var(--c-mem-1),    var(--c-mem-2)); }
+.dot-queue  { background: linear-gradient(135deg, var(--c-queue-1),  var(--c-queue-2)); }
+.dot-mutex  { background: linear-gradient(135deg, var(--c-mutex-1),  var(--c-mutex-2)); }
+.dot-sema   { background: linear-gradient(135deg, var(--c-sema-1),   var(--c-sema-2)); }
+.dot-timer  { background: linear-gradient(135deg, var(--c-timer-1),  var(--c-timer-2)); }
+.dot-isr    { background: linear-gradient(135deg, var(--c-isr-1),    var(--c-isr-2)); }
+.dot-dead   { background: linear-gradient(135deg, var(--c-dead-1),   var(--c-dead-2)); }
+.dot-prio   { background: linear-gradient(135deg, var(--c-prio-1),   var(--c-prio-2)); }
+.dot-multi  { background: linear-gradient(135deg, var(--c-multi-1),  var(--c-multi-2)); }
+.dot-play   { background: linear-gradient(135deg, var(--c-play-1),   var(--c-play-2)); }
+.dot-end    { background: linear-gradient(135deg, var(--c-end-1),    var(--c-end-2)); }
+
+.deck-wrap { padding: 24px 28px 100px; max-width: 1280px; width: 100%; margin: 0 auto; }
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px;
+}
+.toc-toggle {
+  display: none; padding: 8px 12px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  color: white; border-radius: 999px; font-weight: 700; font-size: 12px;
+  cursor: pointer;
+}
+.progress-wrap { flex: 1; height: 6px; background: rgba(255,255,255,.08); border-radius: 999px; overflow: hidden; }
+.progress {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #06b6d4, #ec4899, #f59e0b);
+  transition: width .35s ease;
+  box-shadow: 0 0 12px rgba(236,72,153,.4);
+}
+.counter {
+  color: #cbd5e1; font-size: 12px; font-variant-numeric: tabular-nums;
+  background: rgba(255,255,255,.06); padding: 6px 10px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  font-weight: 700;
+}
+
+.slide {
+  background: var(--paper);
+  border-radius: var(--radius);
+  padding: 28px 32px 24px;
+  box-shadow: var(--shadow);
+  display: none;
+  flex-direction: column;
+  min-height: 70vh;
+  animation: pop .25s ease both;
+  --accent-1: var(--c-cover-1);
+  --accent-2: var(--c-cover-2);
+  border-top: 6px solid transparent;
+  border-image: linear-gradient(90deg, var(--accent-1), var(--accent-2)) 1;
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.slide.s-cover  { --accent-1: var(--c-cover-1);  --accent-2: var(--c-cover-2); }
+.slide.s-intro  { --accent-1: var(--c-intro-1);  --accent-2: var(--c-intro-2); }
+.slide.s-start  { --accent-1: var(--c-start-1);  --accent-2: var(--c-start-2); }
+.slide.s-sched  { --accent-1: var(--c-sched-1);  --accent-2: var(--c-sched-2); }
+.slide.s-mem    { --accent-1: var(--c-mem-1);    --accent-2: var(--c-mem-2); }
+.slide.s-queue  { --accent-1: var(--c-queue-1);  --accent-2: var(--c-queue-2); }
+.slide.s-mutex  { --accent-1: var(--c-mutex-1);  --accent-2: var(--c-mutex-2); }
+.slide.s-sema   { --accent-1: var(--c-sema-1);   --accent-2: var(--c-sema-2); }
+.slide.s-timer  { --accent-1: var(--c-timer-1);  --accent-2: var(--c-timer-2); }
+.slide.s-isr    { --accent-1: var(--c-isr-1);    --accent-2: var(--c-isr-2); }
+.slide.s-dead   { --accent-1: var(--c-dead-1);   --accent-2: var(--c-dead-2); }
+.slide.s-prio   { --accent-1: var(--c-prio-1);   --accent-2: var(--c-prio-2); }
+.slide.s-multi  { --accent-1: var(--c-multi-1);  --accent-2: var(--c-multi-2); }
+.slide.s-play   { --accent-1: var(--c-play-1);   --accent-2: var(--c-play-2); }
+.slide.s-end    { --accent-1: var(--c-end-1);    --accent-2: var(--c-end-2); }
+
+.slide-header {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;
+}
+.slide-header .pill {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: white; padding: 4px 10px; border-radius: 999px;
+  font-weight: 800; letter-spacing: .8px;
+}
+.slide h1 {
+  margin: 4px 0 12px; font-size: clamp(22px, 3vw, 34px); line-height: 1.15;
+  color: var(--ink); font-weight: 800; letter-spacing: -.4px;
+}
+.slide .sub {
+  margin: 0 0 14px; color: var(--muted); font-size: clamp(13px, 1.4vw, 16px); line-height: 1.5;
+}
+
+.slide-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.slide-body.single { grid-template-columns: 1fr; }
+@media (max-width: 800px) { .slide-body { grid-template-columns: 1fr; } }
+
+.slide .content ul { margin: 6px 0 8px; padding-left: 20px; }
+.slide .content li { margin-bottom: 8px; font-size: 14.5px; line-height: 1.55; color: #1e293b; }
+.slide .content li strong { color: var(--accent-1); }
+
+.visual {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 1px solid var(--soft);
+  border-radius: var(--radius-sm);
+  padding: 16px; text-align: center;
+}
+.visual svg { max-width: 100%; height: auto; }
+.visual .caption {
+  margin-top: 8px; font-size: 11.5px; color: var(--muted); font-style: italic; line-height: 1.4;
+}
+.visual .big-emoji { font-size: 110px; line-height: 1; margin: 8px 0; }
+
+pre.code {
+  background: #0b1220; color: #e2e8f0;
+  border-radius: 12px; padding: 14px 16px; margin: 12px 0 0;
+  font-family: "SF Mono", Consolas, Menlo, "Roboto Mono", monospace;
+  font-size: 12.5px; line-height: 1.6; overflow-x: auto;
+  box-shadow: 0 10px 24px rgba(15,23,42,.35);
+}
+pre.code .kw { color: #c084fc; font-weight: 700; }
+pre.code .fn { color: #60a5fa; }
+pre.code .num{ color: #fbbf24; }
+pre.code .cm { color: #64748b; font-style: italic; }
+pre.code .str{ color: #86efac; }
+pre.code .ty { color: #2dd4bf; }
+
+.analogy {
+  margin-top: 12px;
+  background: #f0fdfa;
+  border-left: 4px solid #14b8a6;
+  border-radius: 10px;
+  padding: 10px 14px; font-size: 13.5px; line-height: 1.5; color: #115e59;
+}
+.analogy::before { content: "💡 "; font-weight: 800; color: #0d9488; }
+.analogy.fun  { background:#fdf2f8; border-left-color:#ec4899; color:#831843; }
+.analogy.fun::before  { content: "🎈 "; color:#be185d; }
+.analogy.note { background:#fef3c7; border-left-color:#f59e0b; color:#78350f; }
+.analogy.note::before { content: "📝 "; color:#b45309; }
+.analogy.warn { background:#fee2e2; border-left-color:#ef4444; color:#7f1d1d; }
+.analogy.warn::before { content: "⚠️ "; color:#b91c1c; }
+
+table.cmp { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+table.cmp th, table.cmp td { border-bottom: 1px solid var(--soft); padding: 8px 10px; text-align: left; }
+table.cmp th { color: #475569; font-weight: 700; background: #f8fafc; font-size: 11px; text-transform: uppercase; letter-spacing: .8px; }
+table.cmp td.win { background: #ecfdf5; color: #14532d; font-weight: 700; }
+table.cmp tbody tr:hover { background: #fafcff; }
+
+.kv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.kv { background: #f8fafc; border: 1px solid var(--soft); border-radius: 10px; padding: 10px 12px; }
+.kv .k { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .8px; }
+.kv .v { font-size: 13.5px; color: #0f172a; margin-top: 2px; font-weight: 600; }
+
+/* Quiz */
+.slide.s-play .quiz-q {
+  background: linear-gradient(135deg, #fef9c3, #fef3c7);
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px; padding: 12px 14px; font-size: 14.5px; color: #78350f; margin-bottom: 10px;
+}
+.quiz-options { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.quiz-options li {
+  background: #fff; border: 2px solid #e2e8f0; border-radius: 10px;
+  padding: 10px 14px; cursor: pointer; font-size: 13.5px; color: #1f2937; font-weight: 600;
+  transition: all .15s ease; user-select: none;
+}
+.quiz-options li:hover { border-color: #f59e0b; background: #fefce8; }
+.quiz-options li.correct   { border-color: #16a34a; background: #ecfdf5; color: #14532d; }
+.quiz-options li.wrong     { border-color: #ef4444; background: #fef2f2; color: #7f1d1d; }
+.quiz-options li.disabled  { cursor: not-allowed; opacity: .85; }
+.quiz-feedback {
+  margin-top: 10px; padding: 10px 14px; border-radius: 10px;
+  font-size: 13px; line-height: 1.5; display: none;
+}
+.quiz-feedback.show { display: block; }
+.quiz-feedback.ok  { background:#ecfdf5; color:#14532d; border-left: 4px solid #16a34a; }
+.quiz-feedback.no  { background:#fef2f2; color:#7f1d1d; border-left: 4px solid #ef4444; }
+
+.slide-footer {
+  margin-top: auto; padding-top: 18px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; color: var(--muted); border-top: 1px dashed var(--soft);
+}
+.slide-footer .crumbs { color: #475569; }
+
+/* Controls */
+.controls {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  display: flex; justify-content: center; align-items: center; gap: 12px;
+  background: rgba(15,23,42,.78); backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 10px 16px; z-index: 30;
+}
+.controls button {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  color: white; padding: 9px 16px; border-radius: 999px;
+  font-weight: 700; font-size: 13px; cursor: pointer;
+  transition: background .15s ease, transform .1s ease;
+}
+.controls button:hover:not(:disabled) { background: rgba(255,255,255,.16); }
+.controls button:active { transform: translateY(1px); }
+.controls button:disabled { opacity: .35; cursor: not-allowed; }
+.controls .indicator {
+  color: #cbd5e1; font-size: 12px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cover slide */
+.slide.cover h1 {
+  font-size: clamp(28px, 5vw, 56px);
+  background: linear-gradient(90deg, #06b6d4, #7c3aed, #ec4899);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.slide.cover .cta-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.slide.cover .cta {
+  text-decoration: none; padding: 12px 18px; border-radius: 999px;
+  background: linear-gradient(135deg, #4338ca, #06b6d4); color: white; font-weight: 800;
+  display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 20px rgba(67,56,202,.25);
+}
+.slide.cover .cta.ghost {
+  background: transparent; border: 1.5px solid #cbd5e1; color: #1e293b;
+  box-shadow: none;
+}
+.slide.cover .meta { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+.slide.cover .pill {
+  font-size: 11px; padding: 4px 10px; border-radius: 999px;
+  background: #f1f5f9; color: #475569; font-weight: 700; letter-spacing: .4px;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="toc" id="toc">
+    <div class="brand">
+      <span class="brand-emoji">⏱️</span>
+      <div>
+        RTOS Adventures
+        <small>FreeRTOS · ESP32 · 12 parts</small>
+      </div>
+    </div>
+    <h2>Contents</h2>
+    <div id="toc-list"></div>
+    <div class="nav-other">
+      <strong>Also see:</strong>
+      <a href="intro.html">⚡ Electronics primer</a>
+      <a href="next-steps.html">🚀 Next Steps (10 topics)</a>
+      <a href="index.html">📘 Arduino Adventures</a>
+      <a href="esp32.html">🛰️ ESP32 Adventures</a>
+      <a href="customer-projects.html">🛠️ 73 Maker Projects</a>
+      <a href="esp32-projects.html">🛒 ESP32 Build &amp; Sell</a>
+    </div>
+    <div style="margin-top:18px;font-size:11px;color:#64748b;line-height:1.5;padding:10px;">
+      Based on the 12-part series<br/>
+      <em>"Introduction to RTOS"</em><br/>
+      by <strong>Shawn Hymel</strong> · Digi-Key Electronics.<br/>
+      <a href="https://www.youtube.com/playlist?list=PLEBQazB0HUyQ4hAPU1cJED6t3DU0h34bz" target="_blank" style="color:#7dd3fc;">Watch the playlist ↗</a>
+    </div>
+  </aside>
+
+  <main class="deck-wrap">
+    <div class="topbar">
+      <button class="toc-toggle" id="tocToggle" aria-label="Toggle contents">☰ Contents</button>
+      <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+      <div class="counter" id="counter">1 / 1</div>
+    </div>
+    <div id="deck"></div>
+  </main>
+</div>
+
+<nav class="controls" aria-label="Slide navigation">
+  <button id="prevBtn" aria-label="Previous slide">← Prev</button>
+  <span class="indicator" id="indicator">1 / 1</span>
+  <button id="nextBtn" aria-label="Next slide">Next →</button>
+</nav>
+
+<script>
+/* ==========================================================================
+   RTOS ADVENTURES — single-file presentation
+   Covers all 12 videos of Shawn Hymel's Introduction to RTOS playlist:
+   https://www.youtube.com/playlist?list=PLEBQazB0HUyQ4hAPU1cJED6t3DU0h34bz
+   ========================================================================== */
+
+const PLAYLIST = "https://www.youtube.com/playlist?list=PLEBQazB0HUyQ4hAPU1cJED6t3DU0h34bz";
+const VID = {
+  p1:  "F321087yYy4",
+  p2:  "JIr7Xm_riRs",
+  p3:  "95yUbClyf3E",
+  p4:  "Qske3yZRW5I",
+  p5:  "pHJ3lxOoWeI",
+  p6:  "I55auRpbiTs",
+  p7:  "5JcMtbA9QEE",
+  p8:  "b1f1Iex0Tso",
+  p9:  "qsflCf6ahXU",
+  p10: "hRsWi4HIENc",
+  p11: "C2xKhxROmhA",
+  p12: "LPSHUcH5aQc"
+};
+const yt = (id) => `https://youtu.be/${id}`;
+
+const SECTIONS = {
+  cover: { title: "Welcome",                       cls: "s-cover", dot: "dot-cover" },
+  intro: { title: "1. What is an RTOS?",            cls: "s-intro", dot: "dot-intro" },
+  start: { title: "2. Getting Started with FreeRTOS", cls: "s-start", dot: "dot-start" },
+  sched: { title: "3. Task Scheduling",             cls: "s-sched", dot: "dot-sched" },
+  mem:   { title: "4. Memory Management",           cls: "s-mem",   dot: "dot-mem" },
+  queue: { title: "5. Queues",                      cls: "s-queue", dot: "dot-queue" },
+  mutex: { title: "6. Mutex",                       cls: "s-mutex", dot: "dot-mutex" },
+  sema:  { title: "7. Semaphores",                  cls: "s-sema",  dot: "dot-sema" },
+  timer: { title: "8. Software Timers",             cls: "s-timer", dot: "dot-timer" },
+  isr:   { title: "9. Hardware Interrupts",         cls: "s-isr",   dot: "dot-isr" },
+  dead:  { title: "10. Deadlock & Starvation",      cls: "s-dead",  dot: "dot-dead" },
+  prio:  { title: "11. Priority Inversion",         cls: "s-prio",  dot: "dot-prio" },
+  multi: { title: "12. Multicore Systems",          cls: "s-multi", dot: "dot-multi" },
+  play:  { title: "Quizzes",                        cls: "s-play",  dot: "dot-play" },
+  end:   { title: "What's next?",                   cls: "s-end",   dot: "dot-end" },
+};
+
+/* =====================================================================
+   Reusable inline SVG diagrams (RTOS-themed)
+   ===================================================================== */
+const SVG = {
+
+  bareVsRtos: `
+<svg viewBox="0 0 500 240" width="100%">
+  <g>
+    <rect x="20" y="20" width="220" height="200" rx="14" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+    <text x="130" y="44" text-anchor="middle" font-size="14" font-weight="800" fill="#7f1d1d">Bare-metal (no RTOS)</text>
+    <rect x="40" y="60" width="180" height="40" rx="6" fill="#fff" stroke="#dc2626"/>
+    <text x="130" y="84" text-anchor="middle" font-size="12" font-weight="700" fill="#991b1b">while(1) { do A; do B; do C; }</text>
+    <text x="130" y="120" text-anchor="middle" font-size="11" fill="#7f1d1d">One big loop — if A is slow,</text>
+    <text x="130" y="135" text-anchor="middle" font-size="11" fill="#7f1d1d">B and C have to wait.</text>
+    <text x="130" y="170" text-anchor="middle" font-size="36">😴</text>
+    <text x="130" y="205" text-anchor="middle" font-size="11" font-style="italic" fill="#991b1b">Simple, but poor responsiveness</text>
+  </g>
+  <g>
+    <rect x="260" y="20" width="220" height="200" rx="14" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="370" y="44" text-anchor="middle" font-size="14" font-weight="800" fill="#14532d">With RTOS</text>
+    <rect x="280" y="58" width="55" height="34" rx="5" fill="#fff" stroke="#16a34a"/>
+    <text x="307" y="79" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">Task A</text>
+    <rect x="343" y="58" width="55" height="34" rx="5" fill="#fff" stroke="#16a34a"/>
+    <text x="370" y="79" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">Task B</text>
+    <rect x="406" y="58" width="55" height="34" rx="5" fill="#fff" stroke="#16a34a"/>
+    <text x="433" y="79" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">Task C</text>
+    <rect x="280" y="105" width="181" height="42" rx="6" fill="#bbf7d0" stroke="#16a34a"/>
+    <text x="370" y="129" text-anchor="middle" font-size="12" font-weight="800" fill="#14532d">RTOS Kernel · Scheduler</text>
+    <text x="370" y="165" text-anchor="middle" font-size="32">⚙️</text>
+    <text x="370" y="205" text-anchor="middle" font-size="11" font-style="italic" fill="#14532d">Each task gets its own slot</text>
+  </g>
+</svg>`,
+
+  taskStates: `
+<svg viewBox="0 0 520 280" width="100%">
+  <g>
+    <ellipse cx="260" cy="40" rx="68" ry="26" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+    <text x="260" y="46" text-anchor="middle" font-size="13" font-weight="800" fill="#14532d">RUNNING</text>
+    <ellipse cx="90" cy="150" rx="68" ry="26" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="90" y="156" text-anchor="middle" font-size="13" font-weight="800" fill="#1e3a8a">READY</text>
+    <ellipse cx="430" cy="150" rx="68" ry="26" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+    <text x="430" y="156" text-anchor="middle" font-size="13" font-weight="800" fill="#78350f">BLOCKED</text>
+    <ellipse cx="260" cy="240" rx="68" ry="26" fill="#fce7f3" stroke="#be185d" stroke-width="2"/>
+    <text x="260" y="246" text-anchor="middle" font-size="13" font-weight="800" fill="#831843">SUSPENDED</text>
+
+    <g fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arr)">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker>
+      </defs>
+      <path d="M 158 150 Q 175 95 196 60"/>
+      <path d="M 324 60 Q 350 95 365 132"/>
+      <path d="M 362 150 Q 220 150 158 150"/>
+      <path d="M 290 220 Q 380 200 430 178"/>
+      <path d="M 234 220 Q 160 200 110 178"/>
+      <path d="M 240 65 Q 245 130 250 215"/>
+    </g>
+
+    <text x="180" y="100" font-size="10" fill="#475569" font-weight="700">scheduler picks me</text>
+    <text x="340" y="100" font-size="10" fill="#475569" font-weight="700">vTaskDelay / wait</text>
+    <text x="260" y="142" text-anchor="middle" font-size="10" fill="#475569" font-weight="700">event arrived</text>
+    <text x="370" y="218" font-size="10" fill="#475569" font-weight="700">vTaskSuspend</text>
+    <text x="145" y="218" font-size="10" fill="#475569" font-weight="700">vTaskResume</text>
+  </g>
+</svg>`,
+
+  schedTimeline: `
+<svg viewBox="0 0 520 200" width="100%">
+  <line x1="20" y1="170" x2="500" y2="170" stroke="#64748b" stroke-width="1.5"/>
+  <text x="20" y="190" font-size="10" fill="#475569">t=0</text>
+  <text x="500" y="190" font-size="10" fill="#475569" text-anchor="end">time →</text>
+
+  <text x="6" y="56" font-size="11" font-weight="700" fill="#1e3a8a">Task A (hi)</text>
+  <text x="6" y="98" font-size="11" font-weight="700" fill="#14532d">Task B (mid)</text>
+  <text x="6" y="140" font-size="11" font-weight="700" fill="#7c2d12">Task C (lo)</text>
+
+  <rect x="70"  y="40" width="60" height="24" fill="#2563eb"/>
+  <rect x="230" y="40" width="40" height="24" fill="#2563eb"/>
+  <rect x="380" y="40" width="60" height="24" fill="#2563eb"/>
+  <rect x="130" y="82" width="40" height="24" fill="#16a34a"/>
+  <rect x="270" y="82" width="50" height="24" fill="#16a34a"/>
+  <rect x="170" y="124" width="60" height="24" fill="#ea580c"/>
+  <rect x="320" y="124" width="60" height="24" fill="#ea580c"/>
+  <rect x="440" y="124" width="40" height="24" fill="#ea580c"/>
+
+  <text x="100" y="20" text-anchor="middle" font-size="10" font-weight="700" fill="#1e3a8a">higher priority preempts</text>
+  <line x1="100" y1="22" x2="100" y2="40" stroke="#1e3a8a" stroke-dasharray="2 2"/>
+</svg>`,
+
+  memMap: `
+<svg viewBox="0 0 360 240" width="100%">
+  <rect x="40" y="20" width="280" height="200" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="180" y="42" text-anchor="middle" font-size="13" font-weight="800" fill="#4c1d95">RAM Memory</text>
+  <rect x="60" y="60" width="240" height="34" rx="6" fill="#ddd6fe" stroke="#7c3aed"/>
+  <text x="180" y="81" text-anchor="middle" font-size="12" font-weight="700" fill="#4c1d95">Static / .bss / .data (globals)</text>
+  <rect x="60" y="100" width="240" height="34" rx="6" fill="#fce7f3" stroke="#be185d"/>
+  <text x="180" y="121" text-anchor="middle" font-size="12" font-weight="700" fill="#831843">FreeRTOS Heap (tasks, queues…)</text>
+  <text x="320" y="119" font-size="11" font-weight="800" fill="#be185d">↓</text>
+  <rect x="60" y="140" width="240" height="34" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="180" y="161" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">Each Task's Stack</text>
+  <text x="320" y="159" font-size="11" font-weight="800" fill="#2563eb">↑</text>
+  <rect x="60" y="180" width="240" height="34" rx="6" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="180" y="201" text-anchor="middle" font-size="12" font-weight="700" fill="#14532d">Free pool (unused)</text>
+</svg>`,
+
+  queueFlow: `
+<svg viewBox="0 0 540 200" width="100%">
+  <rect x="20" y="60" width="120" height="80" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="80" y="92" text-anchor="middle" font-size="13" font-weight="800" fill="#14532d">Producer</text>
+  <text x="80" y="115" text-anchor="middle" font-size="11" fill="#14532d">xQueueSend()</text>
+
+  <rect x="190" y="55" width="160" height="90" rx="10" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/>
+  <text x="270" y="78" text-anchor="middle" font-size="13" font-weight="800" fill="#134e4a">Queue</text>
+  <g>
+    <rect x="205" y="92" width="28" height="40" fill="#5eead4" stroke="#0d9488"/>
+    <rect x="237" y="92" width="28" height="40" fill="#5eead4" stroke="#0d9488"/>
+    <rect x="269" y="92" width="28" height="40" fill="#5eead4" stroke="#0d9488"/>
+    <rect x="301" y="92" width="28" height="40" fill="none" stroke="#0d9488" stroke-dasharray="3 2"/>
+  </g>
+  <text x="270" y="158" text-anchor="middle" font-size="10" fill="#134e4a">FIFO buffer</text>
+
+  <rect x="400" y="60" width="120" height="80" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="460" y="92" text-anchor="middle" font-size="13" font-weight="800" fill="#1e3a8a">Consumer</text>
+  <text x="460" y="115" text-anchor="middle" font-size="11" fill="#1e3a8a">xQueueReceive()</text>
+
+  <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#qarr)">
+    <defs><marker id="qarr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+    <line x1="140" y1="100" x2="188" y2="100"/>
+    <line x1="352" y1="100" x2="398" y2="100"/>
+  </g>
+</svg>`,
+
+  mutexLock: `
+<svg viewBox="0 0 540 220" width="100%">
+  <rect x="220" y="20" width="100" height="80" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="270" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="#78350f">Shared</text>
+  <text x="270" y="70" text-anchor="middle" font-size="14" font-weight="800" fill="#78350f">Resource</text>
+  <text x="270" y="90" text-anchor="middle" font-size="20">🔑</text>
+
+  <rect x="20" y="130" width="140" height="70" rx="10" fill="#fce7f3" stroke="#be185d" stroke-width="2"/>
+  <text x="90" y="158" text-anchor="middle" font-size="13" font-weight="800" fill="#831843">Task A</text>
+  <text x="90" y="180" text-anchor="middle" font-size="11" fill="#831843">xSemaphoreTake</text>
+  <text x="90" y="194" text-anchor="middle" font-size="11" fill="#831843">→ ✅ OWNS lock</text>
+
+  <rect x="200" y="130" width="140" height="70" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="270" y="158" text-anchor="middle" font-size="13" font-weight="800" fill="#7f1d1d">Task B</text>
+  <text x="270" y="180" text-anchor="middle" font-size="11" fill="#7f1d1d">xSemaphoreTake</text>
+  <text x="270" y="194" text-anchor="middle" font-size="11" fill="#7f1d1d">→ ⏳ BLOCKED</text>
+
+  <rect x="380" y="130" width="140" height="70" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="450" y="158" text-anchor="middle" font-size="13" font-weight="800" fill="#7f1d1d">Task C</text>
+  <text x="450" y="180" text-anchor="middle" font-size="11" fill="#7f1d1d">xSemaphoreTake</text>
+  <text x="450" y="194" text-anchor="middle" font-size="11" fill="#7f1d1d">→ ⏳ BLOCKED</text>
+
+  <line x1="90" y1="130" x2="240" y2="100" stroke="#16a34a" stroke-width="3"/>
+  <text x="160" y="120" font-size="10" fill="#15803d" font-weight="700">has key</text>
+</svg>`,
+
+  semaCount: `
+<svg viewBox="0 0 520 220" width="100%">
+  <rect x="20" y="40" width="220" height="160" rx="12" fill="#fce7f3" stroke="#be185d" stroke-width="2"/>
+  <text x="130" y="70" text-anchor="middle" font-size="13" font-weight="800" fill="#831843">Binary Semaphore</text>
+  <text x="130" y="118" text-anchor="middle" font-size="46">🚦</text>
+  <text x="130" y="160" text-anchor="middle" font-size="11" fill="#831843">"Hey wake up!"</text>
+  <text x="130" y="178" text-anchor="middle" font-size="11" fill="#831843">ISR → Task signalling</text>
+
+  <rect x="280" y="40" width="220" height="160" rx="12" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="390" y="70" text-anchor="middle" font-size="13" font-weight="800" fill="#78350f">Counting Semaphore</text>
+  <g>
+    <text x="320" y="120" font-size="28">🅿️</text>
+    <text x="356" y="120" font-size="28">🅿️</text>
+    <text x="392" y="120" font-size="28">🅿️</text>
+    <text x="428" y="120" font-size="28">🅿️</text>
+    <text x="464" y="120" font-size="28">🅿️</text>
+  </g>
+  <text x="390" y="160" text-anchor="middle" font-size="11" fill="#78350f">Count = 5 free spots</text>
+  <text x="390" y="178" text-anchor="middle" font-size="11" fill="#78350f">Resource pool management</text>
+</svg>`,
+
+  isrFlow: `
+<svg viewBox="0 0 540 200" width="100%">
+  <rect x="20" y="60" width="120" height="60" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="80" y="86" text-anchor="middle" font-size="12" font-weight="800" fill="#7f1d1d">Hardware</text>
+  <text x="80" y="104" text-anchor="middle" font-size="12" font-weight="800" fill="#7f1d1d">event ⚡</text>
+
+  <rect x="180" y="60" width="160" height="60" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="260" y="86" text-anchor="middle" font-size="12" font-weight="800" fill="#78350f">ISR (short!)</text>
+  <text x="260" y="104" text-anchor="middle" font-size="11" fill="#78350f">xSemaphoreGiveFromISR</text>
+
+  <rect x="380" y="60" width="140" height="60" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="450" y="86" text-anchor="middle" font-size="12" font-weight="800" fill="#14532d">Task</text>
+  <text x="450" y="104" text-anchor="middle" font-size="11" fill="#14532d">does the heavy work</text>
+
+  <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#iarr)">
+    <defs><marker id="iarr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+    <line x1="140" y1="90" x2="178" y2="90"/>
+    <line x1="340" y1="90" x2="378" y2="90"/>
+  </g>
+  <text x="160" y="80" text-anchor="middle" font-size="9" fill="#475569">fire</text>
+  <text x="360" y="80" text-anchor="middle" font-size="9" fill="#475569">give</text>
+  <text x="270" y="155" text-anchor="middle" font-size="11" fill="#475569" font-style="italic">"Deferred Interrupt Processing"</text>
+</svg>`,
+
+  deadlock: `
+<svg viewBox="0 0 480 240" width="100%">
+  <g>
+    <circle cx="120" cy="80" r="38" fill="#fce7f3" stroke="#be185d" stroke-width="2"/>
+    <text x="120" y="86" text-anchor="middle" font-size="13" font-weight="800" fill="#831843">Task A</text>
+
+    <circle cx="360" cy="80" r="38" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="360" y="86" text-anchor="middle" font-size="13" font-weight="800" fill="#1e3a8a">Task B</text>
+
+    <rect x="80" y="170" width="80" height="40" rx="6" fill="#fef9c3" stroke="#d97706" stroke-width="2"/>
+    <text x="120" y="194" text-anchor="middle" font-size="12" font-weight="800" fill="#78350f">Lock 1 🔐</text>
+
+    <rect x="320" y="170" width="80" height="40" rx="6" fill="#fef9c3" stroke="#d97706" stroke-width="2"/>
+    <text x="360" y="194" text-anchor="middle" font-size="12" font-weight="800" fill="#78350f">Lock 2 🔐</text>
+
+    <g stroke="#16a34a" stroke-width="3" fill="none" marker-end="url(#g)">
+      <defs>
+        <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a"/></marker>
+        <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/></marker>
+      </defs>
+      <line x1="120" y1="118" x2="120" y2="166"/>
+      <line x1="360" y1="118" x2="360" y2="166"/>
+    </g>
+    <text x="135" y="142" font-size="9" fill="#15803d" font-weight="700">owns</text>
+    <text x="375" y="142" font-size="9" fill="#15803d" font-weight="700">owns</text>
+
+    <g stroke="#dc2626" stroke-width="3" fill="none" marker-end="url(#r)" stroke-dasharray="6 4">
+      <path d="M 120 170 Q 240 130 320 170"/>
+      <path d="M 360 170 Q 240 240 160 170"/>
+    </g>
+    <text x="220" y="135" text-anchor="middle" font-size="10" font-weight="700" fill="#7f1d1d">wants Lock 2</text>
+    <text x="220" y="220" text-anchor="middle" font-size="10" font-weight="700" fill="#7f1d1d">wants Lock 1</text>
+  </g>
+</svg>`,
+
+  prioInv: `
+<svg viewBox="0 0 540 220" width="100%">
+  <line x1="20" y1="190" x2="520" y2="190" stroke="#64748b" stroke-width="1.5"/>
+  <text x="520" y="208" font-size="10" fill="#475569" text-anchor="end">time →</text>
+
+  <text x="6" y="52" font-size="11" font-weight="700" fill="#7f1d1d">High</text>
+  <text x="6" y="98" font-size="11" font-weight="700" fill="#78350f">Mid</text>
+  <text x="6" y="144" font-size="11" font-weight="700" fill="#14532d">Low</text>
+
+  <rect x="50"  y="130" width="80" height="22" fill="#16a34a"/>
+  <text x="90" y="146" text-anchor="middle" font-size="9" fill="white" font-weight="700">Low takes lock</text>
+  <rect x="130" y="130" width="40" height="22" fill="#16a34a" opacity=".5"/>
+  <rect x="170" y="38" width="40" height="22" fill="#dc2626"/>
+  <text x="190" y="54" text-anchor="middle" font-size="9" fill="white" font-weight="700">High runs</text>
+  <rect x="210" y="38" width="60" height="22" fill="#dc2626" opacity=".4"/>
+  <text x="240" y="54" text-anchor="middle" font-size="9" fill="white" font-weight="700">waits for lock!</text>
+  <rect x="270" y="84" width="180" height="22" fill="#d97706"/>
+  <text x="360" y="100" text-anchor="middle" font-size="10" fill="white" font-weight="700">Mid task runs forever — blocks low (and so blocks high)</text>
+  <rect x="450" y="38" width="60" height="22" fill="#dc2626"/>
+  <text x="480" y="54" text-anchor="middle" font-size="9" fill="white" font-weight="700">finally!</text>
+</svg>`,
+
+  dualCore: `
+<svg viewBox="0 0 480 220" width="100%">
+  <rect x="20" y="30" width="200" height="160" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="120" y="60" text-anchor="middle" font-size="14" font-weight="800" fill="#1e3a8a">Core 0 (PRO_CPU)</text>
+  <text x="120" y="118" text-anchor="middle" font-size="42">🧠</text>
+  <text x="120" y="160" text-anchor="middle" font-size="11" fill="#1e3a8a">WiFi · Bluetooth stack</text>
+  <text x="120" y="176" text-anchor="middle" font-size="11" fill="#1e3a8a">"protocol CPU"</text>
+
+  <rect x="260" y="30" width="200" height="160" rx="14" fill="#fce7f3" stroke="#db2777" stroke-width="2"/>
+  <text x="360" y="60" text-anchor="middle" font-size="14" font-weight="800" fill="#831843">Core 1 (APP_CPU)</text>
+  <text x="360" y="118" text-anchor="middle" font-size="42">🧠</text>
+  <text x="360" y="160" text-anchor="middle" font-size="11" fill="#831843">your tasks</text>
+  <text x="360" y="176" text-anchor="middle" font-size="11" fill="#831843">"application CPU"</text>
+
+  <text x="240" y="208" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">Each core has its own scheduler — true parallelism!</text>
+</svg>`,
+
+  realTime: `
+<svg viewBox="0 0 540 200" width="100%">
+  <rect x="20" y="20" width="160" height="160" rx="12" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="100" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="#7f1d1d">Hard real-time</text>
+  <text x="100" y="105" text-anchor="middle" font-size="44">🚀</text>
+  <text x="100" y="148" text-anchor="middle" font-size="11" fill="#7f1d1d">Missing deadline =</text>
+  <text x="100" y="164" text-anchor="middle" font-size="11" fill="#7f1d1d">disaster (airbag, pacemaker)</text>
+
+  <rect x="190" y="20" width="160" height="160" rx="12" fill="#fef9c3" stroke="#d97706" stroke-width="2"/>
+  <text x="270" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="#78350f">Firm real-time</text>
+  <text x="270" y="105" text-anchor="middle" font-size="44">📷</text>
+  <text x="270" y="148" text-anchor="middle" font-size="11" fill="#78350f">Missed result = useless</text>
+  <text x="270" y="164" text-anchor="middle" font-size="11" fill="#78350f">but not dangerous (camera)</text>
+
+  <rect x="360" y="20" width="160" height="160" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="440" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="#14532d">Soft real-time</text>
+  <text x="440" y="105" text-anchor="middle" font-size="44">🎬</text>
+  <text x="440" y="148" text-anchor="middle" font-size="11" fill="#14532d">Late is OK, quality drops</text>
+  <text x="440" y="164" text-anchor="middle" font-size="11" fill="#14532d">(video stream, audio)</text>
+</svg>`,
+
+  timer: `
+<svg viewBox="0 0 540 200" width="100%">
+  <rect x="20" y="60" width="220" height="100" rx="12" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/>
+  <text x="130" y="90" text-anchor="middle" font-size="13" font-weight="800" fill="#3730a3">One-shot Timer</text>
+  <text x="130" y="120" text-anchor="middle" font-size="11" fill="#3730a3">Fires ONCE after N ms.</text>
+  <text x="130" y="140" text-anchor="middle" font-size="24">⏲️</text>
+
+  <rect x="300" y="60" width="220" height="100" rx="12" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
+  <text x="410" y="90" text-anchor="middle" font-size="13" font-weight="800" fill="#5b21b6">Auto-reload Timer</text>
+  <text x="410" y="120" text-anchor="middle" font-size="11" fill="#5b21b6">Fires every N ms forever.</text>
+  <text x="410" y="140" text-anchor="middle" font-size="24">🔁</text>
+</svg>`,
+};
+
+/* =====================================================================
+   SLIDES
+   ===================================================================== */
+const SLIDES = [
+
+  /* ---------- COVER ---------- */
+  {
+    cover: true, section: "cover",
+    title: "⏱️ RTOS Adventures",
+    sub: "A guided tour through Shawn Hymel's 12-part <strong>Introduction to RTOS</strong> series (Digi-Key) — built around FreeRTOS on the ESP32. Tasks, scheduling, queues, mutexes, semaphores, timers, ISRs, deadlocks, priority inversion and multicore — all in one deck.",
+    metaPills: ["12 video parts", "FreeRTOS API", "ESP32 examples", "Diagrams · Code · Quizzes"],
+    cta: [
+      { label: "Start the tour →", action: "next" },
+      { label: "Watch the playlist ↗", href: PLAYLIST, ghost: true },
+      { label: "← ESP32 Adventures", href: "esp32.html", ghost: true }
+    ]
+  },
+
+  /* ============================================================
+     PART 1 — WHAT IS AN RTOS?  (video p1)
+     ============================================================ */
+  {
+    section: "intro", title: "🤔 What is a Real-Time Operating System?",
+    sub: "Part 1 — the big idea behind every RTOS",
+    bullets: [
+      "An <strong>OS</strong> shares one CPU between many programs by switching very fast",
+      "An <strong>RTOS</strong> is a small OS designed to react to events <strong>within a deadline</strong>",
+      "Used in: cars, drones, robots, medical devices, factory machines, satellites…",
+      "On a microcontroller (Arduino / ESP32) it gives you <strong>multi-tasking with predictable timing</strong>"
+    ],
+    visualEmoji: "⏱️",
+    analogy: "A regular OS is 'best effort'. An RTOS promises: <em>I will respond in less than X ms — guaranteed.</em>",
+    analogyClass: "note"
+  },
+  {
+    section: "intro", title: "🧱 Bare-metal vs RTOS",
+    bullets: [
+      "<strong>Bare-metal</strong> = one big <code>while(1)</code> loop in Arduino-style",
+      "<strong>RTOS</strong> = the kernel runs many <strong>tasks</strong> on the same CPU",
+      "The scheduler picks who runs next, every few milliseconds",
+      "Each task <em>thinks</em> it owns the CPU — but actually they take turns"
+    ],
+    svg: SVG.bareVsRtos,
+    analogy: "Bare-metal is one chef cooking one dish at a time. RTOS is many chefs with a head-chef (scheduler) calling shots."
+  },
+  {
+    section: "intro", title: "🚀 Hard, Firm, Soft real-time",
+    bullets: [
+      "<strong>Hard:</strong> deadlines MUST be met — missing one is catastrophic (pacemaker, ABS brakes, airbag)",
+      "<strong>Firm:</strong> a late result is useless but not catastrophic (industrial machine vision, stock trading)",
+      "<strong>Soft:</strong> late is allowed; quality just degrades (video stream, audio playback)",
+      "FreeRTOS supports all three — but the application code decides which one you actually have"
+    ],
+    svg: SVG.realTime,
+    analogy: "The word <em>real-time</em> doesn't mean fast — it means <strong>predictable</strong>."
+  },
+  {
+    section: "intro", title: "🧰 Why bother with an RTOS?",
+    bullets: [
+      "Cleanly separates concerns: WiFi task, sensor task, display task, button task",
+      "<strong>Blocking is cheap</strong>: a task can wait (<code>vTaskDelay</code>) without burning CPU — others run",
+      "Built-in synchronisation tools: queues, mutexes, semaphores, timers",
+      "Easier to reason about real-time behaviour than one giant loop",
+      "But: adds RAM/Flash overhead, a learning curve, and new bugs (deadlocks!)"
+    ],
+    analogy: "Use it when a single <code>loop()</code> turns into spaghetti — usually around 3+ independent activities."
+  },
+  {
+    section: "intro", title: "🧩 What's inside an RTOS?",
+    bullets: [
+      "<strong>Scheduler</strong> — decides which task runs right now",
+      "<strong>Kernel objects</strong> — tasks, queues, mutexes, semaphores, timers, event groups",
+      "<strong>Tick interrupt</strong> — heartbeat that lets the scheduler check timing (usually every 1 ms)",
+      "<strong>Memory manager</strong> — gives RAM to tasks when they're created",
+      "FreeRTOS is the most popular open-source RTOS: small, free, runs almost anywhere"
+    ],
+    code: `<span class="cm">// The hierarchy in your head</span>
+<span class="kw">Application</span>  &lt;-- your tasks
+   <span class="kw">FreeRTOS</span>  &lt;-- kernel, scheduler, IPC primitives
+      <span class="kw">HAL / drivers</span>
+         <span class="kw">CPU + peripherals</span>`,
+    analogyClass: "note",
+    analogy: "Think of the RTOS as a tiny operating system that fits in 10-15 KB of flash."
+  },
+
+  /* ============================================================
+     PART 2 — GETTING STARTED WITH FREERTOS  (video p2)
+     ============================================================ */
+  {
+    section: "start", title: "👋 Meet FreeRTOS",
+    sub: "Part 2 — the world's most popular embedded RTOS",
+    bullets: [
+      "Created by Richard Barry in 2003, now owned and maintained by <strong>Amazon (AWS)</strong>",
+      "Free (MIT licence), portable to 40+ CPU architectures",
+      "<strong>Already built into ESP-IDF</strong> — meaning the ESP32 comes with FreeRTOS out of the box",
+      "Arduino-ESP32 also exposes the FreeRTOS API directly"
+    ],
+    code: `<span class="cm">// On ESP32 + Arduino, just include and go</span>
+<span class="kw">#include</span> &lt;Arduino.h&gt;
+<span class="kw">#include</span> &lt;freertos/FreeRTOS.h&gt;
+<span class="kw">#include</span> &lt;freertos/task.h&gt;`,
+    analogy: "<em>setup()</em> and <em>loop()</em> on the ESP32 already run inside a FreeRTOS task — you just don't see it."
+  },
+  {
+    section: "start", title: "📦 The pieces you'll touch",
+    bullets: [
+      "<strong>Task</strong> — a function that the scheduler runs concurrently with others",
+      "<strong>Queue</strong> — a safe message pipe between tasks",
+      "<strong>Mutex</strong> — a lock to protect shared data",
+      "<strong>Semaphore</strong> — signalling between tasks (or ISR → task)",
+      "<strong>Software timer</strong> — callbacks that fire after N ms",
+      "<strong>Event group</strong> — wait on multiple bit-flags (we won't cover today)"
+    ],
+    analogy: "Five tools. Master these and you can build almost anything.",
+    analogyClass: "note"
+  },
+  {
+    section: "start", title: "🧪 Your first task",
+    bullets: [
+      "Create a task with <code>xTaskCreate()</code> — give it a function, a name, a stack size and a priority",
+      "The function looks like a normal C function with one parameter (<code>void *</code>)",
+      "It should never return — typically ends in <code>vTaskDelete(NULL)</code> if it ever does",
+      "Use <code>vTaskDelay()</code> to yield CPU and let other tasks run"
+    ],
+    code: `<span class="cm">// Blink LED in its own task</span>
+<span class="kw">void</span> <span class="fn">blinkTask</span>(<span class="ty">void</span> *pv) {
+  <span class="kw">while</span> (1) {
+    <span class="fn">digitalWrite</span>(LED_BUILTIN, HIGH);
+    <span class="fn">vTaskDelay</span>(<span class="num">500</span> / portTICK_PERIOD_MS);
+    <span class="fn">digitalWrite</span>(LED_BUILTIN, LOW);
+    <span class="fn">vTaskDelay</span>(<span class="num">500</span> / portTICK_PERIOD_MS);
+  }
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(LED_BUILTIN, OUTPUT);
+  <span class="fn">xTaskCreate</span>(
+    blinkTask,        <span class="cm">// function</span>
+    <span class="str">"blink"</span>,          <span class="cm">// name (for debug)</span>
+    <span class="num">2048</span>,             <span class="cm">// stack size in words</span>
+    <span class="kw">NULL</span>,             <span class="cm">// parameter</span>
+    <span class="num">1</span>,                <span class="cm">// priority</span>
+    <span class="kw">NULL</span>);            <span class="cm">// task handle</span>
+}
+<span class="kw">void</span> <span class="fn">loop</span>() { }       <span class="cm">// nothing here!</span>`,
+    analogy: "<code>portTICK_PERIOD_MS</code> turns milliseconds into RTOS ticks. Without it you'd be in ticks, not ms."
+  },
+
+  /* ============================================================
+     QUIZ ON PARTS 1-2
+     ============================================================ */
+  {
+    section: "play", quiz: true,
+    title: "🎯 Quick Quiz — RTOS basics",
+    question: "Which statement about an RTOS is TRUE?",
+    options: [
+      { text: "An RTOS makes the CPU faster.", correct: false, why: "No — it just shares the same CPU among tasks more cleverly." },
+      { text: "An RTOS guarantees a fast (predictable) response to events.", correct: true, why: "Exactly! 'Real-time' = predictable timing, not raw speed." },
+      { text: "Once you use FreeRTOS, you can't use Arduino any more.", correct: false, why: "ESP32 + Arduino already includes FreeRTOS. You can use both." },
+      { text: "All tasks must finish in under 1 ms.", correct: false, why: "Nope — tasks can run as long as needed, but they should yield to others." }
+    ],
+    analogy: "Real-time ≠ Real-fast. It means <em>on time</em>."
+  },
+
+  /* ============================================================
+     PART 3 — TASK SCHEDULING  (video p3)
+     ============================================================ */
+  {
+    section: "sched", title: "🎛️ Task Scheduling — the heart of the RTOS",
+    sub: "Part 3 — who runs, when, and for how long?",
+    bullets: [
+      "The <strong>scheduler</strong> is the algorithm that picks the next task to run",
+      "FreeRTOS uses <strong>fixed-priority, preemptive scheduling</strong> by default",
+      "Highest-priority READY task ALWAYS runs — interrupting lower-priority work",
+      "If two tasks share the same priority, they take turns via <strong>time slicing</strong>"
+    ],
+    svg: SVG.schedTimeline,
+    analogy: "Like a referee with a stopwatch: highest priority always plays; ties get equal turns."
+  },
+  {
+    section: "sched", title: "🚦 Task states",
+    bullets: [
+      "<strong>Running</strong> — currently executing on the CPU",
+      "<strong>Ready</strong> — eligible to run but lost the most recent race",
+      "<strong>Blocked</strong> — waiting on a delay, queue, semaphore or event",
+      "<strong>Suspended</strong> — explicitly paused via <code>vTaskSuspend()</code>; will not run until resumed",
+      "Only one task is RUNNING at a time per CPU core; others sit in queues"
+    ],
+    svg: SVG.taskStates,
+    analogy: "Think of a kindergarten: only one kid talks at a time, others are waiting (READY), reading a book (BLOCKED), or taking a nap (SUSPENDED)."
+  },
+  {
+    section: "sched", title: "⌛ vTaskDelay vs delay() vs busy-wait",
+    bullets: [
+      "<code>delay(1000)</code> in vanilla Arduino just spins — wastes 1 second of CPU",
+      "<code>vTaskDelay(1000/portTICK_PERIOD_MS)</code> moves the task to BLOCKED — other tasks run",
+      "Use <code>vTaskDelayUntil()</code> for periodic tasks (drifts less)",
+      "Don't busy-loop with <code>while(!flag);</code> — give the CPU back!",
+      "<code>taskYIELD()</code> politely says 'someone else go now'"
+    ],
+    code: `<span class="cm">// Run every exactly 100 ms — no drift</span>
+TickType_t last = <span class="fn">xTaskGetTickCount</span>();
+<span class="kw">while</span> (1) {
+  <span class="cm">// ...sensor read, log, control...</span>
+  <span class="fn">vTaskDelayUntil</span>(&amp;last, <span class="num">100</span> / portTICK_PERIOD_MS);
+}`,
+    analogyClass: "note",
+    analogy: "delay() is rude — it hogs the room. vTaskDelay says 'wake me in N ms' and lets others use the CPU."
+  },
+  {
+    section: "sched", title: "🥇 Priorities — pick carefully",
+    bullets: [
+      "Priorities are integers — bigger number = higher priority",
+      "FreeRTOS reserves the lowest level (0) for the <strong>idle task</strong>",
+      "Avoid giving everything 'high' — you defeat the scheduler",
+      "Rule of thumb: time-critical &gt; communication &gt; UI &gt; logging",
+      "Use <code>configMAX_PRIORITIES</code> (default 25 on ESP-IDF) to set the ceiling"
+    ],
+    analogy: "Priority is for emergencies. If everything is urgent, nothing is."
+  },
+
+  /* ============================================================
+     PART 4 — MEMORY MANAGEMENT  (video p4)
+     ============================================================ */
+  {
+    section: "mem", title: "🧠 Memory Management",
+    sub: "Part 4 — where do tasks live?",
+    bullets: [
+      "Each task owns its own <strong>stack</strong> — for local variables, return addresses",
+      "Kernel objects (queues, semaphores, task control blocks) live on the <strong>FreeRTOS heap</strong>",
+      "Static variables sit in the regular <code>.bss</code> / <code>.data</code> region — same as a normal C program",
+      "You pick the heap algorithm at compile time"
+    ],
+    svg: SVG.memMap,
+    analogy: "Think of RAM as a hotel: each task gets its own room (stack), and the kernel has a shared lounge (heap)."
+  },
+  {
+    section: "mem", title: "🥞 The five FreeRTOS heap schemes",
+    bullets: [
+      "<strong>heap_1</strong> — allocate only, never free. Smallest, safest. Good for fixed designs.",
+      "<strong>heap_2</strong> — alloc + free, but fragments over time (deprecated; use heap_4 instead)",
+      "<strong>heap_3</strong> — just wraps <code>malloc()</code>/<code>free()</code> from your toolchain",
+      "<strong>heap_4</strong> — coalesces adjacent free blocks → low fragmentation. <em>Most popular.</em>",
+      "<strong>heap_5</strong> — like heap_4 but can span multiple non-contiguous regions",
+      "ESP-IDF uses its own multi-heap on top of these ideas"
+    ],
+    analogyClass: "note",
+    analogy: "Default to heap_4 unless you have a reason. Static allocation (heap_1) is great for safety-critical work."
+  },
+  {
+    section: "mem", title: "📐 Stack size, watermark & overflow",
+    bullets: [
+      "Stack size is in <strong>words</strong> on FreeRTOS (4 bytes on ESP32 → 2048 words = 8 KB)",
+      "Too small = stack overflow → crash. Too big = wasted RAM",
+      "<code>uxTaskGetStackHighWaterMark()</code> tells you the closest your task ever came to overflowing",
+      "Enable <code>configCHECK_FOR_STACK_OVERFLOW</code> to catch overflows in dev"
+    ],
+    code: `<span class="cm">// How much stack did we use?</span>
+UBaseType_t hwm = <span class="fn">uxTaskGetStackHighWaterMark</span>(<span class="kw">NULL</span>);
+<span class="fn">Serial</span>.<span class="fn">printf</span>(<span class="str">"Free stack words: %u\\n"</span>, hwm);
+
+<span class="cm">// Static allocation (no heap at all) — heap_1 style</span>
+<span class="kw">static</span> StackType_t taskStack[<span class="num">2048</span>];
+<span class="kw">static</span> StaticTask_t taskTCB;
+<span class="fn">xTaskCreateStatic</span>(blinkTask, <span class="str">"blink"</span>, <span class="num">2048</span>,
+                  <span class="kw">NULL</span>, <span class="num">1</span>, taskStack, &amp;taskTCB);`,
+    analogy: "High-water mark = the closest the river ever got to the top of the dam. You want a comfortable margin.",
+    analogyClass: "warn"
+  },
+
+  /* ============================================================
+     QUIZ ON PARTS 3-4
+     ============================================================ */
+  {
+    section: "play", quiz: true,
+    title: "🎯 Quiz — Scheduling & Memory",
+    question: "Inside a FreeRTOS task, why is <code>vTaskDelay(100)</code> better than <code>delay(100)</code>?",
+    options: [
+      { text: "It's shorter to type.", correct: false, why: "Definitely not — they're the same length." },
+      { text: "vTaskDelay blocks the task so other tasks can run; delay() burns CPU.", correct: true, why: "Exactly! That's the whole point of the RTOS — yielding properly." },
+      { text: "vTaskDelay runs at twice the speed.", correct: false, why: "No, both target ~100 ms. The difference is who else gets to run." },
+      { text: "delay() is illegal in FreeRTOS.", correct: false, why: "On ESP32-Arduino delay() actually calls vTaskDelay() under the hood — but on bare FreeRTOS it would busy-wait." }
+    ],
+    analogy: "Always prefer the FreeRTOS API for waits. Otherwise you starve other tasks."
+  },
+
+  /* ============================================================
+     PART 5 — QUEUES  (video p5)
+     ============================================================ */
+  {
+    section: "queue", title: "📬 Queues — the message bus",
+    sub: "Part 5 — sending data safely between tasks",
+    bullets: [
+      "A queue is a <strong>FIFO buffer</strong> shared by tasks (and even ISRs)",
+      "It's the safe way to pass data: no shared variables, no races",
+      "Sender uses <code>xQueueSend</code>, receiver uses <code>xQueueReceive</code>",
+      "Both can <strong>block</strong> with a timeout: 'wait up to 100 ms for a slot/message'"
+    ],
+    svg: SVG.queueFlow,
+    analogy: "Like a take-out window: producer drops a tray (message), consumer picks it up. Neither cares about the other's schedule."
+  },
+  {
+    section: "queue", title: "💻 Queue example — producer / consumer",
+    code: `QueueHandle_t q;
+
+<span class="kw">void</span> <span class="fn">producer</span>(<span class="ty">void</span>*) {
+  <span class="ty">int</span> i = <span class="num">0</span>;
+  <span class="kw">while</span> (1) {
+    <span class="fn">xQueueSend</span>(q, &amp;i, portMAX_DELAY);
+    i++;
+    <span class="fn">vTaskDelay</span>(<span class="num">500</span>/portTICK_PERIOD_MS);
+  }
+}
+
+<span class="kw">void</span> <span class="fn">consumer</span>(<span class="ty">void</span>*) {
+  <span class="ty">int</span> v;
+  <span class="kw">while</span> (1) {
+    <span class="kw">if</span> (<span class="fn">xQueueReceive</span>(q, &amp;v, portMAX_DELAY) == pdTRUE) {
+      <span class="fn">Serial</span>.<span class="fn">printf</span>(<span class="str">"Got %d\\n"</span>, v);
+    }
+  }
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">115200</span>);
+  q = <span class="fn">xQueueCreate</span>(<span class="num">5</span>, <span class="kw">sizeof</span>(<span class="ty">int</span>));   <span class="cm">// 5 slots</span>
+  <span class="fn">xTaskCreate</span>(producer, <span class="str">"prod"</span>, <span class="num">2048</span>, <span class="kw">NULL</span>, <span class="num">1</span>, <span class="kw">NULL</span>);
+  <span class="fn">xTaskCreate</span>(consumer, <span class="str">"cons"</span>, <span class="num">2048</span>, <span class="kw">NULL</span>, <span class="num">1</span>, <span class="kw">NULL</span>);
+}`,
+    bullets: [
+      "<code>xQueueCreate(length, itemSize)</code> allocates the buffer",
+      "<code>portMAX_DELAY</code> means 'wait forever'",
+      "Items are <strong>copied</strong> into the queue — pass small structs, not pointers to local vars"
+    ],
+    analogy: "Pass copies through the queue. Pointers to stack memory will burn you when the original task exits."
+  },
+  {
+    section: "queue", title: "🪄 Queue tips & variants",
+    bullets: [
+      "<code>xQueuePeek</code> — read the front item without removing it",
+      "<code>xQueueOverwrite</code> — only useful with length-1 queues (latest value wins)",
+      "Send <strong>structs</strong>, not just ints — pack many fields together",
+      "Send <strong>pointers</strong> only when the buffer outlives the message",
+      "For ISRs use the <code>...FromISR</code> variants (we'll see those in Part 9)"
+    ],
+    analogy: "Treat a queue as the single source of truth between two tasks. No globals to lock = no races to debug."
+  },
+
+  /* ============================================================
+     PART 6 — MUTEX  (video p6)
+     ============================================================ */
+  {
+    section: "mutex", title: "🔐 Mutex — Mutual Exclusion",
+    sub: "Part 6 — protect a shared resource",
+    bullets: [
+      "<strong>Problem:</strong> two tasks both want to use Serial (or an SPI bus, or a global counter)",
+      "Without protection their writes interleave → garbage output, corrupt data",
+      "A <strong>mutex</strong> is a token. Only one task can hold it at a time",
+      "Whoever wants the resource must <strong>take</strong> the mutex before, <strong>give</strong> it back after"
+    ],
+    svg: SVG.mutexLock,
+    analogy: "Like a public bathroom key. One person at a time. Others queue politely until the key returns."
+  },
+  {
+    section: "mutex", title: "💻 Mutex example — protecting Serial",
+    code: `SemaphoreHandle_t serialMtx;
+
+<span class="kw">void</span> <span class="fn">printer</span>(<span class="ty">void</span> *name) {
+  <span class="kw">while</span> (1) {
+    <span class="kw">if</span> (<span class="fn">xSemaphoreTake</span>(serialMtx, portMAX_DELAY) == pdTRUE) {
+      <span class="fn">Serial</span>.<span class="fn">printf</span>(<span class="str">"Hello from %s\\n"</span>, (<span class="ty">char</span>*)name);
+      <span class="fn">xSemaphoreGive</span>(serialMtx);
+    }
+    <span class="fn">vTaskDelay</span>(<span class="num">200</span>/portTICK_PERIOD_MS);
+  }
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">Serial</span>.<span class="fn">begin</span>(<span class="num">115200</span>);
+  serialMtx = <span class="fn">xSemaphoreCreateMutex</span>();
+  <span class="fn">xTaskCreate</span>(printer, <span class="str">"A"</span>, <span class="num">2048</span>, (<span class="ty">void</span>*)<span class="str">"A"</span>, <span class="num">1</span>, <span class="kw">NULL</span>);
+  <span class="fn">xTaskCreate</span>(printer, <span class="str">"B"</span>, <span class="num">2048</span>, (<span class="ty">void</span>*)<span class="str">"B"</span>, <span class="num">1</span>, <span class="kw">NULL</span>);
+}`,
+    bullets: [
+      "FreeRTOS mutexes are <strong>recursive-capable</strong> via <code>xSemaphoreCreateRecursiveMutex</code>",
+      "Mutexes implement <strong>priority inheritance</strong> automatically (we'll cover Part 11!)",
+      "<strong>Never</strong> use a mutex from inside an ISR — use a semaphore instead"
+    ],
+    analogy: "A mutex says 'I'm using the bus, please wait'. Always pair Take with Give!"
+  },
+
+  /* ============================================================
+     PART 7 — SEMAPHORE  (video p7)
+     ============================================================ */
+  {
+    section: "sema", title: "🚦 Semaphores — signalling and counting",
+    sub: "Part 7 — slightly bigger cousin of the mutex",
+    bullets: [
+      "<strong>Binary semaphore</strong> — like a flag. Initially 0, given by one task/ISR, taken by another",
+      "<strong>Counting semaphore</strong> — holds a count of available 'slots' or 'events'",
+      "Unlike a mutex, a semaphore has <strong>no owner</strong> — anyone can give it",
+      "Used heavily to signal from <strong>ISR → task</strong> (deferred interrupt processing)"
+    ],
+    svg: SVG.semaCount,
+    analogy: "Binary semaphore = a doorbell. Counting semaphore = available parking spots."
+  },
+  {
+    section: "sema", title: "🎯 Mutex vs Semaphore — which one?",
+    customHtml: `
+      <table class="cmp">
+        <tr><th>Property</th><th>Mutex</th><th>Binary Semaphore</th></tr>
+        <tr><td>Purpose</td><td class="win">Protect a resource (lock)</td><td>Signal between tasks/ISRs</td></tr>
+        <tr><td>Has an owner?</td><td>Yes — whoever took it</td><td>No</td></tr>
+        <tr><td>Priority inheritance?</td><td class="win">Yes</td><td>No</td></tr>
+        <tr><td>Use from ISR?</td><td>❌ Never</td><td class="win">✅ Yes (FromISR API)</td></tr>
+        <tr><td>Recursive take?</td><td>Yes (with recursive mutex)</td><td>No</td></tr>
+      </table>`,
+    analogyClass: "note",
+    analogy: "Rule: <strong>locking → mutex</strong>; <strong>signalling → semaphore</strong>."
+  },
+  {
+    section: "sema", title: "💻 Counting semaphore — resource pool",
+    code: `<span class="cm">// 3 identical workers can serve at most 3 clients at once</span>
+SemaphoreHandle_t pool;
+
+<span class="kw">void</span> <span class="fn">clientTask</span>(<span class="ty">void</span>*) {
+  <span class="kw">while</span> (1) {
+    <span class="fn">xSemaphoreTake</span>(pool, portMAX_DELAY);    <span class="cm">// grab a worker</span>
+    <span class="fn">doSomeWork</span>();
+    <span class="fn">xSemaphoreGive</span>(pool);                   <span class="cm">// release</span>
+    <span class="fn">vTaskDelay</span>(<span class="num">100</span>/portTICK_PERIOD_MS);
+  }
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  pool = <span class="fn">xSemaphoreCreateCounting</span>(<span class="num">3</span>, <span class="num">3</span>);  <span class="cm">// max=3, start=3</span>
+  <span class="kw">for</span> (<span class="ty">int</span> i=<span class="num">0</span>; i&lt;<span class="num">8</span>; i++)
+    <span class="fn">xTaskCreate</span>(clientTask, <span class="str">"client"</span>, <span class="num">2048</span>, <span class="kw">NULL</span>, <span class="num">1</span>, <span class="kw">NULL</span>);
+}`,
+    bullets: [
+      "Counting semaphores are great for <strong>resource pools</strong>: N printers, M HTTP connections, etc.",
+      "ISRs typically <em>give</em>; tasks typically <em>take</em>"
+    ]
+  },
+
+  /* ============================================================
+     MID QUIZ ON PARTS 5-7
+     ============================================================ */
+  {
+    section: "play", quiz: true,
+    title: "🎯 Quiz — Queues, Mutexes, Semaphores",
+    question: "Two tasks both write to <code>Serial</code>. The output is jumbled. What's the cleanest fix?",
+    options: [
+      { text: "Add a delay() before every print.", correct: false, why: "Random delays — not reliable, and you've just hidden the race." },
+      { text: "Wrap each print in xSemaphoreTake/Give on a shared mutex.", correct: true, why: "Yes! That's exactly what mutexes are for — mutual exclusion on a shared resource." },
+      { text: "Move both Serial calls into the same ISR.", correct: false, why: "ISRs should be tiny; Serial isn't ISR-safe anyway." },
+      { text: "Disable the scheduler with taskENTER_CRITICAL().", correct: false, why: "Works, but it's a sledgehammer that hurts ALL tasks. Mutex is targeted." }
+    ],
+    analogy: "Whenever you say 'shared', think mutex."
+  },
+
+  /* ============================================================
+     PART 8 — SOFTWARE TIMERS  (video p8)
+     ============================================================ */
+  {
+    section: "timer", title: "⏲️ Software Timers",
+    sub: "Part 8 — callbacks that fire on time, without a dedicated task",
+    bullets: [
+      "FreeRTOS has its own <strong>timer task</strong> that runs your callbacks",
+      "Create a timer with <code>xTimerCreate()</code>",
+      "<strong>One-shot</strong> — fires once after the period and stops",
+      "<strong>Auto-reload</strong> — fires every period forever",
+      "Cheaper than a whole task when you just need 'call this every N ms'"
+    ],
+    svg: SVG.timer,
+    analogy: "Like setting an oven timer — you don't need a chef to wait by the oven, the timer rings on its own."
+  },
+  {
+    section: "timer", title: "💻 Software timer — blink without a task",
+    code: `TimerHandle_t blinkTmr;
+
+<span class="kw">void</span> <span class="fn">blinkCb</span>(TimerHandle_t t) {
+  <span class="kw">static</span> <span class="ty">bool</span> on = <span class="kw">false</span>;
+  on = !on;
+  <span class="fn">digitalWrite</span>(LED_BUILTIN, on);
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  <span class="fn">pinMode</span>(LED_BUILTIN, OUTPUT);
+  blinkTmr = <span class="fn">xTimerCreate</span>(<span class="str">"blink"</span>,
+    <span class="num">500</span>/portTICK_PERIOD_MS,   <span class="cm">// period</span>
+    pdTRUE,                  <span class="cm">// auto-reload</span>
+    <span class="kw">NULL</span>,                    <span class="cm">// timer ID</span>
+    blinkCb);                <span class="cm">// callback</span>
+  <span class="fn">xTimerStart</span>(blinkTmr, <span class="num">0</span>);
+}`,
+    bullets: [
+      "Set <code>configTIMER_TASK_PRIORITY</code> to control how time-critical the timer callback is",
+      "<strong>Do NOT block</strong> inside a timer callback — it stalls every other timer",
+      "Need precise timing? Use a hardware timer + ISR instead (Part 9!)"
+    ]
+  },
+
+  /* ============================================================
+     PART 9 — HARDWARE INTERRUPTS  (video p9)
+     ============================================================ */
+  {
+    section: "isr", title: "⚡ Hardware Interrupts & FreeRTOS",
+    sub: "Part 9 — when the hardware can't wait",
+    bullets: [
+      "An <strong>Interrupt Service Routine (ISR)</strong> is a function the CPU jumps to instantly on a hardware event",
+      "Pin change, timer overflow, UART byte, I2C complete… anything can trigger one",
+      "ISRs are <strong>not tasks</strong>. They don't have an FreeRTOS-managed stack the same way",
+      "Rule #1: <strong>keep them SHORT</strong>. Do the heavy work in a task you wake up"
+    ],
+    svg: SVG.isrFlow,
+    analogy: "An ISR is like answering a doorbell. Open the door, take the package, hand it to the family — don't unbox it in the doorway."
+  },
+  {
+    section: "isr", title: "🛠️ ISR-safe FreeRTOS API",
+    bullets: [
+      "Most FreeRTOS API calls have a <code>...FromISR</code> twin: <code>xQueueSendFromISR</code>, <code>xSemaphoreGiveFromISR</code>…",
+      "Plain (non-FromISR) calls may block, which is <strong>illegal in an ISR</strong>",
+      "Pass <code>BaseType_t *pxHigherPriorityTaskWoken</code>; call <code>portYIELD_FROM_ISR()</code> at the end if true",
+      "On ESP32, attach with <code>attachInterrupt(pin, isr, RISING)</code> — same as plain Arduino"
+    ]
+  },
+  {
+    section: "isr", title: "💻 Deferred Interrupt Processing",
+    code: `SemaphoreHandle_t btnSem;
+
+<span class="kw">void</span> IRAM_ATTR <span class="fn">btnIsr</span>() {
+  BaseType_t hpw = pdFALSE;
+  <span class="fn">xSemaphoreGiveFromISR</span>(btnSem, &amp;hpw);
+  <span class="kw">if</span> (hpw) <span class="fn">portYIELD_FROM_ISR</span>();
+}
+
+<span class="kw">void</span> <span class="fn">btnTask</span>(<span class="ty">void</span>*) {
+  <span class="kw">while</span> (1) {
+    <span class="kw">if</span> (<span class="fn">xSemaphoreTake</span>(btnSem, portMAX_DELAY)) {
+      <span class="fn">Serial</span>.<span class="fn">println</span>(<span class="str">"Button pressed!"</span>);
+      <span class="cm">// any heavy work — Serial, files, network — happens HERE, not in the ISR</span>
+    }
+  }
+}
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  btnSem = <span class="fn">xSemaphoreCreateBinary</span>();
+  <span class="fn">pinMode</span>(<span class="num">0</span>, INPUT_PULLUP);
+  <span class="fn">attachInterrupt</span>(<span class="num">0</span>, btnIsr, FALLING);
+  <span class="fn">xTaskCreate</span>(btnTask, <span class="str">"btn"</span>, <span class="num">4096</span>, <span class="kw">NULL</span>, <span class="num">2</span>, <span class="kw">NULL</span>);
+}`,
+    bullets: [
+      "On ESP32, ISRs are placed in <code>IRAM_ATTR</code> so they're always in fast memory",
+      "<code>portYIELD_FROM_ISR()</code> immediately switches to the higher-priority task once we leave the ISR"
+    ],
+    analogy: "ISR opens the door and hands off; the TASK does the actual work. Keep that boundary clean."
+  },
+
+  /* ============================================================
+     PART 10 — DEADLOCK & STARVATION  (video p10)
+     ============================================================ */
+  {
+    section: "dead", title: "💀 Deadlock — the silent killer",
+    sub: "Part 10 — when two tasks hold each other hostage",
+    bullets: [
+      "Deadlock happens when two+ tasks are stuck waiting on resources that the other holds",
+      "Coffman's four conditions (all must hold for deadlock):",
+      "&nbsp;&nbsp;1. <strong>Mutual exclusion</strong> — resource is non-shareable",
+      "&nbsp;&nbsp;2. <strong>Hold and wait</strong> — task holds one resource, asks for another",
+      "&nbsp;&nbsp;3. <strong>No preemption</strong> — can't yank a lock from a task",
+      "&nbsp;&nbsp;4. <strong>Circular wait</strong> — A → B → A"
+    ],
+    svg: SVG.deadlock,
+    analogy: "Two cars meeting on a one-lane bridge from opposite directions. Both refuse to back up. Nobody moves."
+  },
+  {
+    section: "dead", title: "🛡️ Prevention strategies",
+    bullets: [
+      "<strong>Lock ordering</strong> — always acquire locks in the same global order. Breaks circular wait.",
+      "<strong>Try-and-back-off</strong> — use <code>xSemaphoreTake</code> with a timeout; if it fails, release everything and retry",
+      "<strong>Single big lock</strong> — coarse but simple (rarely the best answer)",
+      "<strong>Starvation</strong> ≠ deadlock — a low-priority task never gets the CPU because high-priority tasks dominate. Cure with aging or priority adjustments."
+    ],
+    analogyClass: "warn",
+    analogy: "If two tasks ever lock A and B in different orders, you've planted a deadlock seed. Don't do it."
+  },
+
+  /* ============================================================
+     PART 11 — PRIORITY INVERSION  (video p11)
+     ============================================================ */
+  {
+    section: "prio", title: "🔄 Priority Inversion",
+    sub: "Part 11 — the bug that nearly killed Mars Pathfinder",
+    bullets: [
+      "A high-priority task waits on a lock held by a LOW-priority task",
+      "Meanwhile a MID-priority task hogs the CPU, preventing the low-priority task from finishing and releasing the lock",
+      "Result: HIGH waits on MID — priorities effectively inverted!",
+      "This actually crashed the Mars Pathfinder rover in 1997 (root caused on Earth, patched remotely)"
+    ],
+    svg: SVG.prioInv,
+    analogy: "The President is stuck waiting because the kid who borrowed the key is being interrupted by an unrelated meeting."
+  },
+  {
+    section: "prio", title: "💉 Priority Inheritance & Ceiling",
+    bullets: [
+      "<strong>Priority inheritance</strong> — when HIGH waits on a lock owned by LOW, LOW is <em>temporarily promoted</em> to HIGH's priority until it releases",
+      "<strong>Priority ceiling</strong> — every lock has a ceiling priority; any task taking it inherits that priority for the duration",
+      "FreeRTOS <strong>mutexes implement priority inheritance automatically</strong>",
+      "Binary/counting semaphores do NOT — yet another reason to pick mutex when locking"
+    ],
+    code: `<span class="cm">// This works as expected — no inversion bug</span>
+SemaphoreHandle_t lock = <span class="fn">xSemaphoreCreateMutex</span>();   <span class="cm">// inheritance ✓</span>
+
+<span class="cm">// This would expose priority inversion</span>
+SemaphoreHandle_t bad  = <span class="fn">xSemaphoreCreateBinary</span>();  <span class="cm">// no inheritance ✗</span>`,
+    analogy: "Inheritance is FreeRTOS politely telling the low-priority janitor: 'Finish fast — the President needs the keys.'"
+  },
+
+  /* ============================================================
+     QUIZ ON PARTS 8-11
+     ============================================================ */
+  {
+    section: "play", quiz: true,
+    title: "🎯 Quiz — Timers, ISRs, Deadlocks",
+    question: "Inside a hardware ISR, you want to wake up a task. Which call is correct?",
+    options: [
+      { text: "xSemaphoreGive(sem)", correct: false, why: "Plain Give might block — illegal inside an ISR." },
+      { text: "xSemaphoreGiveFromISR(sem, &hpw); then portYIELD_FROM_ISR() if hpw", correct: true, why: "Exactly! Use the FromISR variant and yield if a higher-priority task woke up." },
+      { text: "delay(0)", correct: false, why: "Doesn't signal anything — and you should never delay inside an ISR." },
+      { text: "taskYIELD()", correct: false, why: "Wrong context — use portYIELD_FROM_ISR() from ISR." }
+    ],
+    analogy: "Remember: any FreeRTOS API used inside an ISR must end in <code>FromISR</code>."
+  },
+
+  /* ============================================================
+     PART 12 — MULTICORE  (video p12)
+     ============================================================ */
+  {
+    section: "multi", title: "🧩 Multicore Systems",
+    sub: "Part 12 — when the chip has more than one brain",
+    bullets: [
+      "<strong>AMP</strong> — Asymmetric Multi-Processing. Each core runs a different OS / firmware (rare)",
+      "<strong>SMP</strong> — Symmetric Multi-Processing. One OS controls both cores; tasks can run on either",
+      "ESP32 ships with a special FreeRTOS port — sometimes called <strong>ESP-IDF FreeRTOS</strong> — that does SMP",
+      "ESP32 has two cores: Core 0 (PRO_CPU, mostly WiFi/BT) and Core 1 (APP_CPU, your sketch)"
+    ],
+    svg: SVG.dualCore,
+    analogy: "Like two chefs in the same kitchen sharing the same fridge and stove. Less waiting — more cooking."
+  },
+  {
+    section: "multi", title: "📌 Pinning tasks to a core",
+    bullets: [
+      "Use <code>xTaskCreatePinnedToCore()</code> to force a task onto a specific core",
+      "Useful when one core is busy with WiFi and you don't want it interrupted",
+      "Pass <code>tskNO_AFFINITY</code> to let the scheduler put the task on any free core",
+      "Critical sections become trickier on SMP — prefer <code>portMUX_TYPE</code> spinlocks on ESP-IDF"
+    ],
+    code: `<span class="cm">// Run sensor task on Core 1 (APP), networking on Core 0 (PRO)</span>
+<span class="fn">xTaskCreatePinnedToCore</span>(sensorTask,  <span class="str">"sense"</span>, <span class="num">4096</span>, <span class="kw">NULL</span>, <span class="num">2</span>, <span class="kw">NULL</span>, <span class="num">1</span>);
+<span class="fn">xTaskCreatePinnedToCore</span>(networkTask, <span class="str">"net"</span>,   <span class="num">4096</span>, <span class="kw">NULL</span>, <span class="num">2</span>, <span class="kw">NULL</span>, <span class="num">0</span>);
+
+<span class="cm">// Don't care which core</span>
+<span class="fn">xTaskCreatePinnedToCore</span>(uiTask,      <span class="str">"ui"</span>,    <span class="num">2048</span>, <span class="kw">NULL</span>, <span class="num">1</span>, <span class="kw">NULL</span>, tskNO_AFFINITY);`,
+    analogy: "Use pinning for predictability. Use tskNO_AFFINITY when you just want the work done."
+  },
+  {
+    section: "multi", title: "🔍 Picking a core: rules of thumb",
+    customHtml: `
+      <table class="cmp">
+        <tr><th>Workload</th><th>Recommended core (ESP32)</th><th>Why</th></tr>
+        <tr><td>WiFi / TCP / Bluetooth stack</td><td>Core 0 (PRO_CPU)</td><td>That's where Espressif puts the network drivers by default</td></tr>
+        <tr><td>Tight sensor loop, audio DSP</td><td>Core 1 (APP_CPU)</td><td>Less likely to be interrupted by network housekeeping</td></tr>
+        <tr><td>UI / OLED refresh</td><td>tskNO_AFFINITY</td><td>Either core is fine</td></tr>
+        <tr><td>setup() / loop() (Arduino sketch)</td><td>Core 1 (default)</td><td>That's where Arduino on ESP32 runs your code</td></tr>
+      </table>`,
+    analogyClass: "note",
+    analogy: "Rule: critical real-time stuff on Core 1, network plumbing on Core 0. Then measure!"
+  },
+
+  /* ============================================================
+     FINAL QUIZ + WRAP-UP
+     ============================================================ */
+  {
+    section: "play", quiz: true,
+    title: "🏁 Final Quiz — All 12 parts",
+    question: "You have ONE shared SPI bus, TWO tasks of different priorities both using it, and ONE ISR that fires on data-ready. Which combo is correct?",
+    options: [
+      { text: "Mutex for the bus (with priority inheritance) + binary semaphore from ISR → task", correct: true, why: "Yes! Mutex protects the shared resource (avoids priority inversion). Semaphore from ISR signals the worker task safely." },
+      { text: "Binary semaphore for the bus + delay() in the ISR", correct: false, why: "Semaphores have no priority inheritance — risk of inversion. delay() in an ISR is forbidden." },
+      { text: "Just disable interrupts during SPI access", correct: false, why: "Kills real-time responsiveness — your ISRs might miss bytes." },
+      { text: "Use a global volatile flag", correct: false, why: "Race conditions, no priority inheritance, no proper signalling. Classic bug factory." }
+    ],
+    analogy: "Locking → mutex (with inheritance). Signalling → semaphore (FromISR)."
+  },
+  {
+    section: "end", title: "📋 RTOS cheat-sheet",
+    customHtml: `
+      <table class="cmp">
+        <tr><th>Need</th><th>API</th><th>When</th></tr>
+        <tr><td>Create a task</td><td><code>xTaskCreate / xTaskCreatePinnedToCore</code></td><td>Independent activity</td></tr>
+        <tr><td>Wait without burning CPU</td><td><code>vTaskDelay / vTaskDelayUntil</code></td><td>Periodic work</td></tr>
+        <tr><td>Pass data safely</td><td><code>xQueueCreate / Send / Receive</code></td><td>Task ↔ Task or ISR → Task</td></tr>
+        <tr><td>Protect shared data</td><td><code>xSemaphoreCreateMutex</code></td><td>Lock a resource</td></tr>
+        <tr><td>Signal an event</td><td><code>xSemaphoreCreateBinary</code></td><td>ISR → Task</td></tr>
+        <tr><td>Track resource pool</td><td><code>xSemaphoreCreateCounting</code></td><td>N identical resources</td></tr>
+        <tr><td>Fire a callback later</td><td><code>xTimerCreate / xTimerStart</code></td><td>Software-timed events</td></tr>
+        <tr><td>Pin task to core</td><td><code>xTaskCreatePinnedToCore</code></td><td>ESP32 SMP design</td></tr>
+      </table>`,
+    analogy: "Print this slide and stick it next to your monitor. You'll use it forever.",
+    analogyClass: "fun"
+  },
+  {
+    section: "end", title: "🎓 You did it! What's next?",
+    bullets: [
+      "Try porting a small Arduino sketch with 2–3 things going on into FreeRTOS tasks",
+      "Add a queue between the sensor task and the display task",
+      "Add a mutex around any shared <code>Serial</code> use",
+      "Move long-running ISRs to a deferred-task pattern with a binary semaphore",
+      "Use <code>vTaskGetRunTimeStats()</code> to see how much CPU each task actually uses"
+    ],
+    cta: [
+      { label: "Watch the full playlist ↗", href: PLAYLIST, ghost: false },
+      { label: "FreeRTOS docs ↗", href: "https://www.freertos.org/", ghost: true },
+      { label: "ESP-IDF FreeRTOS ↗", href: "https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/freertos.html", ghost: true },
+      { label: "← ESP32 Adventures", href: "esp32.html", ghost: true }
+    ],
+    analogy: "Real-time mastery comes from <em>measuring</em>, not guessing. Profile before you optimize.",
+    analogyClass: "note"
+  }
+];
+
+/* =====================================================================
+   Renderer
+   ===================================================================== */
+const slides   = SLIDES;
+const tocEl    = document.getElementById("toc");
+const tocList  = document.getElementById("toc-list");
+const tocToggle= document.getElementById("tocToggle");
+const deck     = document.getElementById("deck");
+const counter  = document.getElementById("counter");
+const progress = document.getElementById("progress");
+const prevBtn  = document.getElementById("prevBtn");
+const nextBtn  = document.getElementById("nextBtn");
+const indicator= document.getElementById("indicator");
+let current = 0;
+
+function buildVisual(s) {
+  if (s.svg) {
+    const cap = s.caption ? `<div class="caption">${s.caption}</div>` : "";
+    return `<div class="visual">${s.svg}${cap}</div>`;
+  }
+  if (s.visualEmoji) {
+    return `<div class="visual"><div class="big-emoji">${s.visualEmoji}</div>${s.caption ? `<div class="caption">${s.caption}</div>` : ""}</div>`;
+  }
+  return "";
+}
+
+function renderQuizBody(s) {
+  const optionsHtml = s.options.map((o, i) =>
+    `<li data-correct="${o.correct ? 1 : 0}" data-why="${(o.why||"").replace(/"/g,'&quot;')}">${o.text}</li>`
+  ).join("");
+  const analogyHtml = s.analogy ? `<div class="analogy ${s.analogyClass||""}">${s.analogy}</div>` : "";
+  return `
+    <div class="quiz-q">${s.question}</div>
+    <ul class="quiz-options">${optionsHtml}</ul>
+    <div class="quiz-feedback" data-feedback></div>
+    ${analogyHtml}
+  `;
+}
+
+function renderSlide(s, i) {
+  const meta = SECTIONS[s.section] || SECTIONS.cover;
+  const el = document.createElement("section");
+  el.className = `slide ${meta.cls}`;
+  el.dataset.i = i;
+  el.style.display = i === 0 ? "flex" : "none";
+
+  const header = `
+    <div class="slide-header">
+      <span class="pill">${meta.title}</span>
+      <span>slide ${i+1} / ${slides.length}</span>
+    </div>`;
+
+  let body = "";
+  if (s.cover) {
+    const pills = (s.metaPills || []).map(p => `<span class="pill">${p}</span>`).join("");
+    const cta   = (s.cta || []).map(c =>
+      c.action === "next"
+        ? `<a class="cta" href="#" data-next>${c.label}</a>`
+        : `<a class="cta ${c.ghost ? "ghost":""}" href="${c.href}" target="_blank">${c.label}</a>`
+    ).join("");
+    el.classList.add("cover");
+    body = `
+      <div class="slide-body single">
+        <div>
+          <h1>${s.title}</h1>
+          <p class="sub">${s.sub || ""}</p>
+          <div class="meta">${pills}</div>
+          <div class="cta-row">${cta}</div>
+        </div>
+      </div>`;
+  } else if (s.quiz) {
+    body = `
+      <h1>${s.title}</h1>
+      <div class="slide-body single">
+        <div class="content">${renderQuizBody(s)}</div>
+      </div>`;
+  } else {
+    const visual = buildVisual(s);
+    const codeHtml = s.code ? `<pre class="code">${s.code}</pre>` : "";
+    const customHtml = s.customHtml || "";
+    const analogyHtml = s.analogy ? `<div class="analogy ${s.analogyClass || ""}">${s.analogy}</div>` : "";
+    const bullets = (s.bullets || []).map(b => `<li>${b}</li>`).join("");
+    const hasVisual = !!visual;
+    const subHtml = s.sub ? `<p class="sub">${s.sub}</p>` : "";
+    body = `
+      <h1>${s.title}</h1>
+      ${subHtml}
+      <div class="slide-body ${hasVisual ? "" : "single"}">
+        ${visual}
+        <div class="content">
+          ${bullets ? `<ul>${bullets}</ul>` : ""}
+          ${customHtml}
+          ${codeHtml}
+          ${analogyHtml}
+        </div>
+      </div>`;
+  }
+
+  const footer = `
+    <div class="slide-footer">
+      <span class="crumbs">📺 Based on Shawn Hymel's "Introduction to RTOS" (Digi-Key)</span>
+      <span>${meta.title} · ${i+1}/${slides.length}</span>
+    </div>`;
+
+  el.innerHTML = `${header}${body}${footer}`;
+  return el;
+}
+
+function renderTOC() {
+  let html = "";
+  let lastSec = null;
+  slides.forEach((s, i) => {
+    if (s.section !== lastSec) {
+      const meta = SECTIONS[s.section] || SECTIONS.cover;
+      if (lastSec !== null) html += `</div>`;
+      html += `<div class="toc-section">
+        <div class="toc-section-title"><span class="dot ${meta.dot}"></span>${meta.title}</div>`;
+      lastSec = s.section;
+    }
+    const title = s.title.replace(/<[^>]+>/g, "");
+    html += `<div class="toc-item" data-i="${i}"><span class="num">${i+1}</span><span>${title}</span></div>`;
+  });
+  if (lastSec !== null) html += `</div>`;
+  tocList.innerHTML = html;
+}
+
+function go(i) {
+  current = Math.max(0, Math.min(slides.length - 1, i));
+  const slides_els = deck.querySelectorAll(".slide");
+  slides_els.forEach(el => el.style.display = "none");
+  if (slides_els[current]) slides_els[current].style.display = "flex";
+  counter.textContent = `${current+1} / ${slides.length}`;
+  indicator.textContent = `${current+1} / ${slides.length}`;
+  progress.style.width = `${((current+1)/slides.length)*100}%`;
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === slides.length - 1;
+  document.querySelectorAll(".toc-item").forEach(el => {
+    el.classList.toggle("active", Number(el.dataset.i) === current);
+  });
+  const activeToc = document.querySelector(".toc-item.active");
+  if (activeToc) activeToc.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  history.replaceState(null, "", `#${current+1}`);
+}
+
+function attachQuizHandler() {
+  deck.addEventListener("click", (e) => {
+    const li = e.target.closest(".quiz-options li");
+    if (!li) return;
+    const parent = li.parentElement;
+    if (parent.dataset.locked === "1") return;
+    parent.dataset.locked = "1";
+    const isCorrect = li.dataset.correct === "1";
+    li.classList.add(isCorrect ? "correct" : "wrong");
+    parent.querySelectorAll("li").forEach(other => {
+      other.classList.add("disabled");
+      if (other.dataset.correct === "1") other.classList.add("correct");
+    });
+    const fb = parent.parentElement.querySelector("[data-feedback]");
+    if (fb) {
+      fb.innerHTML = (isCorrect ? "✅ " : "❌ ") + (li.dataset.why || "");
+      fb.classList.add("show", isCorrect ? "ok" : "no");
+    }
+  });
+}
+
+function init() {
+  slides.forEach((s, i) => deck.appendChild(renderSlide(s, i)));
+  renderTOC();
+  attachQuizHandler();
+  const startHash = parseInt((location.hash || "").replace("#",""), 10);
+  go(Number.isInteger(startHash) && startHash > 0 ? startHash - 1 : 0);
+  prevBtn.addEventListener("click", () => go(current - 1));
+  nextBtn.addEventListener("click", () => go(current + 1));
+  tocToggle.addEventListener("click", () => tocEl.classList.toggle("open"));
+  tocList.addEventListener("click", (e) => {
+    const item = e.target.closest(".toc-item");
+    if (!item) return;
+    go(Number(item.dataset.i));
+    tocEl.classList.remove("open");
+  });
+  deck.addEventListener("click", (e) => {
+    if (e.target.matches("[data-next]")) { e.preventDefault(); go(current + 1); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); go(current + 1); }
+    if (e.key === "ArrowLeft"  || e.key === "PageUp")   { e.preventDefault(); go(current - 1); }
+    if (e.key === "Home") { e.preventDefault(); go(0); }
+    if (e.key === "End")  { e.preventDefault(); go(slides.length - 1); }
+  });
+  let touchStartX = null;
+  deck.addEventListener("touchstart", (e) => { touchStartX = e.touches[0].clientX; });
+  deck.addEventListener("touchend", (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (dx >  60) go(current - 1);
+    if (dx < -60) go(current + 1);
+    touchStartX = null;
+  });
+}
+init();
+</script>
+</body>
+</html>
